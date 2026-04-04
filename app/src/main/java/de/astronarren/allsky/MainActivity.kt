@@ -13,6 +13,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import de.astronarren.allsky.data.UserPreferences
 import de.astronarren.allsky.data.network.WeatherApiProvider
 import de.astronarren.allsky.ui.MainScreen
@@ -24,6 +28,8 @@ import de.astronarren.allsky.viewmodel.*
 import de.astronarren.allsky.data.WeatherRepository
 import de.astronarren.allsky.data.AllskyRepository
 import de.astronarren.allsky.utils.LanguageManager
+import de.astronarren.allsky.workers.WeatherWorker
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     private val locationPermissionRequest = registerForActivityResult(
@@ -78,6 +84,7 @@ class MainActivity : ComponentActivity() {
         liveImageViewModel = LiveImageViewModel(userPreferences)
         
         checkAndRequestLocationPermissions()
+        scheduleWeatherWorker()
         
         enableEdgeToEdge()
         setContent {
@@ -149,5 +156,21 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    private fun scheduleWeatherWorker() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val weatherWorkRequest = PeriodicWorkRequestBuilder<WeatherWorker>(3, TimeUnit.HOURS)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "WeatherAlerts",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            weatherWorkRequest
+        )
     }
 }

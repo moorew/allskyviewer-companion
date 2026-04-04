@@ -15,7 +15,8 @@ data class AllskyUiState(
     val error: String? = null,
     val timelapses: List<AllskyMediaUiState> = emptyList(),
     val keograms: List<AllskyMediaUiState> = emptyList(),
-    val startrails: List<AllskyMediaUiState> = emptyList()
+    val startrails: List<AllskyMediaUiState> = emptyList(),
+    val images: List<AllskyMediaUiState> = emptyList()
 )
 
 data class AllskyMediaUiState(
@@ -56,6 +57,9 @@ class AllskyViewModel(
                     },
                     startrails = content.startrails.map { 
                         AllskyMediaUiState(it.date, it.url) 
+                    },
+                    images = content.images.map {
+                        AllskyMediaUiState(it.date, it.url)
                     }
                 )
             } catch (e: Exception) {

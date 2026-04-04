@@ -111,6 +111,9 @@ dependencies {
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+
     // Media3 dependencies
     implementation("androidx.media3:media3-exoplayer:1.2.1")
     implementation("androidx.media3:media3-ui:1.2.1")

@@ -62,6 +62,7 @@
     <string name="timelapses" translatable="false">Timelapses</string>
     <string name="keograms" translatable="false">Keograms</string>
     <string name="startrails" translatable="false">Startrails</string>
+    <string name="daily_images" translatable="false">Daily Images</string>
     <string name="no_content_available" translatable="false">No content available</string>
     <string name="media_from_date" translatable="false">Media from %s</string>
     

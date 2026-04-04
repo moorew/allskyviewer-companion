@@ -17,25 +17,37 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
-    surface = Color(0xFF1A1C1E),
-    background = Color(0xFF1A1C1E)
+    primary = PrimaryBlue,
+    secondary = AccentYellow,
+    tertiary = NightPurple,
+    surface = SurfaceDark,
+    background = DeepNavy,
+    onPrimary = Color.White,
+    onSecondary = Color.Black,
+    onBackground = Color.White,
+    onSurface = Color.White,
+    surfaceVariant = CardBackgroundDark,
+    onSurfaceVariant = Color.LightGray
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    surface = Color(0xFFFFFBFE),
-    background = Color(0xFFFFFBFE)
+    primary = PrimaryBlue,
+    secondary = AccentYellow,
+    tertiary = SkyBlue,
+    surface = SurfaceLight,
+    background = SurfaceLight,
+    onPrimary = Color.White,
+    onSecondary = Color.Black,
+    onBackground = Color.Black,
+    onSurface = Color.Black,
+    surfaceVariant = CardBackgroundLight,
+    onSurfaceVariant = Color.DarkGray
 )
 
 @Composable
 fun AllskyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disable dynamic for custom Allsky branding
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

@@ -11,12 +11,16 @@ interface AllskyService {
 
     @GET("startrails/")
     suspend fun getStartrails(): String
+
+    @GET("images/")
+    suspend fun getImages(): String
 }
 
 data class AllskyContent(
     val timelapses: List<AllskyMedia>,
     val keograms: List<AllskyMedia>,
-    val startrails: List<AllskyMedia>
+    val startrails: List<AllskyMedia>,
+    val images: List<AllskyMedia> = emptyList()
 )
 
 data class AllskyMedia(

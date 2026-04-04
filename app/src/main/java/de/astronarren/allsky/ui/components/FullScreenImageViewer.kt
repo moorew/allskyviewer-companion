@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,14 +18,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import de.astronarren.allsky.utils.DownloadHelper
 
 @Composable
 fun FullScreenImageViewer(
     imageUrl: String,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val downloadHelper = remember { DownloadHelper(context) }
+    
     var scale by remember { mutableStateOf(1f) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
@@ -37,16 +43,7 @@ fun FullScreenImageViewer(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.9f))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        if (scale <= 1f) {
-                            onDismiss()
-                        }
-                    }
-                )
-            }
+            .background(Color.Black.copy(alpha = 0.95f))
     ) {
         AsyncImage(
             model = imageUrl,
@@ -79,27 +76,56 @@ fun FullScreenImageViewer(
                             scale = if (scale > 1f) 1f else 2f
                             offsetX = 0f
                             offsetY = 0f
+                        },
+                        onTap = {
+                            if (scale <= 1f) onDismiss()
                         }
                     )
                 },
             contentScale = ContentScale.Fit
         )
         
-        Surface(
+        // Control Buttons
+        Row(
             modifier = Modifier
-                .padding(16.dp)
-                .size(48.dp)
+                .fillMaxWidth()
+                .padding(24.dp)
                 .align(Alignment.TopEnd),
-            shape = CircleShape,
-            color = Color.Black.copy(alpha = 0.5f),
-            onClick = onDismiss
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close",
-                tint = Color.White,
-                modifier = Modifier.padding(12.dp)
-            )
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.6f),
+                onClick = {
+                    val fileName = "allsky_${System.currentTimeMillis()}.jpg"
+                    downloadHelper.downloadMedia(imageUrl, fileName, isVideo = false)
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = "Download",
+                    tint = Color.White,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.6f),
+                onClick = onDismiss
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.White,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
     }
-} 
+}

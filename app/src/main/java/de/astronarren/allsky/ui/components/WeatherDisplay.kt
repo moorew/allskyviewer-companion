@@ -3,13 +3,17 @@ package de.astronarren.allsky.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import de.astronarren.allsky.data.WeatherData
 import de.astronarren.allsky.data.City
 import java.text.SimpleDateFormat
@@ -24,106 +28,97 @@ fun WeatherDisplay(
     uiState: WeatherUiState,
     onRequestPermission: () -> Unit = {}
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            when {
-                uiState.isLoading -> {
-                    CircularProgressIndicator()
-                    Text(
-                        text = stringResource(R.string.loading_weather),
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+        when {
+            uiState.isLoading -> {
+                Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
-                uiState.error?.contains("permission", ignoreCase = true) == true -> {
+            }
+            uiState.error?.contains("permission", ignoreCase = true) == true -> {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(32.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(24.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.location_permission_required),
                             style = MaterialTheme.typography.titleLarge,
                             textAlign = TextAlign.Center
                         )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        Text(
-                            text = stringResource(R.string.location_permission_rationale),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        
                         Spacer(modifier = Modifier.height(16.dp))
-                        
-                        Button(
-                            onClick = onRequestPermission,
-                            modifier = Modifier.fillMaxWidth(0.8f)
-                        ) {
+                        Button(onClick = onRequestPermission, shape = RoundedCornerShape(16.dp)) {
                             Text(stringResource(R.string.grant_location_permission))
                         }
                     }
                 }
-                uiState.error != null -> {
+            }
+            uiState.weatherData != null -> {
+                val (city, forecasts) = uiState.weatherData
+                Column {
+                    // Location and Current Temp
                     Text(
-                        text = uiState.error,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                uiState.weatherData != null -> {
-                    val (city, forecasts) = uiState.weatherData
-                    
-                    // Location Header
-                    Text(
-                        text = stringResource(
-                            R.string.location_format,
-                            city.name,
-                            city.country
+                        text = city.name.uppercase(),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
                         ),
-                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
                     
-                    Text(
-                        text = stringResource(R.string.five_day_forecast),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    
-                    // Current Weather
                     forecasts.firstOrNull()?.let { current ->
-                        CurrentWeather(current)
+                        Row(
+                            verticalAlignment = Alignment.Bottom,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "${Math.round(current.main.temp)}°",
+                                style = MaterialTheme.typography.displayLarge.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 84.sp,
+                                    letterSpacing = (-4).sp
+                                ),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            
+                            Column(modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)) {
+                                Text(
+                                    text = current.weather.firstOrNull()?.description?.capitalize() ?: "",
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "Feels like ${Math.round(current.main.feels_like)}°",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
-                    
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .padding(vertical = 16.dp)
-                            .fillMaxWidth()
-                    )
-                    
-                    // 5-Day Forecast
-                    Text(
-                        text = stringResource(R.string.next_days),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(bottom = 8.dp)
-                    )
-                    
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+
+                    // 5-Day Forecast Bento Box
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                        )
                     ) {
-                        items(forecasts.take(5)) { dayWeather ->
-                            DayForecast(dayWeather)
+                        LazyRow(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.fillMaxWidth().padding(24.dp)
+                        ) {
+                            items(forecasts.take(5)) { dayWeather ->
+                                DayForecast(dayWeather)
+                            }
                         }
                     }
                 }
@@ -133,94 +128,21 @@ fun WeatherDisplay(
 }
 
 @Composable
-private fun CurrentWeather(weather: WeatherData) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(
-                R.string.temperature_celsius,
-                weather.main.temp
-            ),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-        
-        Text(
-            text = weather.weather.firstOrNull()?.description?.capitalize() ?: "",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            WeatherInfo(
-                label = stringResource(R.string.feels_like),
-                value = "${String.format("%.1f", weather.main.feels_like)}°C"
-            )
-            WeatherInfo(
-                label = stringResource(R.string.humidity),
-                value = "${weather.main.humidity}%"
-            )
-            WeatherInfo(
-                label = stringResource(R.string.cloud_cover),
-                value = stringResource(R.string.cloud_coverage, weather.clouds.all)
-            )
-        }
-    }
-}
-
-@Composable
 private fun DayForecast(weather: WeatherData) {
-    Card(
-        modifier = Modifier.width(100.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = formatDay(weather.dt),
-                style = MaterialTheme.typography.labelMedium
-            )
-            Text(
-                text = "${String.format("%.1f", weather.main.temp)}°C",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "${weather.clouds.all}%",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun WeatherInfo(
-    label: String,
-    value: String
-) {
     Column(
+        modifier = Modifier.padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = formatDay(weather.dt).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         )
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge
+            text = "${Math.round(weather.main.temp)}°",
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

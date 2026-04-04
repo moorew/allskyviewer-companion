@@ -24,6 +24,7 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val timelapseDoc = Jsoup.connect("$baseUrl/videos/").get()
                 val keogramDoc = Jsoup.connect("$baseUrl/keograms/").get()
                 val startrailDoc = Jsoup.connect("$baseUrl/startrails/").get()
+                val imagesDoc = try { Jsoup.connect("$baseUrl/images/").get() } catch (e: Exception) { null }
 
                 println("Debug: Successfully fetched HTML documents")
 
@@ -36,14 +37,38 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val timelapses = parseTimelapses(timelapseDoc, baseUrl)
                 println("Debug: Found ${timelapses.size} timelapses")
 
+                val images = imagesDoc?.let { parseImages(it, baseUrl) } ?: emptyList()
+                println("Debug: Found ${images.size} images")
+
                 AllskyContent(
                     timelapses = timelapses,
                     keograms = keograms,
-                    startrails = startrails
+                    startrails = startrails,
+                    images = images
                 )
             } catch (e: Exception) {
                 println("Debug: Error fetching allsky content: ${e.message}")
                 throw e
+            }
+        }
+    }
+
+    private fun parseImages(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
+        return doc.select("div.archived-files a").mapNotNull { element ->
+            try {
+                val href = element.attr("href")
+                // Typically Allsky stores daily images in subfolders, 
+                // but let's look for any .jpg that isn't a keogram/startrail if we are in images/
+                if (href.endsWith(".jpg") || href.endsWith("/")) {
+                    val dateText = element.select("div.day-text").text()
+                    AllskyMedia(
+                        date = dateText,
+                        url = "$baseUrl/images/$href"
+                    )
+                } else null
+            } catch (e: Exception) {
+                println("Debug: Error parsing image element: ${e.message}")
+                null
             }
         }
     }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import coil.compose.AsyncImage
 import de.astronarren.allsky.ui.components.*
 import de.astronarren.allsky.data.UserPreferences
@@ -29,6 +31,9 @@ import de.astronarren.allsky.utils.LanguageManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import de.astronarren.allsky.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,8 +107,20 @@ fun MainScreen(
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text("Allsky") },
+                CenterAlignedTopAppBar(
+                    title = { 
+                        Text(
+                            "ALLSKY", 
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 4.sp
+                            )
+                        ) 
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground
+                    ),
                     actions = {
                         IconButton(
                             onClick = {
@@ -115,112 +132,132 @@ fun MainScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings"
+                                contentDescription = "Settings",
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
                 )
-            }
+            },
+            containerColor = Color.Transparent
         ) { padding ->
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                DeepNavy,
+                                NightPurple,
+                                ClearNight
+                            )
+                        )
+                    )
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
-                        .verticalScroll(scrollState)
-                        .padding(horizontal = 16.dp),
+                        .padding(top = padding.calculateTopPadding())
+                        .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                    
+                    // Live Image Section - Full Width & Heroic
                     if (allskyUrl.isNotEmpty()) {
-                        Card(
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(300.dp)
-                                .clickable { 
-                                    imageViewerViewModel.showImage(liveImageState.imageUrl)
-                                },
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                .height(400.dp)
+                                .padding(20.dp)
                         ) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                AsyncImage(
-                                    model = liveImageState.imageUrl,
-                                    contentDescription = stringResource(R.string.live_allsky_image),
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                                
-                                Text(
-                                    text = "Last update: ${formatTime(liveImageState.lastUpdate)}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(8.dp)
-                                        .background(
-                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                                            shape = MaterialTheme.shapes.small
-                                        )
-                                        .padding(4.dp)
-                                )
-                            }
-                        }
-                    } else {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable { 
+                                        imageViewerViewModel.showImage(liveImageState.imageUrl)
+                                    },
+                                shape = RoundedCornerShape(40.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                             ) {
-                                Text(
-                                    text = "No Allsky URL configured",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    AsyncImage(
+                                        model = liveImageState.imageUrl,
+                                        contentDescription = stringResource(R.string.live_allsky_image),
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    
+                                    // Status Badge
+                                    Surface(
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(20.dp),
+                                        color = Color.Black.copy(alpha = 0.5f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(8.dp)
+                                                    .background(Color.Green, RoundedCornerShape(4.dp))
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "LIVE",
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                color = Color.White
+                                            )
+                                        }
+                                    }
+
+                                    Surface(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(20.dp),
+                                        color = Color.Black.copy(alpha = 0.5f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text(
+                                            text = formatTime(liveImageState.lastUpdate),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = Color.White,
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    MoonPhaseDisplay()
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
+
+                    // Weather Section
                     if (apiKey.isEmpty()) {
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            shape = RoundedCornerShape(32.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            )
                         ) {
                             Column(
-                                modifier = Modifier.padding(16.dp),
+                                modifier = Modifier.padding(24.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = stringResource(R.string.weather_forecast),
-                                    style = MaterialTheme.typography.titleLarge
+                                    text = "Weather Forecast",
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                                 )
-                                
-                                Spacer(modifier = Modifier.height(8.dp))
-                                
-                                Text(
-                                    text = stringResource(R.string.weather_api_required),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                                
+                                Spacer(modifier = Modifier.height(12.dp))
                                 val uriHandler = LocalUriHandler.current
-                                TextButton(
-                                    onClick = { 
-                                        uriHandler.openUri("https://home.openweathermap.org/api_keys")
-                                    }
+                                Button(
+                                    onClick = { uriHandler.openUri("https://home.openweathermap.org/api_keys") },
+                                    shape = RoundedCornerShape(16.dp)
                                 ) {
-                                    Text(stringResource(R.string.get_api_key))
+                                    Text("Get API Key")
                                 }
                             }
                         }
@@ -231,52 +268,54 @@ fun MainScreen(
                         )
                     }
                     
+                    // Moon Phase Section (Integrated into Bento layout)
+                    Box(modifier = Modifier.padding(horizontal = 4.dp)) {
+                        MoonPhaseDisplay()
+                    }
+                    
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Media Sections
                     if (allskyUiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(8.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.loading_description),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                        CircularProgressIndicator(modifier = Modifier.padding(32.dp))
                     } else if (allskyUiState.error != null) {
                         Text(
                             text = allskyUiState.error!!,
-                            color = MaterialTheme.colorScheme.error
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(20.dp)
                         )
                     } else {
                         AllskyMediaSection(
-                            title = stringResource(R.string.timelapses),
+                            title = "Recent Timelapses",
                             media = allskyUiState.timelapses,
-                            onMediaClick = { media -> 
-                                currentVideo = media.url
-                            },
+                            onMediaClick = { media -> currentVideo = media.url },
                             isVideo = true
                         )
 
                         AllskyMediaSection(
-                            title = stringResource(R.string.keograms),
-                            media = allskyUiState.keograms,
-                            onMediaClick = { media -> 
-                                imageViewerViewModel.showImage(media.url)
-                            }
+                            title = "Daily Raw Images",
+                            media = allskyUiState.images,
+                            onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
                         )
 
                         AllskyMediaSection(
-                            title = stringResource(R.string.startrails),
+                            title = "Keograms",
+                            media = allskyUiState.keograms,
+                            onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
+                        )
+
+                        AllskyMediaSection(
+                            title = "Startrails",
                             media = allskyUiState.startrails,
-                            onMediaClick = { media -> 
-                                imageViewerViewModel.showImage(media.url)
-                            }
+                            onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
                         )
                     }
+                    
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
 
+                // Overlay components
                 if (imageViewerState.isFullScreen && imageViewerState.currentImageUrl != null) {
-                    println("Debug: Showing full screen image: ${imageViewerState.currentImageUrl}")
                     FullScreenImageViewer(
                         imageUrl = imageViewerState.currentImageUrl!!,
                         onDismiss = { imageViewerViewModel.dismissImage() }
@@ -297,12 +336,8 @@ fun MainScreen(
         val state = updateState as UpdateUiState.UpdateAvailable
         UpdateDialog(
             showDialog = true,
-            onDismiss = {
-                updateViewModel.dismissUpdate()
-            },
-            onDownload = {
-                updateViewModel.downloadUpdate()
-            },
+            onDismiss = { updateViewModel.dismissUpdate() },
+            onDownload = { updateViewModel.downloadUpdate() },
             version = state.updateInfo.latestVersion,
             changelog = state.updateInfo.releaseNotes
         )
