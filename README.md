@@ -15,6 +15,10 @@ An Android companion app for the [Allsky Camera Project](https://github.com/Alls
 - **Location Services**: Automatic weather data for your location
 - **Responsive Design**: Works on phones and tablets
 
+## Acknowledgments
+
+This project is a fork of the [Allsky Companion App](https://github.com/acocalypso/allskyviewer-companion) originally created by [acocalypso](https://github.com/acocalypso). We are grateful for their hard work in establishing the foundation for this app.
+
 ## Requirements
 
 - Android 10 (API 29) or higher
