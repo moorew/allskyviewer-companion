@@ -53,7 +53,9 @@ data class City(
     val name: String,
     val coord: Coord,
     val country: String,
-    val timezone: Int
+    val timezone: Int,
+    val sunrise: Long,
+    val sunset: Long
 )
 
 data class Coord(

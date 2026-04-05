@@ -37,7 +37,34 @@ class WeatherWorker(
                 apiKey = apiKey
             )
             
-            // Check first forecast in the list (usually nearest 3-hour window)
+            // Check for Night Conditions Notification
+            val currentTime = System.currentTimeMillis()
+            val sunsetTime = response.city.sunset * 1000
+            val threeHours = 3 * 60 * 60 * 1000L
+            val isNearSunset = currentTime in (sunsetTime - threeHours)..(sunsetTime + 60 * 60 * 1000L)
+            
+            val currentDateStr = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+            val lastNotifiedDate = userPreferences.getLastNotificationDate()
+            
+            if (isNearSunset && currentDateStr != lastNotifiedDate) {
+                val endOfNight = sunsetTime + 12 * 60 * 60 * 1000L
+                val nightForecasts = response.list.filter {
+                    val dt = it.dt * 1000
+                    dt in sunsetTime..endOfNight
+                }
+                
+                if (nightForecasts.isNotEmpty()) {
+                    val avgClouds = nightForecasts.map { it.clouds.all }.average().toInt()
+                    val minTemp = nightForecasts.minOf { it.main.temp }
+                    
+                    val notificationHelper = NotificationHelper(applicationContext)
+                    notificationHelper.showNightConditionsNotification(avgClouds, minTemp)
+                    
+                    userPreferences.saveLastNotificationDate(currentDateStr)
+                }
+            }
+            
+            // Still check the immediate forecast for clear skies if needed (existing logic)
             val nextForecast = response.list.firstOrNull()
             if (nextForecast != null && nextForecast.clouds.all < 20) {
                 val notificationHelper = NotificationHelper(applicationContext)

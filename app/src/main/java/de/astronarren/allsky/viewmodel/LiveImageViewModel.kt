@@ -45,9 +45,10 @@ class LiveImageViewModel(
         val url = baseUrl ?: userPreferences.getAllskyUrl()
         if (url.isNotEmpty()) {
             try {
+                val cleanUrl = url.trimEnd('/')
                 _uiState.update { currentState ->
                     currentState.copy(
-                        imageUrl = "$url/image.jpg?t=${System.currentTimeMillis()}",
+                        imageUrl = "$cleanUrl/image.jpg?t=${System.currentTimeMillis()}",
                         lastUpdate = System.currentTimeMillis(),
                         error = null // Clear any previous errors
                     )

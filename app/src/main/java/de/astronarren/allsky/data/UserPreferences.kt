@@ -14,6 +14,19 @@ class UserPreferences(private val context: Context) {
         private val API_KEY = stringPreferencesKey("api_key")
         private val SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
         private val LANGUAGE_KEY = stringPreferencesKey("selected_language")
+        private val LAST_NOTIFICATION_DATE = stringPreferencesKey("last_notification_date")
+    }
+
+    suspend fun saveLastNotificationDate(dateStr: String) {
+        context.dataStore.edit { preferences ->
+            preferences[LAST_NOTIFICATION_DATE] = dateStr
+        }
+    }
+
+    fun getLastNotificationDate(): String {
+        return runBlocking {
+            context.dataStore.data.first()[LAST_NOTIFICATION_DATE] ?: ""
+        }
     }
 
     suspend fun saveAllskyUrl(url: String) {

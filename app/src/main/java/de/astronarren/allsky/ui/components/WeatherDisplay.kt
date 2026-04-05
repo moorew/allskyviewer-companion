@@ -104,6 +104,9 @@ fun WeatherDisplay(
                         }
                     }
 
+                    // Tonight's Viewing Conditions
+                    NightConditionsDisplay(city = city, forecasts = forecasts)
+
                     // 5-Day Forecast Bento Box
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -144,6 +147,87 @@ private fun DayForecast(weather: WeatherData) {
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun NightConditionsDisplay(city: City, forecasts: List<WeatherData>) {
+    val currentTime = System.currentTimeMillis()
+    // sunset/sunrise are for the current day. If it's already past sunset, we might be looking at the next day's sunrise.
+    // For simplicity, just find the forecasts between sunset and next 12 hours.
+    val sunsetTime = city.sunset * 1000
+    // If we are well past sunset (e.g. next morning before new sunset is fetched), don't show it as "tonight"
+    val endOfNight = sunsetTime + 12 * 60 * 60 * 1000L
+    
+    val nightForecasts = forecasts.filter { 
+        val dt = it.dt * 1000
+        dt in sunsetTime..endOfNight
+    }
+    
+    if (nightForecasts.isNotEmpty()) {
+        val avgClouds = nightForecasts.map { it.clouds.all }.average().toInt()
+        val minTemp = nightForecasts.minOf { it.main.temp }
+        val avgVisibility = nightForecasts.map { it.visibility }.average().toInt() / 1000 // to km
+        
+        val conditionText = when {
+            avgClouds < 20 -> "Excellent"
+            avgClouds < 50 -> "Fair"
+            else -> "Poor"
+        }
+        
+        val color = when {
+            avgClouds < 20 -> Color(0xFF4CAF50)
+            avgClouds < 50 -> Color(0xFFFFC107)
+            else -> Color(0xFFF44336)
+        }
+        
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Tonight's Viewing",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Surface(
+                        color = color.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = conditionText,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = color,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text("Cloud Cover", style = MaterialTheme.typography.labelMedium)
+                        Text("$avgClouds%", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                    }
+                    Column {
+                        Text("Min Temp", style = MaterialTheme.typography.labelMedium)
+                        Text("${Math.round(minTemp)}°", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                    }
+                    Column {
+                        Text("Visibility", style = MaterialTheme.typography.labelMedium)
+                        Text("${avgVisibility}km", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                    }
+                }
+            }
+        }
     }
 }
 
