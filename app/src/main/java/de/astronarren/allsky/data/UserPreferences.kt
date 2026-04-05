@@ -15,6 +15,32 @@ class UserPreferences(private val context: Context) {
         private val SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
         private val LANGUAGE_KEY = stringPreferencesKey("selected_language")
         private val LAST_NOTIFICATION_DATE = stringPreferencesKey("last_notification_date")
+        private val USERNAME = stringPreferencesKey("username")
+        private val PASSWORD = stringPreferencesKey("password")
+    }
+
+    suspend fun saveUsername(username: String) {
+        context.dataStore.edit { preferences ->
+            preferences[USERNAME] = username
+        }
+    }
+
+    fun getUsername(): String {
+        return runBlocking {
+            context.dataStore.data.first()[USERNAME] ?: ""
+        }
+    }
+
+    suspend fun savePassword(password: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PASSWORD] = password
+        }
+    }
+
+    fun getPassword(): String {
+        return runBlocking {
+            context.dataStore.data.first()[PASSWORD] ?: ""
+        }
     }
 
     suspend fun saveLastNotificationDate(dateStr: String) {

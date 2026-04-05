@@ -33,7 +33,11 @@ fun SetupScreen(
         1 -> WelcomeStep(onNext = { viewModel.nextStep() })
         2 -> UrlStep(
             currentUrl = uiState.allskyUrl,
+            currentUsername = uiState.username,
+            currentPassword = uiState.password,
             onUrlChange = { viewModel.updateAllskyUrl(it) },
+            onUsernameChange = { viewModel.updateUsername(it) },
+            onPasswordChange = { viewModel.updatePassword(it) },
             onNext = { viewModel.nextStep() }
         )
         3 -> ApiKeyStep(
@@ -93,13 +97,27 @@ private fun WelcomeStep(onNext: () -> Unit) {
 @Composable
 private fun UrlStep(
     currentUrl: String,
+    currentUsername: String,
+    currentPassword: String,
     onUrlChange: (String) -> Unit,
+    onUsernameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
     onNext: () -> Unit
 ) {
     var urlInput by remember { mutableStateOf(currentUrl) }
+    var usernameInput by remember { mutableStateOf(currentUsername) }
+    var passwordInput by remember { mutableStateOf(currentPassword) }
 
     LaunchedEffect(urlInput) {
         onUrlChange(urlInput)
+    }
+    
+    LaunchedEffect(usernameInput) {
+        onUsernameChange(usernameInput)
+    }
+
+    LaunchedEffect(passwordInput) {
+        onPasswordChange(passwordInput)
     }
 
     Column(
@@ -127,6 +145,26 @@ private fun UrlStep(
             value = urlInput,
             onValueChange = { urlInput = it },
             label = { Text("Allsky URL") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        OutlinedTextField(
+            value = usernameInput,
+            onValueChange = { usernameInput = it },
+            label = { Text("Username (Optional)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        OutlinedTextField(
+            value = passwordInput,
+            onValueChange = { passwordInput = it },
+            label = { Text("Password (Optional)") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )

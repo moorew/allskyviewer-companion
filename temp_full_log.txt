@@ -1,0 +1,142 @@
+Build and Release	Set up job	﻿2026-04-05T19:23:30.3710087Z Current runner version: '2.333.1'
+Build and Release	Set up job	2026-04-05T19:23:30.3743891Z ##[group]Runner Image Provisioner
+Build and Release	Set up job	2026-04-05T19:23:30.3745196Z Hosted Compute Agent
+Build and Release	Set up job	2026-04-05T19:23:30.3746027Z Version: 20260213.493
+Build and Release	Set up job	2026-04-05T19:23:30.3746926Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+Build and Release	Set up job	2026-04-05T19:23:30.3748119Z Build Date: 2026-02-13T00:28:41Z
+Build and Release	Set up job	2026-04-05T19:23:30.3749520Z Worker ID: {11449be1-7e77-49bb-896e-090669c7ef92}
+Build and Release	Set up job	2026-04-05T19:23:30.3750534Z Azure Region: eastus2
+Build and Release	Set up job	2026-04-05T19:23:30.3751429Z ##[endgroup]
+Build and Release	Set up job	2026-04-05T19:23:30.3753882Z ##[group]Operating System
+Build and Release	Set up job	2026-04-05T19:23:30.3754937Z Ubuntu
+Build and Release	Set up job	2026-04-05T19:23:30.3755620Z 24.04.4
+Build and Release	Set up job	2026-04-05T19:23:30.3756329Z LTS
+Build and Release	Set up job	2026-04-05T19:23:30.3756943Z ##[endgroup]
+Build and Release	Set up job	2026-04-05T19:23:30.3757861Z ##[group]Runner Image
+Build and Release	Set up job	2026-04-05T19:23:30.3758867Z Image: ubuntu-24.04
+Build and Release	Set up job	2026-04-05T19:23:30.3759785Z Version: 20260329.72.1
+Build and Release	Set up job	2026-04-05T19:23:30.3761333Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260329.72/images/ubuntu/Ubuntu2404-Readme.md
+Build and Release	Set up job	2026-04-05T19:23:30.3764021Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260329.72
+Build and Release	Set up job	2026-04-05T19:23:30.3765404Z ##[endgroup]
+Build and Release	Set up job	2026-04-05T19:23:30.3767064Z ##[group]GITHUB_TOKEN Permissions
+Build and Release	Set up job	2026-04-05T19:23:30.3770250Z Contents: write
+Build and Release	Set up job	2026-04-05T19:23:30.3771016Z Metadata: read
+Build and Release	Set up job	2026-04-05T19:23:30.3771850Z Packages: write
+Build and Release	Set up job	2026-04-05T19:23:30.3772629Z ##[endgroup]
+Build and Release	Set up job	2026-04-05T19:23:30.3775390Z Secret source: Actions
+Build and Release	Set up job	2026-04-05T19:23:30.3777107Z Prepare workflow directory
+Build and Release	Set up job	2026-04-05T19:23:30.4240918Z Prepare all required actions
+Build and Release	Set up job	2026-04-05T19:23:30.4295879Z Getting action download info
+Build and Release	Set up job	2026-04-05T19:23:30.7033665Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Build and Release	Set up job	2026-04-05T19:23:30.8219223Z Download action repository 'gradle/wrapper-validation-action@v1' (SHA:56b90f209b02bf6d1deae490e9ef18b21a389cd4)
+Build and Release	Set up job	2026-04-05T19:23:31.0987375Z Download action repository 'actions/setup-java@v4' (SHA:c1e323688fd81a25caa38c78aa6df2d33d3e20d9)
+Build and Release	Set up job	2026-04-05T19:23:31.4357682Z Download action repository 'r0adkll/sign-android-release@v1' (SHA:349ebdef58775b1e0d8099458af0816dc79b6407)
+Build and Release	Set up job	2026-04-05T19:23:33.3109656Z Download action repository 'softprops/action-gh-release@v2' (SHA:153bb8e04406b158c6c84fc1615b65b24149a1fe)
+Build and Release	Set up job	2026-04-05T19:23:33.6055460Z Complete job name: Build and Release
+Build and Release	Run actions/checkout@v4	﻿2026-04-05T19:23:33.6738481Z ##[group]Run actions/checkout@v4
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6739185Z with:
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6739462Z   repository: moorew/allskyviewer-companion
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6739996Z   token: ***
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6740231Z   ssh-strict: true
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6740475Z   ssh-user: git
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6740714Z   persist-credentials: true
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6740994Z   clean: true
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6741231Z   sparse-checkout-cone-mode: true
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6741522Z   fetch-depth: 1
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6741745Z   fetch-tags: false
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6741988Z   show-progress: true
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6742254Z   lfs: false
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6742468Z   submodules: false
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6742750Z   set-safe-directory: true
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.6743184Z ##[endgroup]
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7821996Z Syncing repository: moorew/allskyviewer-companion
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7823695Z ##[group]Getting Git version info
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7824248Z Working directory is '/home/runner/work/allskyviewer-companion/allskyviewer-companion'
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7825040Z [command]/usr/bin/git version
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7859776Z git version 2.53.0
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7884131Z ##[endgroup]
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7906813Z Temporarily overriding HOME='/home/runner/work/_temp/1393cbd4-2a1a-40f0-82c9-061d611a168b' before making global git config changes
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7907669Z Adding repository directory to the temporary git global config as a safe directory
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7913794Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/allskyviewer-companion/allskyviewer-companion
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7947517Z Deleting the contents of '/home/runner/work/allskyviewer-companion/allskyviewer-companion'
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7951352Z ##[group]Initializing the repository
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.7955967Z [command]/usr/bin/git init /home/runner/work/allskyviewer-companion/allskyviewer-companion
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8029597Z hint: Using 'master' as the name for the initial branch. This default branch name
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8030560Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8031376Z hint: to use in all of your new repositories, which will suppress this warning,
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8031980Z hint: call:
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8032446Z hint:
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8032763Z hint: 	git config --global init.defaultBranch <name>
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8033117Z hint:
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8033446Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8033957Z hint: 'development'. The just-created branch can be renamed via this command:
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8034352Z hint:
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8034573Z hint: 	git branch -m <name>
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8034848Z hint:
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8035184Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8035882Z Initialized empty Git repository in /home/runner/work/allskyviewer-companion/allskyviewer-companion/.git/
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8042474Z [command]/usr/bin/git remote add origin https://github.com/moorew/allskyviewer-companion
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8072432Z ##[endgroup]
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8072971Z ##[group]Disabling automatic garbage collection
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8076570Z [command]/usr/bin/git config --local gc.auto 0
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8104887Z ##[endgroup]
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8105416Z ##[group]Setting up auth
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8111644Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8141684Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8491353Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8522524Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8754574Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.8787893Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.9023473Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.9059582Z ##[endgroup]
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.9067299Z ##[group]Fetching the repository
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:33.9068268Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +07e75272e2f8e6e3add5ac08a2b1d28fc64dd0e8:refs/remotes/origin/main
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5264645Z From https://github.com/moorew/allskyviewer-companion
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5269357Z  * [new ref]         07e75272e2f8e6e3add5ac08a2b1d28fc64dd0e8 -> origin/main
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5295651Z ##[endgroup]
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5296208Z ##[group]Determining the checkout info
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5297830Z ##[endgroup]
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5303957Z [command]/usr/bin/git sparse-checkout disable
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5342156Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5367694Z ##[group]Checking out the ref
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.5372969Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.7171748Z Switched to a new branch 'main'
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.7172401Z branch 'main' set up to track 'origin/main'.
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.7183807Z ##[endgroup]
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.7223696Z [command]/usr/bin/git log -1 --format=%H
+Build and Release	Run actions/checkout@v4	2026-04-05T19:23:34.7246524Z 07e75272e2f8e6e3add5ac08a2b1d28fc64dd0e8
+Build and Release	Extract version from build.gradle	﻿2026-04-05T19:23:34.7437061Z ##[group]Run VERSION=$(grep 'versionName = ' app/build.gradle.kts | sed 's/.*versionName = "\(.*\)".*/\1/')
+Build and Release	Extract version from build.gradle	2026-04-05T19:23:34.7437843Z [36;1mVERSION=$(grep 'versionName = ' app/build.gradle.kts | sed 's/.*versionName = "\(.*\)".*/\1/')[0m
+Build and Release	Extract version from build.gradle	2026-04-05T19:23:34.7438585Z [36;1mecho "Version found: $VERSION"[0m
+Build and Release	Extract version from build.gradle	2026-04-05T19:23:34.7438900Z [36;1mecho "version=$VERSION" >> $GITHUB_OUTPUT[0m
+Build and Release	Extract version from build.gradle	2026-04-05T19:23:34.7469695Z shell: /usr/bin/bash -e {0}
+Build and Release	Extract version from build.gradle	2026-04-05T19:23:34.7469982Z ##[endgroup]
+Build and Release	Extract version from build.gradle	2026-04-05T19:23:34.7559961Z Version found: 1.1.4
+Build and Release	Extract latest changelog entry	﻿2026-04-05T19:23:34.7609395Z ##[group]Run LATEST=$(awk '/^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {if (p) exit; p=1; next} p' CHANGELOG.md)
+Build and Release	Extract latest changelog entry	2026-04-05T19:23:34.7610012Z [36;1mLATEST=$(awk '/^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {if (p) exit; p=1; next} p' CHANGELOG.md)[0m
+Build and Release	Extract latest changelog entry	2026-04-05T19:23:34.7610455Z [36;1mecho "changelog<<EOF" >> $GITHUB_OUTPUT[0m
+Build and Release	Extract latest changelog entry	2026-04-05T19:23:34.7610757Z [36;1mecho "$LATEST" >> $GITHUB_OUTPUT[0m
+Build and Release	Extract latest changelog entry	2026-04-05T19:23:34.7611034Z [36;1mecho "EOF" >> $GITHUB_OUTPUT[0m
+Build and Release	Extract latest changelog entry	2026-04-05T19:23:34.7636812Z shell: /usr/bin/bash -e {0}
+Build and Release	Extract latest changelog entry	2026-04-05T19:23:34.7637080Z ##[endgroup]
+Build and Release	Validate Gradle Wrapper	﻿2026-04-05T19:23:34.7752175Z ##[group]Run gradle/wrapper-validation-action@v1
+Build and Release	Validate Gradle Wrapper	2026-04-05T19:23:34.7752497Z with:
+Build and Release	Validate Gradle Wrapper	2026-04-05T19:23:34.7752692Z   min-wrapper-count: 1
+Build and Release	Validate Gradle Wrapper	2026-04-05T19:23:34.7752900Z   allow-snapshots: false
+Build and Release	Validate Gradle Wrapper	2026-04-05T19:23:34.7753119Z ##[endgroup]
+Build and Release	Post Run actions/checkout@v4	﻿2026-04-05T19:23:37.1494372Z Post job cleanup.
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2436853Z [command]/usr/bin/git version
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2473473Z git version 2.53.0
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2513946Z Temporarily overriding HOME='/home/runner/work/_temp/f8704e8d-d828-4daa-92a6-1f3f6cd681e4' before making global git config changes
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2515098Z Adding repository directory to the temporary git global config as a safe directory
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2519908Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/allskyviewer-companion/allskyviewer-companion
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2557477Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2590880Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2830068Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2853035Z http.https://github.com/.extraheader
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2865156Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.2897330Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.3129422Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build and Release	Post Run actions/checkout@v4	2026-04-05T19:23:37.3161485Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build and Release	Complete job	﻿2026-04-05T19:23:37.3514169Z Cleaning up orphan processes
+Build and Release	Complete job	2026-04-05T19:23:37.3794626Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, gradle/wrapper-validation-action@v1. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

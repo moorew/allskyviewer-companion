@@ -18,12 +18,16 @@ class SetupViewModel(
             val isComplete = userPreferences.isSetupComplete()
             val url = userPreferences.getAllskyUrl()
             val apiKey = userPreferences.getApiKey()
+            val username = userPreferences.getUsername()
+            val password = userPreferences.getPassword()
             
             _uiState.update { state ->
                 state.copy(
                     isComplete = isComplete,
                     allskyUrl = url,
-                    apiKey = apiKey
+                    apiKey = apiKey,
+                    username = username,
+                    password = password
                 )
             }
         }
@@ -40,6 +44,24 @@ class SetupViewModel(
             userPreferences.saveAllskyUrl(url)
             _uiState.update { state ->
                 state.copy(allskyUrl = url)
+            }
+        }
+    }
+
+    fun updateUsername(username: String) {
+        viewModelScope.launch {
+            userPreferences.saveUsername(username)
+            _uiState.update { state ->
+                state.copy(username = username)
+            }
+        }
+    }
+
+    fun updatePassword(password: String) {
+        viewModelScope.launch {
+            userPreferences.savePassword(password)
+            _uiState.update { state ->
+                state.copy(password = password)
             }
         }
     }

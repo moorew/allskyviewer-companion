@@ -41,6 +41,8 @@ fun SettingsPanel(
 ) {
     var apiKeyInput by remember { mutableStateOf("") }
     var urlInput by remember { mutableStateOf("") }
+    var usernameInput by remember { mutableStateOf("") }
+    var passwordInput by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     var showLanguageDialog by remember { mutableStateOf(false) }
     var currentLanguage by remember { mutableStateOf(languageManager.getCurrentLanguage()) }
@@ -50,6 +52,8 @@ fun SettingsPanel(
         if (isOpen) {
             apiKeyInput = userPreferences.getApiKey()
             urlInput = userPreferences.getAllskyUrl()
+            usernameInput = userPreferences.getUsername()
+            passwordInput = userPreferences.getPassword()
         }
     }
 
@@ -154,7 +158,30 @@ fun SettingsPanel(
                         .fillMaxWidth()
                         .semantics(mergeDescendants = true) { 
                             contentDescription = urlInputDescription
-                        }
+                        },
+                    singleLine = true
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Username Input
+                OutlinedTextField(
+                    value = usernameInput,
+                    onValueChange = { usernameInput = it },
+                    label = { Text("Username (Optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Password Input
+                OutlinedTextField(
+                    value = passwordInput,
+                    onValueChange = { passwordInput = it },
+                    label = { Text("Password (Optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -224,6 +251,8 @@ fun SettingsPanel(
                     onClick = {
                         scope.launch {
                             userPreferences.saveAllskyUrl(urlInput)
+                            userPreferences.saveUsername(usernameInput)
+                            userPreferences.savePassword(passwordInput)
                             userPreferences.saveApiKey(apiKeyInput)
                             onDismiss()
                         }

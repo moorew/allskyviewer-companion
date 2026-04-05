@@ -1,0 +1,5 @@
+Build and Release	Validate Gradle Wrapper	﻿2026-04-05T19:23:34.7752175Z ##[group]Run gradle/wrapper-validation-action@v1
+Build and Release	Validate Gradle Wrapper	2026-04-05T19:23:34.7752497Z with:
+Build and Release	Validate Gradle Wrapper	2026-04-05T19:23:34.7752692Z   min-wrapper-count: 1
+Build and Release	Validate Gradle Wrapper	2026-04-05T19:23:34.7752900Z   allow-snapshots: false
+Build and Release	Validate Gradle Wrapper	2026-04-05T19:23:34.7753119Z ##[endgroup]

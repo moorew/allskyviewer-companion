@@ -43,12 +43,23 @@ class LiveImageViewModel(
 
     private suspend fun updateImage(baseUrl: String? = null) {
         val url = baseUrl ?: userPreferences.getAllskyUrl()
+        val username = userPreferences.getUsername()
+        val password = userPreferences.getPassword()
+        
         if (url.isNotEmpty()) {
             try {
                 val cleanUrl = url.trimEnd('/')
+                val authUrl = if (username.isNotEmpty() && password.isNotEmpty()) {
+                    val uri = android.net.Uri.parse(cleanUrl)
+                    val authority = "${android.net.Uri.encode(username)}:${android.net.Uri.encode(password)}@${uri.authority}"
+                    uri.buildUpon().encodedAuthority(authority).build().toString()
+                } else {
+                    cleanUrl
+                }
+                
                 _uiState.update { currentState ->
                     currentState.copy(
-                        imageUrl = "$cleanUrl/image.jpg?t=${System.currentTimeMillis()}",
+                        imageUrl = "$authUrl/image.jpg?t=${System.currentTimeMillis()}",
                         lastUpdate = System.currentTimeMillis(),
                         error = null // Clear any previous errors
                     )
