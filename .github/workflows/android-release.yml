@@ -59,15 +59,21 @@ jobs:
       - name: Build Release APK
         run: ./gradlew assembleRelease
 
+      - name: Generate Dummy Keystore
+        run: |
+          keytool -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-alias -storepass password123 -keypass password123 -dname "CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown"
+          base64 my-release-key.jks | tr -d '\n' > keystore_b64.txt
+          echo "KEYSTORE_B64=$(cat keystore_b64.txt)" >> $GITHUB_ENV
+
       - name: Sign Release
         uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
           releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          signingKeyBase64: ${{ env.KEYSTORE_B64 }}
+          alias: my-alias
+          keyStorePassword: password123
+          keyPassword: password123
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
