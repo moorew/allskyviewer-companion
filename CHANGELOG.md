@@ -4,6 +4,17 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-06
+### Added
+- New "Meteor Recordings" section to view captured meteor events.
+- Support for "Historic" daily image archives by correctly parsing daily subdirectories.
+
+### Fixed
+- Major overhaul of media discovery to be more robust across different Allsky Portal versions.
+- Fixed path resolution issues using absolute URL logic.
+- Improved date extraction from filenames and directory names.
+- Better handling of relative and root-relative links in directory listings.
+
 ## [1.1.9] - 2026-04-06
 ### Fixed
 - Further improved media parsing for various Allsky directory listing styles.

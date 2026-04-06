@@ -71,30 +71,35 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
 
                 println("Debug: Fetching content from Allsky: $jsoupBaseUrl")
                 
-                val timelapseDoc = createConnection("$jsoupBaseUrl/videos/").get()
-                val keogramDoc = createConnection("$jsoupBaseUrl/keograms/").get()
-                val startrailDoc = createConnection("$jsoupBaseUrl/startrails/").get()
+                val timelapseDoc = try { createConnection("$jsoupBaseUrl/videos/").get() } catch (e: Exception) { null }
+                val keogramDoc = try { createConnection("$jsoupBaseUrl/keograms/").get() } catch (e: Exception) { null }
+                val startrailDoc = try { createConnection("$jsoupBaseUrl/startrails/").get() } catch (e: Exception) { null }
                 val imagesDoc = try { createConnection("$jsoupBaseUrl/images/").get() } catch (e: Exception) { null }
+                val meteorDoc = try { createConnection("$jsoupBaseUrl/meteors/").get() } catch (e: Exception) { null }
 
                 println("Debug: Successfully fetched HTML documents")
 
-                val keograms = parseKeograms(keogramDoc, authBaseUrl)
+                val keograms = keogramDoc?.let { parseKeograms(it, authBaseUrl) } ?: emptyList()
                 println("Debug: Found ${keograms.size} keograms")
                 
-                val startrails = parseStartrails(startrailDoc, authBaseUrl)
+                val startrails = startrailDoc?.let { parseStartrails(it, authBaseUrl) } ?: emptyList()
                 println("Debug: Found ${startrails.size} startrails")
                 
-                val timelapses = parseTimelapses(timelapseDoc, authBaseUrl)
+                val timelapses = timelapseDoc?.let { parseTimelapses(it, authBaseUrl) } ?: emptyList()
                 println("Debug: Found ${timelapses.size} timelapses")
 
                 val images = imagesDoc?.let { parseImages(it, authBaseUrl) } ?: emptyList()
                 println("Debug: Found ${images.size} images")
 
+                val meteors = meteorDoc?.let { parseMeteors(it, authBaseUrl) } ?: emptyList()
+                println("Debug: Found ${meteors.size} meteors")
+
                 AllskyContent(
                     timelapses = timelapses,
                     keograms = keograms,
                     startrails = startrails,
-                    images = images
+                    images = images,
+                    meteors = meteors
                 )
             } catch (e: Exception) {
                 println("Debug: Error fetching allsky content: ${e.message}")
@@ -108,43 +113,41 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         val specificDate = element.select("div.day-text").text()
         if (specificDate.isNotEmpty()) return specificDate
 
-        // Otherwise, try to extract date from filename (e.g., allsky-20240101.mp4)
+        // Clean href for matching
+        val cleanedHref = href.substringAfterLast("/")
+
+        // Try YYYY-MM-DD or YYYYMMDD patterns
         val datePattern = Regex("(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})")
-        val match = datePattern.find(href)
+        val match = datePattern.find(cleanedHref)
         if (match != null) {
             val (year, month, day) = match.destructured
             return "$year-$month-$day"
         }
 
         // If no date found, return the filename itself or a placeholder
-        return href.substringBeforeLast(".")
-    }
-
-    private fun cleanHref(href: String): String {
-        return href.removePrefix("/").removePrefix("./")
+        return cleanedHref.substringBeforeLast(".")
     }
 
     private fun parseImages(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        val links = if (doc.select("div.archived-files").isNotEmpty()) {
-            doc.select("div.archived-files a")
-        } else {
-            doc.select("a[href]")
-        }
-
+        val links = doc.select("a[href]")
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..") || rawHref.startsWith("/")) return@mapNotNull null
+                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
                 
-                val href = cleanHref(rawHref)
-                if ((href.endsWith(".jpg") || href.endsWith(".png")) && 
-                    !href.contains("keogram", ignoreCase = true) && 
-                    !href.contains("startrail", ignoreCase = true) && 
-                    !href.contains("image.jpg")) {
+                // For images, we also accept directories (daily folders)
+                val isDirectory = rawHref.endsWith("/")
+                val isImage = rawHref.lowercase().endsWith(".jpg") || rawHref.lowercase().endsWith(".png")
+                
+                if ((isImage || isDirectory) && 
+                    !rawHref.contains("keogram", ignoreCase = true) && 
+                    !rawHref.contains("startrail", ignoreCase = true) && 
+                    !rawHref.contains("image.jpg")) {
                     
+                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/images/${rawHref.removePrefix("/")}"
                     AllskyMedia(
-                        date = extractDate(href, element),
-                        url = "$baseUrl/images/$href"
+                        date = extractDate(rawHref, element),
+                        url = url
                     )
                 } else null
             } catch (e: Exception) {
@@ -154,22 +157,18 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
     }
 
     private fun parseTimelapses(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        val links = if (doc.select("div.archived-files").isNotEmpty()) {
-            doc.select("div.archived-files a")
-        } else {
-            doc.select("a[href]")
-        }
-
+        val links = doc.select("a[href]")
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..") || rawHref.startsWith("/")) return@mapNotNull null
+                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
                 
-                val href = cleanHref(rawHref)
-                if (href.endsWith(".mp4") || href.endsWith(".webm") || href.endsWith(".mkv") || href.endsWith(".mov")) {
+                val lowerHref = rawHref.lowercase()
+                if (lowerHref.endsWith(".mp4") || lowerHref.endsWith(".webm") || lowerHref.endsWith(".mkv") || lowerHref.endsWith(".mov")) {
+                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/videos/${rawHref.removePrefix("/")}"
                     AllskyMedia(
-                        date = extractDate(href, element),
-                        url = "$baseUrl/videos/$href"
+                        date = extractDate(rawHref, element),
+                        url = url
                     )
                 } else null
             } catch (e: Exception) {
@@ -179,22 +178,17 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
     }
 
     private fun parseKeograms(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        val links = if (doc.select("div.archived-files").isNotEmpty()) {
-            doc.select("div.archived-files a")
-        } else {
-            doc.select("a[href]")
-        }
-
+        val links = doc.select("a[href]")
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..") || rawHref.startsWith("/")) return@mapNotNull null
+                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
                 
-                val href = cleanHref(rawHref)
-                if (href.contains("keogram", ignoreCase = true) && (href.endsWith(".jpg") || href.endsWith(".png"))) {
+                if (rawHref.contains("keogram", ignoreCase = true) && (rawHref.lowercase().endsWith(".jpg") || rawHref.lowercase().endsWith(".png"))) {
+                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/keograms/${rawHref.removePrefix("/")}"
                     AllskyMedia(
-                        date = extractDate(href, element),
-                        url = "$baseUrl/keograms/$href"
+                        date = extractDate(rawHref, element),
+                        url = url
                     )
                 } else null
             } catch (e: Exception) {
@@ -204,22 +198,38 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
     }
 
     private fun parseStartrails(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        val links = if (doc.select("div.archived-files").isNotEmpty()) {
-            doc.select("div.archived-files a")
-        } else {
-            doc.select("a[href]")
-        }
-
+        val links = doc.select("a[href]")
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..") || rawHref.startsWith("/")) return@mapNotNull null
+                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
                 
-                val href = cleanHref(rawHref)
-                if (href.contains("startrail", ignoreCase = true) && (href.endsWith(".jpg") || href.endsWith(".png"))) {
+                if (rawHref.contains("startrail", ignoreCase = true) && (rawHref.lowercase().endsWith(".jpg") || rawHref.lowercase().endsWith(".png"))) {
+                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/startrails/${rawHref.removePrefix("/")}"
                     AllskyMedia(
-                        date = extractDate(href, element),
-                        url = "$baseUrl/startrails/$href"
+                        date = extractDate(rawHref, element),
+                        url = url
+                    )
+                } else null
+            } catch (e: Exception) {
+                null
+            }
+        }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
+    }
+
+    private fun parseMeteors(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
+        val links = doc.select("a[href]")
+        return links.mapNotNull { element ->
+            try {
+                val rawHref = element.attr("href")
+                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
+                
+                val lowerHref = rawHref.lowercase()
+                if (lowerHref.endsWith(".jpg") || lowerHref.endsWith(".png") || lowerHref.endsWith(".mp4")) {
+                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/meteors/${rawHref.removePrefix("/")}"
+                    AllskyMedia(
+                        date = extractDate(rawHref, element),
+                        url = url
                     )
                 } else null
             } catch (e: Exception) {

@@ -16,7 +16,8 @@ data class AllskyUiState(
     val timelapses: List<AllskyMediaUiState> = emptyList(),
     val keograms: List<AllskyMediaUiState> = emptyList(),
     val startrails: List<AllskyMediaUiState> = emptyList(),
-    val images: List<AllskyMediaUiState> = emptyList()
+    val images: List<AllskyMediaUiState> = emptyList(),
+    val meteors: List<AllskyMediaUiState> = emptyList()
 )
 
 data class AllskyMediaUiState(
@@ -59,6 +60,9 @@ class AllskyViewModel(
                         AllskyMediaUiState(it.date, it.url) 
                     },
                     images = content.images.map {
+                        AllskyMediaUiState(it.date, it.url)
+                    },
+                    meteors = content.meteors.map {
                         AllskyMediaUiState(it.date, it.url)
                     }
                 )

@@ -288,8 +288,20 @@ fun MainScreen(
                         AllskyMediaSection(
                             title = "Recent Timelapses",
                             media = allskyUiState.timelapses,
-                            onMediaClick = { media -> currentVideo = media.url },
-                            isVideo = true
+                            onMediaClick = { media -> currentVideo = media.url }
+                        )
+
+                        AllskyMediaSection(
+                            title = "Meteor Recordings",
+                            media = allskyUiState.meteors,
+                            onMediaClick = { media -> 
+                                if (media.url.lowercase().contains(".mp4") || 
+                                    media.url.lowercase().contains(".webm")) {
+                                    currentVideo = media.url
+                                } else {
+                                    imageViewerViewModel.showImage(media.url)
+                                }
+                            }
                         )
 
                         AllskyMediaSection(

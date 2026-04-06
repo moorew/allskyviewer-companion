@@ -28,7 +28,7 @@ fun AllskyMediaSection(
     title: String,
     media: List<AllskyMediaUiState>,
     onMediaClick: (AllskyMediaUiState) -> Unit,
-    isVideo: Boolean = false
+    isVideo: Boolean? = null
 ) {
     Column(
         modifier = Modifier
@@ -92,10 +92,15 @@ fun AllskyMediaSection(
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp)
             ) {
                 items(media) { item ->
+                    val isItemVideo = isVideo ?: (item.url.lowercase().contains(".mp4") || 
+                                              item.url.lowercase().contains(".webm") || 
+                                              item.url.lowercase().contains(".mov") || 
+                                              item.url.lowercase().contains(".mkv"))
                     MediaCard(
                         media = item,
                         onClick = { onMediaClick(item) },
-                        isVideo = isVideo
+                        isVideo = isItemVideo,
+                        isMeteor = title.contains("Meteor", ignoreCase = true)
                     )
                 }
             }
@@ -107,7 +112,8 @@ fun AllskyMediaSection(
 private fun MediaCard(
     media: AllskyMediaUiState,
     onClick: () -> Unit,
-    isVideo: Boolean = false
+    isVideo: Boolean = false,
+    isMeteor: Boolean = false
 ) {
     Card(
         modifier = Modifier
@@ -172,7 +178,11 @@ private fun MediaCard(
                     color = Color.White
                 )
                 Text(
-                    text = if (isVideo) "TIMELAPSE" else "ARCHIVE",
+                    text = when {
+                        isMeteor -> "METEOR"
+                        isVideo -> "TIMELAPSE"
+                        else -> "ARCHIVE"
+                    },
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
