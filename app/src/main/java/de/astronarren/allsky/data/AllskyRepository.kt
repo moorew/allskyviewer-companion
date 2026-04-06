@@ -12,7 +12,7 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
     suspend fun getAllContent(): AllskyContent {
         return withContext(Dispatchers.IO) {
             try {
-                val baseUrl = userPreferences.getAllskyUrl()
+                var baseUrl = userPreferences.getAllskyUrl()
                 if (baseUrl.isEmpty()) {
                     return@withContext AllskyContent(emptyList(), emptyList(), emptyList())
                 }
@@ -21,8 +21,40 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     throw IllegalArgumentException("Invalid URL format")
                 }
 
+                baseUrl = baseUrl.trimEnd('/')
+
                 val username = userPreferences.getUsername()
                 val password = userPreferences.getPassword()
+                
+                fun createConnection(url: String): Connection {
+                    val conn = Jsoup.connect(url)
+                    if (username.isNotEmpty() && password.isNotEmpty()) {
+                        val basicAuth = "Basic " + Base64.encodeToString("$username:$password".toByteArray(), Base64.NO_WRAP)
+                        conn.header("Authorization", basicAuth)
+                    }
+                    return conn
+                }
+
+                // Check if we need to append /allsky
+                try {
+                    val testConn = createConnection("$baseUrl/videos/")
+                    testConn.execute()
+                } catch (e: org.jsoup.HttpStatusException) {
+                    if (e.statusCode == 404) {
+                        try {
+                            val altConn = createConnection("$baseUrl/allsky/videos/")
+                            if (altConn.execute().statusCode() == 200) {
+                                baseUrl = "$baseUrl/allsky"
+                                userPreferences.saveAllskyUrl(baseUrl)
+                                println("Debug: Auto-corrected baseUrl to $baseUrl")
+                            }
+                        } catch (e2: Exception) {
+                            println("Debug: Auto-correct failed: ${e2.message}")
+                        }
+                    }
+                } catch (e: Exception) {
+                    println("Debug: BaseUrl test failed: ${e.message}")
+                }
                 
                 // Base URL for Jsoup (without credentials to avoid parsing issues)
                 val jsoupBaseUrl = baseUrl
@@ -35,15 +67,6 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     builder.encodedAuthority(authority).build().toString()
                 } else {
                     baseUrl
-                }
-                
-                fun createConnection(url: String): Connection {
-                    val conn = Jsoup.connect(url)
-                    if (username.isNotEmpty() && password.isNotEmpty()) {
-                        val basicAuth = "Basic " + Base64.encodeToString("$username:$password".toByteArray(), Base64.NO_WRAP)
-                        conn.header("Authorization", basicAuth)
-                    }
-                    return conn
                 }
 
                 println("Debug: Fetching content from Allsky: $jsoupBaseUrl")
