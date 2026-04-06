@@ -76,6 +76,8 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     var doc: org.jsoup.nodes.Document? = null
                     try {
                         doc = createConnection("$jsoupBaseUrl/index.php?page=$portalPage").get()
+                    } catch (e: org.jsoup.HttpStatusException) {
+                        if (e.statusCode == 401 || e.statusCode == 403) throw e
                     } catch (e: Exception) {}
 
                     // Simple heuristic: if the document contains list_ or media elements, it's likely the right page
@@ -87,8 +89,11 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
 
                     return try {
                         createConnection("$jsoupBaseUrl/$path").get()
-                    } catch (e: Exception) {
+                    } catch (e: org.jsoup.HttpStatusException) {
+                        if (e.statusCode == 401 || e.statusCode == 403) throw e
                         doc // Return the portal doc even if it didn't have obvious content, as a last resort
+                    } catch (e: Exception) {
+                        doc
                     }
                 }
 
@@ -121,6 +126,9 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                         if (dailyImages.isNotEmpty()) {
                             images = dailyImages
                         }
+                    } catch (e: org.jsoup.HttpStatusException) {
+                        if (e.statusCode == 401 || e.statusCode == 403) throw e
+                        println("Debug: Failed to fetch daily images: ${e.message}")
                     } catch (e: Exception) {
                         println("Debug: Failed to fetch daily images: ${e.message}")
                     }
@@ -137,6 +145,12 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     images = images,
                     meteors = meteors
                 )
+            } catch (e: org.jsoup.HttpStatusException) {
+                println("Debug: HTTP Error fetching allsky content: ${e.statusCode}")
+                if (e.statusCode == 401 || e.statusCode == 403) {
+                    throw Exception("Authentication Required (401). Please enter your Username and Password in Settings.")
+                }
+                throw Exception("Server returned error: ${e.statusCode}")
             } catch (e: Exception) {
                 println("Debug: Error fetching allsky content: ${e.message}")
                 throw e

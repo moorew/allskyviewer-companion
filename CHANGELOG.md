@@ -4,6 +4,10 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.4] - 2026-04-06
+### Fixed
+- **Authentication Error Visibility**: Fixed an issue where "No content available" would be displayed if the Allsky Portal was protected by Basic Authentication but credentials were not entered in the app settings. The app now explicitly throws a 401 Unauthorized error and displays a clear message to the user prompting them to enter their Username and Password.
+
 ## [1.3.3] - 2026-04-06
 ### Fixed
 - Fixed an issue where media would not display if the web server incorrectly returned a "200 OK" placeholder page for missing subdirectories (e.g., `/videos/`) instead of a 404 error. The app now explicitly requests the portal page first and checks for valid media tags before falling back.
