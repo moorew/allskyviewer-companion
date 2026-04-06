@@ -62,11 +62,6 @@ fun MainScreen(
     val mainLayout by userPreferences.getMainLayoutFlow().collectAsStateWithLifecycle(
         initialValue = listOf("LIVE_VIEW", "WEATHER", "MOON", "TIMELAPSES", "METEORS", "IMAGES", "KEOGRAMS", "STARTRAILS")
     )
-
-    
-    val mainLayout by userPreferences.getMainLayoutFlow().collectAsStateWithLifecycle(
-        initialValue = listOf("LIVE_VIEW", "WEATHER", "MOON", "TIMELAPSES", "METEORS", "IMAGES", "KEOGRAMS", "STARTRAILS")
-    )
     
     var allskyUrl by remember { mutableStateOf("") }
     
@@ -162,18 +157,6 @@ fun MainScreen(
                     "Clouds" -> listOf(Color(0xFF37474F), Color(0xFF455A64), Color(0xFF607D8B)) // Grey/Blue-Grey
                     "Rain", "Drizzle", "Thunderstorm" -> listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)) // Dark Rain Blue
                     "Snow" -> listOf(Color(0xFF78909C), Color(0xFF90A4AE), Color(0xFFB0BEC5)) // Cool bright
-                    else -> listOf(DeepNavy, NightPurple, ClearNight)
-                }
-            }
-
-
-            val weatherCondition = weatherUiState.weatherData?.second?.firstOrNull()?.weather?.firstOrNull()?.main ?: "Clear"
-            val backgroundColors = remember(weatherCondition) {
-                when (weatherCondition) {
-                    "Clear" -> listOf(DeepNavy, NightPurple, ClearNight)
-                    "Clouds" -> listOf(Color(0xFF37474F), Color(0xFF455A64), Color(0xFF607D8B))
-                    "Rain", "Drizzle", "Thunderstorm" -> listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB))
-                    "Snow" -> listOf(Color(0xFF78909C), Color(0xFF90A4AE), Color(0xFFB0BEC5))
                     else -> listOf(DeepNavy, NightPurple, ClearNight)
                 }
             }

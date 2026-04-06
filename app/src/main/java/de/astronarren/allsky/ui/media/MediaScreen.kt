@@ -1,6 +1,12 @@
 package de.astronarren.allsky.ui.media
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import AsyncImage
+
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -98,27 +104,27 @@ fun MediaScreen(
                                 .aspectRatio(1f)
                                 .fillMaxWidth(),
                             onClick = { onMediaClick(item) },
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(16.dp)
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
-                                coil.compose.AsyncImage(
+                                AsyncImage(
                                     model = item.url,
                                     contentDescription = item.date,
                                     modifier = Modifier.fillMaxSize(),
-                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                    contentScale = ContentScale.Crop
                                 )
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.BottomStart)
                                         .fillMaxWidth()
-                                        .androidx.compose.foundation.background(
-                                            androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f)
+                                        .background(
+                                            Color.Black.copy(alpha = 0.5f)
                                         )
                                         .padding(8.dp)
                                 ) {
                                     Text(
                                         text = item.date,
-                                        color = androidx.compose.ui.graphics.Color.White,
+                                        color = Color.White,
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                 }
