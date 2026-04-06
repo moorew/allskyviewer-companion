@@ -120,8 +120,11 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         return href.substringBeforeLast(".")
     }
 
+    private fun cleanHref(href: String): String {
+        return href.removePrefix("/").removePrefix("./")
+    }
+
     private fun parseImages(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        // Select all <a> tags within div.archived-files (if exists) OR all <a> tags in the document
         val links = if (doc.select("div.archived-files").isNotEmpty()) {
             doc.select("div.archived-files a")
         } else {
@@ -130,10 +133,14 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
 
         return links.mapNotNull { element ->
             try {
-                val href = element.attr("href")
-                // Check if it's a direct image or a subfolder (Allsky often groups images in daily subfolders)
+                val rawHref = element.attr("href")
+                if (rawHref.contains("?") || rawHref.startsWith("..") || rawHref.startsWith("/")) return@mapNotNull null
+                
+                val href = cleanHref(rawHref)
                 if ((href.endsWith(".jpg") || href.endsWith(".png")) && 
-                    !href.contains("keogram") && !href.contains("startrail") && !href.contains("image.jpg")) {
+                    !href.contains("keogram", ignoreCase = true) && 
+                    !href.contains("startrail", ignoreCase = true) && 
+                    !href.contains("image.jpg")) {
                     
                     AllskyMedia(
                         date = extractDate(href, element),
@@ -141,10 +148,9 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     )
                 } else null
             } catch (e: Exception) {
-                println("Debug: Error parsing image element: ${e.message}")
                 null
             }
-        }.sortedByDescending { it.date }.take(20)
+        }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
     }
 
     private fun parseTimelapses(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
@@ -156,18 +162,20 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
 
         return links.mapNotNull { element ->
             try {
-                val href = element.attr("href")
-                if (href.endsWith(".mp4") || href.endsWith(".webm") || href.endsWith(".mkv")) {
+                val rawHref = element.attr("href")
+                if (rawHref.contains("?") || rawHref.startsWith("..") || rawHref.startsWith("/")) return@mapNotNull null
+                
+                val href = cleanHref(rawHref)
+                if (href.endsWith(".mp4") || href.endsWith(".webm") || href.endsWith(".mkv") || href.endsWith(".mov")) {
                     AllskyMedia(
                         date = extractDate(href, element),
                         url = "$baseUrl/videos/$href"
                     )
                 } else null
             } catch (e: Exception) {
-                println("Debug: Error parsing timelapse element: ${e.message}")
                 null
             }
-        }.sortedByDescending { it.date }.take(20)
+        }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
     }
 
     private fun parseKeograms(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
@@ -179,7 +187,10 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
 
         return links.mapNotNull { element ->
             try {
-                val href = element.attr("href")
+                val rawHref = element.attr("href")
+                if (rawHref.contains("?") || rawHref.startsWith("..") || rawHref.startsWith("/")) return@mapNotNull null
+                
+                val href = cleanHref(rawHref)
                 if (href.contains("keogram", ignoreCase = true) && (href.endsWith(".jpg") || href.endsWith(".png"))) {
                     AllskyMedia(
                         date = extractDate(href, element),
@@ -187,10 +198,9 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     )
                 } else null
             } catch (e: Exception) {
-                println("Debug: Error parsing keogram element: ${e.message}")
                 null
             }
-        }.sortedByDescending { it.date }.take(20)
+        }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
     }
 
     private fun parseStartrails(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
@@ -202,7 +212,10 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
 
         return links.mapNotNull { element ->
             try {
-                val href = element.attr("href")
+                val rawHref = element.attr("href")
+                if (rawHref.contains("?") || rawHref.startsWith("..") || rawHref.startsWith("/")) return@mapNotNull null
+                
+                val href = cleanHref(rawHref)
                 if (href.contains("startrail", ignoreCase = true) && (href.endsWith(".jpg") || href.endsWith(".png"))) {
                     AllskyMedia(
                         date = extractDate(href, element),
@@ -210,9 +223,8 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     )
                 } else null
             } catch (e: Exception) {
-                println("Debug: Error parsing startrail element: ${e.message}")
                 null
             }
-        }.sortedByDescending { it.date }.take(20)
+        }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
     }
 } 
