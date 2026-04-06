@@ -103,16 +103,40 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         }
     }
 
+    private fun extractDate(href: String, element: org.jsoup.nodes.Element): String {
+        // First try the specific div if it exists (for certain portal versions)
+        val specificDate = element.select("div.day-text").text()
+        if (specificDate.isNotEmpty()) return specificDate
+
+        // Otherwise, try to extract date from filename (e.g., allsky-20240101.mp4)
+        val datePattern = Regex("(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})")
+        val match = datePattern.find(href)
+        if (match != null) {
+            val (year, month, day) = match.destructured
+            return "$year-$month-$day"
+        }
+
+        // If no date found, return the filename itself or a placeholder
+        return href.substringBeforeLast(".")
+    }
+
     private fun parseImages(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        return doc.select("div.archived-files a").mapNotNull { element ->
+        // Select all <a> tags within div.archived-files (if exists) OR all <a> tags in the document
+        val links = if (doc.select("div.archived-files").isNotEmpty()) {
+            doc.select("div.archived-files a")
+        } else {
+            doc.select("a[href]")
+        }
+
+        return links.mapNotNull { element ->
             try {
                 val href = element.attr("href")
-                // Typically Allsky stores daily images in subfolders, 
-                // but let's look for any .jpg that isn't a keogram/startrail if we are in images/
-                if (href.endsWith(".jpg") || href.endsWith("/")) {
-                    val dateText = element.select("div.day-text").text()
+                // Check if it's a direct image or a subfolder (Allsky often groups images in daily subfolders)
+                if ((href.endsWith(".jpg") || href.endsWith(".png")) && 
+                    !href.contains("keogram") && !href.contains("startrail") && !href.contains("image.jpg")) {
+                    
                     AllskyMedia(
-                        date = dateText,
+                        date = extractDate(href, element),
                         url = "$baseUrl/images/$href"
                     )
                 } else null
@@ -120,17 +144,22 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 println("Debug: Error parsing image element: ${e.message}")
                 null
             }
-        }
+        }.sortedByDescending { it.date }.take(20)
     }
 
     private fun parseTimelapses(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        return doc.select("div.archived-files a").mapNotNull { element ->
+        val links = if (doc.select("div.archived-files").isNotEmpty()) {
+            doc.select("div.archived-files a")
+        } else {
+            doc.select("a[href]")
+        }
+
+        return links.mapNotNull { element ->
             try {
                 val href = element.attr("href")
-                if (href.endsWith(".mp4")) {
-                    val dateText = element.select("div.day-text").text()
+                if (href.endsWith(".mp4") || href.endsWith(".webm") || href.endsWith(".mkv")) {
                     AllskyMedia(
-                        date = dateText,
+                        date = extractDate(href, element),
                         url = "$baseUrl/videos/$href"
                     )
                 } else null
@@ -138,17 +167,22 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 println("Debug: Error parsing timelapse element: ${e.message}")
                 null
             }
-        }
+        }.sortedByDescending { it.date }.take(20)
     }
 
     private fun parseKeograms(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        return doc.select("div.archived-files a").mapNotNull { element ->
+        val links = if (doc.select("div.archived-files").isNotEmpty()) {
+            doc.select("div.archived-files a")
+        } else {
+            doc.select("a[href]")
+        }
+
+        return links.mapNotNull { element ->
             try {
                 val href = element.attr("href")
-                if (href.contains("keogram") && href.endsWith(".jpg")) {
-                    val dateText = element.select("div.day-text").text()
+                if (href.contains("keogram", ignoreCase = true) && (href.endsWith(".jpg") || href.endsWith(".png"))) {
                     AllskyMedia(
-                        date = dateText,
+                        date = extractDate(href, element),
                         url = "$baseUrl/keograms/$href"
                     )
                 } else null
@@ -156,17 +190,22 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 println("Debug: Error parsing keogram element: ${e.message}")
                 null
             }
-        }
+        }.sortedByDescending { it.date }.take(20)
     }
 
     private fun parseStartrails(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        return doc.select("div.archived-files a").mapNotNull { element ->
+        val links = if (doc.select("div.archived-files").isNotEmpty()) {
+            doc.select("div.archived-files a")
+        } else {
+            doc.select("a[href]")
+        }
+
+        return links.mapNotNull { element ->
             try {
                 val href = element.attr("href")
-                if (href.contains("startrail") && href.endsWith(".jpg")) {
-                    val dateText = element.select("div.day-text").text()
+                if (href.contains("startrail", ignoreCase = true) && (href.endsWith(".jpg") || href.endsWith(".png"))) {
                     AllskyMedia(
-                        date = dateText,
+                        date = extractDate(href, element),
                         url = "$baseUrl/startrails/$href"
                     )
                 } else null
@@ -174,6 +213,6 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 println("Debug: Error parsing startrail element: ${e.message}")
                 null
             }
-        }
+        }.sortedByDescending { it.date }.take(20)
     }
 } 

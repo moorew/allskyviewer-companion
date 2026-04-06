@@ -28,24 +28,39 @@ fun MoonPhaseDisplay() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .padding(20.dp),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = stringResource(R.string.moon_phase).uppercase(),
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp
+                ),
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+
             // Moon Icon with theme-aware gradient background
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(160.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                Color.White.copy(alpha = 0.15f),
+                                Color.Transparent
                             )
                         )
                     ),
@@ -53,58 +68,66 @@ fun MoonPhaseDisplay() {
             ) {
                 Text(
                     text = moonPhase.emoji,
-                    style = MaterialTheme.typography.displayLarge
+                    fontSize = 100.sp
                 )
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
             // Moon Phase Name
             Text(
-                text = stringResource(R.string.moon_phase),
-                style = MaterialTheme.typography.titleMedium
+                text = stringResource(moonPhase.stringResId).uppercase(),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = (-1).sp
+                ),
+                color = MaterialTheme.colorScheme.onBackground
             )
             
-            Text(
-                text = "${moonPhase.emoji} ${stringResource(moonPhase.stringResId)}",
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Spacer(modifier = Modifier.height(16.dp))
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "ILLUMINATION",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                    Text(
+                        text = "%.1f%%".format(illumination),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "NEW MOON",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                    Text(
+                        text = "IN ${daysUntilNewMoon.roundToInt()} DAYS",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
             
-            // Days until new moon
-            Text(
-                text = stringResource(R.string.next_new_moon_in, daysUntilNewMoon.roundToInt()),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Illumination Percentage
-            Text(
-                text = stringResource(R.string.moon_illumination),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            // Add illumination percentage text
-            Text(
-                text = "%.1f%%".format(illumination),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
-            
+            Spacer(modifier = Modifier.height(20.dp))
+
             // Progress Indicator
             LinearProgressIndicator(
                 modifier = Modifier
-                    .padding(top = 8.dp)
                     .fillMaxWidth()
-                    .height(4.dp),
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp)),
                 progress = { (illumination / 100).toFloat() },
                 color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
             )
         }
     }
