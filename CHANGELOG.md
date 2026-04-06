@@ -4,6 +4,12 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-04-06
+### Fixed
+- Robust media discovery for Portal-style URLs (`index.php?page=list_...`).
+- Improved support for daily image listings by parsing date-specific portal pages.
+- Enhanced path normalization to handle various Allsky URL configurations.
+
 ## [1.2.0] - 2026-04-06
 ### Added
 - New "Meteor Recordings" section to view captured meteor events.

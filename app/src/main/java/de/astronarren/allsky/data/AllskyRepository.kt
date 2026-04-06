@@ -71,11 +71,24 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
 
                 println("Debug: Fetching content from Allsky: $jsoupBaseUrl")
                 
-                val timelapseDoc = try { createConnection("$jsoupBaseUrl/videos/").get() } catch (e: Exception) { null }
-                val keogramDoc = try { createConnection("$jsoupBaseUrl/keograms/").get() } catch (e: Exception) { null }
-                val startrailDoc = try { createConnection("$jsoupBaseUrl/startrails/").get() } catch (e: Exception) { null }
-                val imagesDoc = try { createConnection("$jsoupBaseUrl/images/").get() } catch (e: Exception) { null }
-                val meteorDoc = try { createConnection("$jsoupBaseUrl/meteors/").get() } catch (e: Exception) { null }
+                // Strategy: Try both direct directory and portal page
+                suspend fun fetchDoc(path: String, portalPage: String): org.jsoup.nodes.Document? {
+                    return try {
+                        createConnection("$jsoupBaseUrl/$path").get()
+                    } catch (e: Exception) {
+                        try {
+                            createConnection("$jsoupBaseUrl/index.php?page=$portalPage").get()
+                        } catch (e2: Exception) {
+                            null
+                        }
+                    }
+                }
+
+                val timelapseDoc = fetchDoc("videos/", "list_videos")
+                val keogramDoc = fetchDoc("keograms/", "list_keograms")
+                val startrailDoc = fetchDoc("startrails/", "list_startrails")
+                val imagesDoc = fetchDoc("images/", "list_images")
+                val meteorDoc = fetchDoc("meteors/", "list_meteors")
 
                 println("Debug: Successfully fetched HTML documents")
 
@@ -88,7 +101,21 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val timelapses = timelapseDoc?.let { parseTimelapses(it, authBaseUrl) } ?: emptyList()
                 println("Debug: Found ${timelapses.size} timelapses")
 
-                val images = imagesDoc?.let { parseImages(it, authBaseUrl) } ?: emptyList()
+                var images = imagesDoc?.let { parseImages(it, authBaseUrl) } ?: emptyList()
+                
+                // If we found day-links in images, try to fetch the most recent day to get actual images
+                val dayLink = images.firstOrNull { it.url.contains("day=") || it.url.endsWith("/") }
+                if (dayLink != null && (images.isEmpty() || images.all { it.url.endsWith("/") || it.url.contains("day=") })) {
+                    try {
+                        val dayDoc = createConnection(dayLink.url).get()
+                        val dailyImages = parseImages(dayDoc, authBaseUrl)
+                        if (dailyImages.isNotEmpty()) {
+                            images = dailyImages
+                        }
+                    } catch (e: Exception) {
+                        println("Debug: Failed to fetch daily images: ${e.message}")
+                    }
+                }
                 println("Debug: Found ${images.size} images")
 
                 val meteors = meteorDoc?.let { parseMeteors(it, authBaseUrl) } ?: emptyList()
@@ -116,16 +143,47 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         // Clean href for matching
         val cleanedHref = href.substringAfterLast("/")
 
-        // Try YYYY-MM-DD or YYYYMMDD patterns
+        // Try to find a date in the href (e.g., day=20240101 or allsky-20240101.mp4)
         val datePattern = Regex("(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})")
-        val match = datePattern.find(cleanedHref)
+        val match = datePattern.find(href)
         if (match != null) {
             val (year, month, day) = match.destructured
             return "$year-$month-$day"
         }
 
+        // Try link text if it looks like a date
+        val text = element.text().trim()
+        val textMatch = datePattern.find(text)
+        if (textMatch != null) {
+            val (year, month, day) = textMatch.destructured
+            return "$year-$month-$day"
+        }
+
         // If no date found, return the filename itself or a placeholder
-        return cleanedHref.substringBeforeLast(".")
+        return cleanedHref.substringBeforeLast(".").ifEmpty { cleanedHref }
+    }
+
+    private fun normalizeUrl(rawHref: String, baseUrl: String, subDir: String): String? {
+        if (rawHref.contains("javascript:") || rawHref.startsWith("#")) return null
+        
+        // Handle Portal links like index.php?page=list_images&day=20240101
+        if (rawHref.contains("page=list_")) {
+            return if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/${rawHref.removePrefix("/")}"
+        }
+
+        val lowerHref = rawHref.lowercase()
+        val isMedia = lowerHref.endsWith(".jpg") || lowerHref.endsWith(".png") || 
+                      lowerHref.endsWith(".mp4") || lowerHref.endsWith(".webm") || 
+                      lowerHref.endsWith(".mov") || lowerHref.endsWith(".mkv") ||
+                      rawHref.endsWith("/")
+
+        if (!isMedia) return null
+
+        return when {
+            rawHref.startsWith("http") -> rawHref
+            rawHref.startsWith("/") -> "${baseUrl.trimEnd('/')}$rawHref"
+            else -> "${baseUrl.trimEnd('/')}/$subDir/${rawHref.removePrefix("./")}"
+        }
     }
 
     private fun parseImages(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
@@ -133,18 +191,15 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
+                if (rawHref.startsWith("..") || rawHref.contains("delete") || rawHref.contains("edit")) return@mapNotNull null
                 
-                // For images, we also accept directories (daily folders)
-                val isDirectory = rawHref.endsWith("/")
-                val isImage = rawHref.lowercase().endsWith(".jpg") || rawHref.lowercase().endsWith(".png")
+                val url = normalizeUrl(rawHref, baseUrl, "images") ?: return@mapNotNull null
                 
-                if ((isImage || isDirectory) && 
-                    !rawHref.contains("keogram", ignoreCase = true) && 
-                    !rawHref.contains("startrail", ignoreCase = true) && 
-                    !rawHref.contains("image.jpg")) {
+                val lowerUrl = url.lowercase()
+                if (lowerUrl.contains("page=list_images") || lowerUrl.endsWith("/") || 
+                    ((lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".png")) && 
+                     !lowerUrl.contains("keogram") && !lowerUrl.contains("startrail") && !lowerUrl.contains("image.jpg"))) {
                     
-                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/images/${rawHref.removePrefix("/")}"
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -161,11 +216,12 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
+                if (rawHref.startsWith("..") || rawHref.contains("delete") || rawHref.contains("edit")) return@mapNotNull null
                 
-                val lowerHref = rawHref.lowercase()
-                if (lowerHref.endsWith(".mp4") || lowerHref.endsWith(".webm") || lowerHref.endsWith(".mkv") || lowerHref.endsWith(".mov")) {
-                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/videos/${rawHref.removePrefix("/")}"
+                val url = normalizeUrl(rawHref, baseUrl, "videos") ?: return@mapNotNull null
+                val lowerUrl = url.lowercase()
+                
+                if (lowerUrl.contains(".mp4") || lowerUrl.contains(".webm") || lowerUrl.contains(".mkv") || lowerUrl.contains(".mov")) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -182,10 +238,12 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
+                if (rawHref.startsWith("..") || rawHref.contains("delete") || rawHref.contains("edit")) return@mapNotNull null
                 
-                if (rawHref.contains("keogram", ignoreCase = true) && (rawHref.lowercase().endsWith(".jpg") || rawHref.lowercase().endsWith(".png"))) {
-                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/keograms/${rawHref.removePrefix("/")}"
+                val url = normalizeUrl(rawHref, baseUrl, "keograms") ?: return@mapNotNull null
+                val lowerUrl = url.lowercase()
+                
+                if (lowerUrl.contains("keogram") && (lowerUrl.contains(".jpg") || lowerUrl.contains(".png"))) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -202,10 +260,12 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
+                if (rawHref.startsWith("..") || rawHref.contains("delete") || rawHref.contains("edit")) return@mapNotNull null
                 
-                if (rawHref.contains("startrail", ignoreCase = true) && (rawHref.lowercase().endsWith(".jpg") || rawHref.lowercase().endsWith(".png"))) {
-                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/startrails/${rawHref.removePrefix("/")}"
+                val url = normalizeUrl(rawHref, baseUrl, "startrails") ?: return@mapNotNull null
+                val lowerUrl = url.lowercase()
+                
+                if (lowerUrl.contains("startrail") && (lowerUrl.contains(".jpg") || lowerUrl.contains(".png"))) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -222,11 +282,12 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
         return links.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href")
-                if (rawHref.contains("?") || rawHref.startsWith("..")) return@mapNotNull null
+                if (rawHref.startsWith("..") || rawHref.contains("delete") || rawHref.contains("edit")) return@mapNotNull null
                 
-                val lowerHref = rawHref.lowercase()
-                if (lowerHref.endsWith(".jpg") || lowerHref.endsWith(".png") || lowerHref.endsWith(".mp4")) {
-                    val url = if (rawHref.startsWith("http")) rawHref else "${baseUrl.trimEnd('/')}/meteors/${rawHref.removePrefix("/")}"
+                val url = normalizeUrl(rawHref, baseUrl, "meteors") ?: return@mapNotNull null
+                val lowerUrl = url.lowercase()
+                
+                if (lowerUrl.contains(".jpg") || lowerUrl.contains(".png") || lowerUrl.contains(".mp4")) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
