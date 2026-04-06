@@ -4,6 +4,16 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8] - 2026-04-06
+### Added
+- Bold typographic redesign for a more modern "heroic" aesthetic.
+- Enhanced Moon Phase display with improved layout and illumination details.
+- Uppercase headers and increased letter spacing for a premium feel.
+
+### Fixed
+- Robust media parsing for Allsky installations, ensuring timelapses, keograms, and startrails are correctly identified even with non-standard directory listings.
+- Improved date extraction from filenames when metadata is missing.
+
 ## [1.1.7] - 2026-04-05
 ### Fixed
 - Added detection for live images located at `/current/tmp/image.jpg` (common in local Allsky installations).
