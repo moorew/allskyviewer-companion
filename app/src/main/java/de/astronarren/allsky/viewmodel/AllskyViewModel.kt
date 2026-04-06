@@ -41,13 +41,17 @@ class AllskyViewModel(
         }
     }
 
-    private fun loadContent() {
+    fun fetchContentForDate(date: String? = null) {
+        loadContent(date)
+    }
+
+    private fun loadContent(date: String? = null) {
         viewModelScope.launch {
             _uiState.update { currentState -> 
                 currentState.copy(isLoading = true, error = null) 
             }
             try {
-                val content = allskyRepository.getAllContent()
+                val content = allskyRepository.getAllContent(date)
                 _uiState.value = AllskyUiState(
                     isLoading = false,
                     timelapses = content.timelapses.map { 

@@ -31,6 +31,13 @@ import de.astronarren.allsky.utils.LanguageManager
 import de.astronarren.allsky.workers.WeatherWorker
 import java.util.concurrent.TimeUnit
 
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import de.astronarren.allsky.ui.layout.LayoutEditorScreen
+import de.astronarren.allsky.ui.media.MediaScreen
+import de.astronarren.allsky.ui.settings.SettingsScreen
+
 class MainActivity : ComponentActivity() {
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -93,34 +100,42 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val navController = rememberNavController()
                     var showSetup by remember { mutableStateOf(true) }
-                    var showAbout by remember { mutableStateOf(false) }
                     
                     LaunchedEffect(Unit) {
                         showSetup = !userPreferences.isSetupComplete()
+                        if (!showSetup) {
+                            navController.navigate("home") {
+                                popUpTo("setup") { inclusive = true }
+                            }
+                        }
                     }
                     
-                    when {
-                        showSetup -> {
+                    NavHost(
+                        navController = navController,
+                        startDestination = if (showSetup) "setup" else "home"
+                    ) {
+                        composable("setup") {
                             SetupScreen(
                                 viewModel = setupViewModel,
-                                onSetupComplete = { showSetup = false }
+                                onSetupComplete = { 
+                                    showSetup = false
+                                    navController.navigate("home") {
+                                        popUpTo("setup") { inclusive = true }
+                                    }
+                                }
                             )
                         }
-                        showAbout -> {
-                            AboutScreen(
-                                onNavigateBack = { showAbout = false }
-                            )
-                        }
-                        else -> {
+                        composable("home") {
                             MainScreen(
+                                navController = navController,
                                 userPreferences = userPreferences,
                                 weatherViewModel = weatherViewModel,
                                 allskyViewModel = allskyViewModel,
                                 imageViewerViewModel = imageViewerViewModel,
                                 liveImageViewModel = liveImageViewModel,
                                 languageManager = languageManager,
-                                onNavigateToAbout = { showAbout = true },
                                 onRequestLocationPermission = {
                                     locationPermissionRequest.launch(
                                         arrayOf(
@@ -129,6 +144,46 @@ class MainActivity : ComponentActivity() {
                                         )
                                     )
                                 }
+                            )
+                        }
+                        composable("layout_editor") {
+                            LayoutEditorScreen(
+                                userPreferences = userPreferences,
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable("media/{type}") { backStackEntry ->
+                            val type = backStackEntry.arguments?.getString("type") ?: "timelapses"
+                            val title = type.replaceFirstChar { it.uppercase() }
+                            MediaScreen(
+                                title = title,
+                                mediaType = type,
+                                viewModel = allskyViewModel,
+                                onMediaClick = { media ->
+                                    if (media.url.lowercase().contains(".mp4") || media.url.lowercase().contains(".webm")) {
+                                        // You could pass this back to main screen or handle video playing here
+                                        imageViewerViewModel.showImage(media.url) // reusing imageviewer for simplicity or implement video player
+                                    } else {
+                                        imageViewerViewModel.showImage(media.url)
+                                    }
+                                },
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable("settings") {
+                            val updateViewModel: de.astronarren.allsky.viewmodel.UpdateViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                                factory = de.astronarren.allsky.viewmodel.UpdateViewModelFactory(applicationContext as android.app.Application)
+                            )
+                            SettingsScreen(
+                                userPreferences = userPreferences,
+                                languageManager = languageManager,
+                                updateViewModel = updateViewModel,
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable("about") {
+                            AboutScreen(
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
                     }

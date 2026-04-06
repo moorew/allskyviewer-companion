@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 import android.util.Base64
 
 class AllskyRepository(private val userPreferences: UserPreferences) {
-    suspend fun getAllContent(): AllskyContent {
+    suspend fun getAllContent(date: String? = null): AllskyContent {
         return withContext(Dispatchers.IO) {
             try {
                 var baseUrl = userPreferences.getAllskyUrl()
@@ -84,11 +84,12 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     }
                 }
 
-                val timelapseDoc = fetchDoc("videos/", "list_videos&day=All")
-                val keogramDoc = fetchDoc("keograms/", "list_keograms&day=All")
-                val startrailDoc = fetchDoc("startrails/", "list_startrails&day=All")
+                val dayParam = date ?: "All"
+                val timelapseDoc = fetchDoc("videos/", "list_videos&day=$dayParam")
+                val keogramDoc = fetchDoc("keograms/", "list_keograms&day=$dayParam")
+                val startrailDoc = fetchDoc("startrails/", "list_startrails&day=$dayParam")
                 val imagesDoc = fetchDoc("images/", "list_days")
-                val meteorDoc = fetchDoc("meteors/", "list_meteors&day=All")
+                val meteorDoc = fetchDoc("meteors/", "list_meteors&day=$dayParam")
 
                 println("Debug: Successfully fetched HTML documents")
 

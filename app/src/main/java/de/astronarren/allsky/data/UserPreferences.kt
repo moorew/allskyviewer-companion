@@ -17,6 +17,27 @@ class UserPreferences(private val context: Context) {
         private val LAST_NOTIFICATION_DATE = stringPreferencesKey("last_notification_date")
         private val USERNAME = stringPreferencesKey("username")
         private val PASSWORD = stringPreferencesKey("password")
+        private val MAIN_LAYOUT = stringPreferencesKey("main_layout")
+    }
+
+    suspend fun saveMainLayout(layout: List<String>) {
+        context.dataStore.edit { preferences ->
+            preferences[MAIN_LAYOUT] = layout.joinToString(",")
+        }
+    }
+
+    fun getMainLayout(): List<String> {
+        val defaultLayout = "LIVE_VIEW,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
+        return runBlocking {
+            (context.dataStore.data.first()[MAIN_LAYOUT] ?: defaultLayout).split(",")
+        }
+    }
+
+    fun getMainLayoutFlow(): Flow<List<String>> {
+        val defaultLayout = "LIVE_VIEW,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
+        return context.dataStore.data.map { preferences ->
+            (preferences[MAIN_LAYOUT] ?: defaultLayout).split(",")
+        }
     }
 
     suspend fun saveUsername(username: String) {

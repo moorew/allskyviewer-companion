@@ -7,7 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,17 +34,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import de.astronarren.allsky.ui.theme.*
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
+    navController: NavController,
     userPreferences: UserPreferences,
     weatherViewModel: WeatherViewModel,
     allskyViewModel: AllskyViewModel,
     imageViewerViewModel: ImageViewerViewModel,
     liveImageViewModel: LiveImageViewModel,
     languageManager: LanguageManager,
-    onNavigateToAbout: () -> Unit,
     onRequestLocationPermission: () -> Unit
 ) {
     var isSettingsOpen by remember { mutableStateOf(false) }
@@ -57,15 +58,17 @@ fun MainScreen(
     val allskyUiState by allskyViewModel.uiState.collectAsStateWithLifecycle()
     val imageViewerState by imageViewerViewModel.uiState.collectAsStateWithLifecycle()
     val liveImageState by liveImageViewModel.uiState.collectAsStateWithLifecycle()
+
+    val mainLayout by userPreferences.getMainLayoutFlow().collectAsStateWithLifecycle(
+        initialValue = listOf("LIVE_VIEW", "WEATHER", "MOON", "TIMELAPSES", "METEORS", "IMAGES", "KEOGRAMS", "STARTRAILS")
+    )
+
+    
+    val mainLayout by userPreferences.getMainLayoutFlow().collectAsStateWithLifecycle(
+        initialValue = listOf("LIVE_VIEW", "WEATHER", "MOON", "TIMELAPSES", "METEORS", "IMAGES", "KEOGRAMS", "STARTRAILS")
+    )
     
     var allskyUrl by remember { mutableStateOf("") }
-    
-    val context = LocalContext.current
-    val updateViewModel: UpdateViewModel = viewModel(
-        factory = UpdateViewModelFactory(context.applicationContext as android.app.Application)
-    )
-    val updateState by updateViewModel.uiState.collectAsState()
-    val showUpdateDialog by updateViewModel.showDialog.collectAsState()
     
     var currentVideo by remember { mutableStateOf<String?>(null) }
     
@@ -98,10 +101,19 @@ fun MainScreen(
                         isSettingsOpen = false
                     }
                 },
-                onAboutClick = onNavigateToAbout,
-                userPreferences = userPreferences,
-                languageManager = languageManager,
-                updateViewModel = updateViewModel
+                onNavigate = { route ->
+                    scope.launch {
+                        drawerState.close()
+                        isSettingsOpen = false
+                    }
+                    if (route == "home") {
+                        navController.navigate(route) {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(route)
+                    }
+                }
             )
         }
     ) {
@@ -121,7 +133,7 @@ fun MainScreen(
                         containerColor = Color.Transparent,
                         titleContentColor = MaterialTheme.colorScheme.onBackground
                     ),
-                    actions = {
+                    navigationIcon = {
                         IconButton(
                             onClick = {
                                 scope.launch {
@@ -131,8 +143,8 @@ fun MainScreen(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings",
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu",
                                 tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
@@ -141,18 +153,35 @@ fun MainScreen(
             },
             containerColor = Color.Transparent
         ) { padding ->
+            
+            // Dynamic Background based on Weather
+            val weatherCondition = weatherUiState.weatherData?.second?.firstOrNull()?.weather?.firstOrNull()?.main ?: "Clear"
+            val backgroundColors = remember(weatherCondition) {
+                when (weatherCondition) {
+                    "Clear" -> listOf(DeepNavy, NightPurple, ClearNight)
+                    "Clouds" -> listOf(Color(0xFF37474F), Color(0xFF455A64), Color(0xFF607D8B)) // Grey/Blue-Grey
+                    "Rain", "Drizzle", "Thunderstorm" -> listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)) // Dark Rain Blue
+                    "Snow" -> listOf(Color(0xFF78909C), Color(0xFF90A4AE), Color(0xFFB0BEC5)) // Cool bright
+                    else -> listOf(DeepNavy, NightPurple, ClearNight)
+                }
+            }
+
+
+            val weatherCondition = weatherUiState.weatherData?.second?.firstOrNull()?.weather?.firstOrNull()?.main ?: "Clear"
+            val backgroundColors = remember(weatherCondition) {
+                when (weatherCondition) {
+                    "Clear" -> listOf(DeepNavy, NightPurple, ClearNight)
+                    "Clouds" -> listOf(Color(0xFF37474F), Color(0xFF455A64), Color(0xFF607D8B))
+                    "Rain", "Drizzle", "Thunderstorm" -> listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB))
+                    "Snow" -> listOf(Color(0xFF78909C), Color(0xFF90A4AE), Color(0xFFB0BEC5))
+                    else -> listOf(DeepNavy, NightPurple, ClearNight)
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                DeepNavy,
-                                NightPurple,
-                                ClearNight
-                            )
-                        )
-                    )
+                    .background(brush = Brush.verticalGradient(colors = backgroundColors))
             ) {
                 Column(
                     modifier = Modifier
@@ -162,165 +191,162 @@ fun MainScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     
-                    // Live Image Section - Full Width & Heroic
-                    if (allskyUrl.isNotEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(400.dp)
-                                .padding(20.dp)
-                        ) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clickable { 
-                                        imageViewerViewModel.showImage(liveImageState.imageUrl)
-                                    },
-                                shape = RoundedCornerShape(40.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                            ) {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    AsyncImage(
-                                        model = liveImageState.imageUrl,
-                                        contentDescription = stringResource(R.string.live_allsky_image),
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                    
-                                    // Status Badge
-                                    Surface(
+                    mainLayout.forEach { moduleName ->
+                        when (moduleName) {
+                            "LIVE_VIEW" -> {
+                                if (allskyUrl.isNotEmpty()) {
+                                    Box(
                                         modifier = Modifier
-                                            .align(Alignment.TopStart)
-                                            .padding(20.dp),
-                                        color = Color.Black.copy(alpha = 0.5f),
-                                        shape = RoundedCornerShape(12.dp)
+                                            .fillMaxWidth()
+                                            .height(400.dp)
+                                            .padding(20.dp)
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .clickable { 
+                                                    imageViewerViewModel.showImage(liveImageState.imageUrl)
+                                                },
+                                            shape = RoundedCornerShape(40.dp),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                                         ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(8.dp)
-                                                    .background(Color.Green, RoundedCornerShape(4.dp))
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text(
-                                                text = "LIVE",
-                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                                color = Color.White
-                                            )
+                                            Box(modifier = Modifier.fillMaxSize()) {
+                                                AsyncImage(
+                                                    model = liveImageState.imageUrl,
+                                                    contentDescription = stringResource(R.string.live_allsky_image),
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                                
+                                                Surface(
+                                                    modifier = Modifier
+                                                        .align(Alignment.TopStart)
+                                                        .padding(20.dp),
+                                                    color = Color.Black.copy(alpha = 0.5f),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                ) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                                    ) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(8.dp)
+                                                                .background(Color.Green, RoundedCornerShape(4.dp))
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        Text(
+                                                            text = "LIVE",
+                                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                            color = Color.White
+                                                        )
+                                                    }
+                                                }
+
+                                                Surface(
+                                                    modifier = Modifier
+                                                        .align(Alignment.BottomEnd)
+                                                        .padding(20.dp),
+                                                    color = Color.Black.copy(alpha = 0.5f),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                ) {
+                                                    Text(
+                                                        text = formatTime(liveImageState.lastUpdate),
+                                                        style = MaterialTheme.typography.labelMedium,
+                                                        color = Color.White,
+                                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
-
-                                    Surface(
+                                }
+                            }
+                            "WEATHER" -> {
+                                if (apiKey.isEmpty()) {
+                                    Card(
                                         modifier = Modifier
-                                            .align(Alignment.BottomEnd)
+                                            .fillMaxWidth()
                                             .padding(20.dp),
-                                        color = Color.Black.copy(alpha = 0.5f),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        Text(
-                                            text = formatTime(liveImageState.lastUpdate),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                        shape = RoundedCornerShape(32.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                         )
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(24.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                text = "Weather Forecast",
+                                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                                            )
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            val uriHandler = LocalUriHandler.current
+                                            Button(
+                                                onClick = { uriHandler.openUri("https://home.openweathermap.org/api_keys") },
+                                                shape = RoundedCornerShape(16.dp)
+                                            ) {
+                                                Text("Get API Key")
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                        }
-                    }
-
-                    // Weather Section
-                    if (apiKey.isEmpty()) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp),
-                            shape = RoundedCornerShape(32.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "Weather Forecast",
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                val uriHandler = LocalUriHandler.current
-                                Button(
-                                    onClick = { uriHandler.openUri("https://home.openweathermap.org/api_keys") },
-                                    shape = RoundedCornerShape(16.dp)
-                                ) {
-                                    Text("Get API Key")
-                                }
-                            }
-                        }
-                    } else {
-                        WeatherDisplay(
-                            uiState = weatherUiState,
-                            onRequestPermission = onRequestLocationPermission
-                        )
-                    }
-                    
-                    // Moon Phase Section (Integrated into Bento layout)
-                    Box(modifier = Modifier.padding(horizontal = 4.dp)) {
-                        MoonPhaseDisplay()
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Media Sections
-                    if (allskyUiState.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.padding(32.dp))
-                    } else if (allskyUiState.error != null) {
-                        Text(
-                            text = allskyUiState.error!!,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(20.dp)
-                        )
-                    } else {
-                        AllskyMediaSection(
-                            title = "Recent Timelapses",
-                            media = allskyUiState.timelapses,
-                            onMediaClick = { media -> currentVideo = media.url }
-                        )
-
-                        AllskyMediaSection(
-                            title = "Meteor Recordings",
-                            media = allskyUiState.meteors,
-                            onMediaClick = { media -> 
-                                if (media.url.lowercase().contains(".mp4") || 
-                                    media.url.lowercase().contains(".webm")) {
-                                    currentVideo = media.url
                                 } else {
-                                    imageViewerViewModel.showImage(media.url)
+                                    WeatherDisplay(
+                                        uiState = weatherUiState,
+                                        onRequestPermission = onRequestLocationPermission
+                                    )
                                 }
                             }
-                        )
-
-                        AllskyMediaSection(
-                            title = "Daily Raw Images",
-                            media = allskyUiState.images,
-                            onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
-                        )
-
-                        AllskyMediaSection(
-                            title = "Keograms",
-                            media = allskyUiState.keograms,
-                            onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
-                        )
-
-                        AllskyMediaSection(
-                            title = "Startrails",
-                            media = allskyUiState.startrails,
-                            onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
-                        )
+                            "MOON" -> {
+                                Box(modifier = Modifier.padding(horizontal = 4.dp)) {
+                                    MoonPhaseDisplay()
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                            "TIMELAPSES" -> {
+                                AllskyMediaSection(
+                                    title = "Recent Timelapses",
+                                    media = allskyUiState.timelapses,
+                                    onMediaClick = { media -> currentVideo = media.url }
+                                )
+                            }
+                            "METEORS" -> {
+                                AllskyMediaSection(
+                                    title = "Meteor Recordings",
+                                    media = allskyUiState.meteors,
+                                    onMediaClick = { media -> 
+                                        if (media.url.lowercase().contains(".mp4") || 
+                                            media.url.lowercase().contains(".webm")) {
+                                            currentVideo = media.url
+                                        } else {
+                                            imageViewerViewModel.showImage(media.url)
+                                        }
+                                    }
+                                )
+                            }
+                            "IMAGES" -> {
+                                AllskyMediaSection(
+                                    title = "Daily Raw Images",
+                                    media = allskyUiState.images,
+                                    onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
+                                )
+                            }
+                            "KEOGRAMS" -> {
+                                AllskyMediaSection(
+                                    title = "Keograms",
+                                    media = allskyUiState.keograms,
+                                    onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
+                                )
+                            }
+                            "STARTRAILS" -> {
+                                AllskyMediaSection(
+                                    title = "Startrails",
+                                    media = allskyUiState.startrails,
+                                    onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
+                                )
+                            }
+                        }
                     }
                     
                     Spacer(modifier = Modifier.height(40.dp))
@@ -342,17 +368,6 @@ fun MainScreen(
                 }
             }
         }
-    }
-
-    if (updateState is UpdateUiState.UpdateAvailable && showUpdateDialog) {
-        val state = updateState as UpdateUiState.UpdateAvailable
-        UpdateDialog(
-            showDialog = true,
-            onDismiss = { updateViewModel.dismissUpdate() },
-            onDownload = { updateViewModel.downloadUpdate() },
-            version = state.updateInfo.latestVersion,
-            changelog = state.updateInfo.releaseNotes
-        )
     }
 }
 
