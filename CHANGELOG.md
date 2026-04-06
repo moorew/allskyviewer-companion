@@ -4,6 +4,12 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-04-06
+### Fixed
+- Fixed "No Content Available" error by adding the required `&day=All` parameter when fetching portal media.
+- Fixed historic image discovery by parsing thumbnail `<img>` tags (since the portal does not use standard links for raw images).
+- Cleaned up `/thumbnails` paths when retrieving full-resolution image links.
+
 ## [1.2.1] - 2026-04-06
 ### Fixed
 - Robust media discovery for Portal-style URLs (`index.php?page=list_...`).
