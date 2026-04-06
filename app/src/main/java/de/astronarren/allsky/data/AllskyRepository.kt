@@ -71,16 +71,24 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
 
                 println("Debug: Fetching content from Allsky: $jsoupBaseUrl")
                 
-                // Strategy: Try both direct directory and portal page
+                // Strategy: Try portal page first, fallback to direct directory
                 suspend fun fetchDoc(path: String, portalPage: String): org.jsoup.nodes.Document? {
+                    var doc: org.jsoup.nodes.Document? = null
+                    try {
+                        doc = createConnection("$jsoupBaseUrl/index.php?page=$portalPage").get()
+                    } catch (e: Exception) {}
+
+                    // Simple heuristic: if the document contains list_ or media elements, it's likely the right page
+                    val hasPortalContent = doc != null && doc.select("a[href], img[src], source[src]").isNotEmpty()
+                    
+                    if (doc != null && hasPortalContent) {
+                        return doc
+                    }
+
                     return try {
                         createConnection("$jsoupBaseUrl/$path").get()
                     } catch (e: Exception) {
-                        try {
-                            createConnection("$jsoupBaseUrl/index.php?page=$portalPage").get()
-                        } catch (e2: Exception) {
-                            null
-                        }
+                        doc // Return the portal doc even if it didn't have obvious content, as a last resort
                     }
                 }
 
@@ -88,7 +96,7 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val timelapseDoc = fetchDoc("videos/", "list_videos&day=$dayParam")
                 val keogramDoc = fetchDoc("keograms/", "list_keograms&day=$dayParam")
                 val startrailDoc = fetchDoc("startrails/", "list_startrails&day=$dayParam")
-                val imagesDoc = fetchDoc("images/", "list_days")
+                val imagesDoc = if (date != null && date != "All") fetchDoc("images/", "list_images&day=$date") else fetchDoc("images/", "list_days")
                 val meteorDoc = fetchDoc("meteors/", "list_meteors&day=$dayParam")
 
                 println("Debug: Successfully fetched HTML documents")
