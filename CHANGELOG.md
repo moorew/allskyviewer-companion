@@ -4,6 +4,10 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7] - 2026-04-05
+### Fixed
+- Added detection for live images located at `/current/tmp/image.jpg` (common in local Allsky installations).
+
 ## [1.1.6] - 2026-04-05
 ### Fixed
 - Fixed issue where the app failed to load media or live view if the base URL did not contain the `/allsky` path.
