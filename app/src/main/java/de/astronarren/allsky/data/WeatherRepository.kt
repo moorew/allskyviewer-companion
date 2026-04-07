@@ -9,23 +9,34 @@ class WeatherRepository(
     private val weatherService: WeatherService,
     private val userPreferences: UserPreferences
 ) {
-    suspend fun getForecast(): Result<WeatherResponse> {
+    suspend fun getForecast(lat: Double? = null, lon: Double? = null): Result<WeatherResponse> {
         return try {
-            if (!locationManager.isLocationPermissionGranted()) {
-                return Result.failure(Exception("Location permission required"))
-            }
-            
-            val location = locationManager.getCurrentLocation() ?: 
-                return Result.failure(Exception("Location not available"))
-            
             val apiKey = userPreferences.getApiKey()
             if (apiKey.isEmpty()) {
                 return Result.failure(Exception("API key not configured"))
             }
 
+            val finalLat: Double
+            val finalLon: Double
+
+            if (lat != null && lon != null) {
+                finalLat = lat
+                finalLon = lon
+            } else {
+                if (!locationManager.isLocationPermissionGranted()) {
+                    return Result.failure(Exception("Location permission required"))
+                }
+                
+                val location = locationManager.getCurrentLocation() ?: 
+                    return Result.failure(Exception("Location not available"))
+                
+                finalLat = location.latitude
+                finalLon = location.longitude
+            }
+
             val response = weatherService.getForecast(
-                lat = location.latitude,
-                lon = location.longitude,
+                lat = finalLat,
+                lon = finalLon,
                 apiKey = apiKey
             )
             Result.success(response)

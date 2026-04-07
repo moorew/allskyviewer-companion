@@ -60,7 +60,7 @@ fun MainScreen(
     val liveImageState by liveImageViewModel.uiState.collectAsStateWithLifecycle()
 
     val mainLayout by userPreferences.getMainLayoutFlow().collectAsStateWithLifecycle(
-        initialValue = listOf("LIVE_VIEW", "WEATHER", "MOON", "TIMELAPSES", "METEORS", "IMAGES", "KEOGRAMS", "STARTRAILS")
+        initialValue = listOf("LIVE_VIEW", "BEST_VIEWING", "WEATHER", "MOON", "TIMELAPSES", "METEORS", "IMAGES", "KEOGRAMS", "STARTRAILS")
     )
     
     var allskyUrl by remember { mutableStateOf("") }
@@ -245,6 +245,44 @@ fun MainScreen(
                                     }
                                 }
                             }
+                            "BEST_VIEWING" -> {
+                                val bestNight = weatherViewModel.getBestViewingNight()
+                                if (bestNight != null) {
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(20.dp),
+                                        shape = RoundedCornerShape(32.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = Color.White.copy(alpha = 0.1f)
+                                        )
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(24.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                text = "BEST VIEWING NIGHT",
+                                                style = MaterialTheme.typography.labelLarge.copy(
+                                                    fontWeight = FontWeight.Black,
+                                                    letterSpacing = 2.sp
+                                                ),
+                                                color = Color.Yellow
+                                            )
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text(
+                                                text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date(bestNight.dt * 1000)).uppercase(),
+                                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+                                            )
+                                            Text(
+                                                text = "${bestNight.weather.firstOrNull()?.description?.uppercase() ?: ""} • ${bestNight.clouds.all}% CLOUDS",
+                                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                                color = Color.White.copy(alpha = 0.7f)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                             "WEATHER" -> {
                                 if (apiKey.isEmpty()) {
                                     Card(
@@ -339,6 +377,7 @@ fun MainScreen(
                 if (imageViewerState.isFullScreen && imageViewerState.currentImageUrl != null) {
                     FullScreenImageViewer(
                         imageUrl = imageViewerState.currentImageUrl!!,
+                        userPreferences = userPreferences,
                         onDismiss = { imageViewerViewModel.dismissImage() }
                     )
                 }
@@ -346,6 +385,7 @@ fun MainScreen(
                 if (currentVideo != null) {
                     VideoPlayer(
                         videoUrl = currentVideo!!,
+                        userPreferences = userPreferences,
                         onDismiss = { currentVideo = null }
                     )
                 }

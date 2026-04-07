@@ -228,7 +228,8 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val url = normalizeUrl(rawHref, baseUrl, "videos") ?: return@mapNotNull null
                 val lowerUrl = url.lowercase()
                 
-                if (lowerUrl.contains(".mp4") || lowerUrl.contains(".webm") || lowerUrl.contains(".mkv") || lowerUrl.contains(".mov")) {
+                if ((lowerUrl.contains(".mp4") || lowerUrl.contains(".webm") || lowerUrl.contains(".mkv") || lowerUrl.contains(".mov")) &&
+                    !lowerUrl.contains("allsky-logo")) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -251,7 +252,8 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val url = normalizeUrl(rawHref, baseUrl, "keograms") ?: return@mapNotNull null
                 val lowerUrl = url.lowercase()
                 
-                if (lowerUrl.contains("keogram") && (lowerUrl.contains(".jpg") || lowerUrl.contains(".png"))) {
+                if (lowerUrl.contains("keogram") && (lowerUrl.contains(".jpg") || lowerUrl.contains(".png")) &&
+                    !lowerUrl.contains("allsky-logo") && !lowerUrl.contains("image.jpg") && !lowerUrl.contains("image-resize")) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -307,5 +309,7 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 null
             }
         }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
+    }
+}  }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
     }
 } 

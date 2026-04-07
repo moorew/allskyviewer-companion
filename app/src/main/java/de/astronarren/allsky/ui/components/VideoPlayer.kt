@@ -27,10 +27,11 @@ import de.astronarren.allsky.utils.DownloadHelper
 @Composable
 fun VideoPlayer(
     videoUrl: String,
+    userPreferences: de.astronarren.allsky.data.UserPreferences,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val downloadHelper = remember { DownloadHelper(context) }
+    val downloadHelper = remember { DownloadHelper(context, userPreferences) }
     
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {

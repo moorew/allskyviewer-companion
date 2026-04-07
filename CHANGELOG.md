@@ -4,6 +4,19 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-04-07
+### Added
+- **New App Icon**: Completely updated the application identity with a fresh new icon.
+- **Best Viewing Night Detection**: Added a smart logic to scan your weather forecast and pinpoint the upcoming night with the best astronomical viewing conditions (lowest clouds and no precipitation).
+- **Station-Specific Weather**: Removed phone location dependency. You can now set the exact Latitude and Longitude of your camera station in Settings for pinpoint accurate forecasts.
+- **Download Media**: You can now download images and videos directly to your device from the full-screen viewers.
+- **Calendar Date Picker**: Replaced manual date typing with an intuitive Android calendar picker in the media galleries.
+
+### Fixed
+- **Media Cleanup**: Automatically hiding system files like `allsky-logo.jpg` and `image.jpg` from the galleries.
+- **Media Placeholders**: Added dark background placeholders for video and image thumbnails to prevent layout flickering.
+- **About Page Redesign**: Updated author information and credits with a fresh look.
+
 ## [1.3.5] - 2026-04-06
 ### Fixed
 - **URL Auto-Correct Bug**: Removed an overzealous auto-correct feature that was silently appending `/allsky` to users' base URLs and saving it to preferences. This caused the app to look in the wrong directory, completely breaking media discovery for many setups.

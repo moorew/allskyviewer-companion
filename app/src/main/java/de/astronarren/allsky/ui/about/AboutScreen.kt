@@ -22,51 +22,17 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.clickable
 import de.astronarren.allsky.BuildConfig
 
-// Update data class to not use stringResource directly
-private data class ComponentInfo(
-    val nameResId: Int,
-    val url: String,
-    val licenseResId: Int = R.string.apache_license
-)
-
-@Composable
-private fun ComponentLink(
-    component: ComponentInfo,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.Circle,
-            contentDescription = null,
-            modifier = Modifier.size(8.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        
-        Text(
-            text = "${stringResource(component.nameResId)} (${stringResource(component.licenseResId)})",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.primary,
-                textDecoration = TextDecoration.Underline
-            )
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(
     onNavigateBack: () -> Unit
 ) {
+    val uriHandler = LocalUriHandler.current
+    
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.about)) },
+                title = { Text("About") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -83,246 +49,151 @@ fun AboutScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // App Title and Version
             Text(
-                text = stringResource(R.string.about_title),
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
+                text = "ALLSKY",
+                style = MaterialTheme.typography.displayMedium,
+                fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center
             )
             
             Text(
-                text = stringResource(
-                    R.string.about_version,
-                    BuildConfig.VERSION_NAME
-                ),
+                text = "Version ${BuildConfig.VERSION_NAME}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Copyright Card
+            // Author Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge,
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = stringResource(R.string.about_copyright),
-                        style = MaterialTheme.typography.titleMedium,
+                        text = "Developed by Will Moore",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Description Card
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.about_description),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Row(
+                        modifier = Modifier.clickable { uriHandler.openUri("https://github.com/moorew") },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Code, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "GitHub: moorew",
+                            style = MaterialTheme.typography.bodyLarge.copy(textDecoration = TextDecoration.Underline)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Row(
+                        modifier = Modifier.clickable { uriHandler.openUri("https://bsky.app/profile/clevercode.ca") },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Cloud, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Bluesky: @clevercode.ca",
+                            style = MaterialTheme.typography.bodyLarge.copy(textDecoration = TextDecoration.Underline)
+                        )
+                    }
                 }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Features Section
+            // Description
             Text(
-                text = stringResource(R.string.about_features),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium
+                text = "A modern companion app for your Allsky camera station. Track your local weather, monitor live feeds, and explore your history of captures with ease.",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Feature Cards
-            FeatureCard(
-                icon = Icons.Outlined.Refresh,
-                title = stringResource(R.string.feature_live_view_title),
-                description = stringResource(R.string.feature_live_view_desc)
-            )
+            Spacer(modifier = Modifier.height(32.dp))
             
-            FeatureCard(
-                icon = Icons.Outlined.NightsStay,
-                title = stringResource(R.string.feature_moon_phase_title),
-                description = stringResource(R.string.feature_moon_phase_desc)
-            )
-            
-            FeatureCard(
-                icon = Icons.Outlined.WbSunny,
-                title = stringResource(R.string.feature_weather_title),
-                description = stringResource(R.string.feature_weather_desc)
-            )
-            
-            FeatureCard(
-                icon = Icons.Outlined.Collections,
-                title = stringResource(R.string.feature_media_title),
-                description = stringResource(R.string.feature_media_desc)
-            )
-            
-            FeatureCard(
-                icon = Icons.Outlined.Palette,
-                title = stringResource(R.string.feature_theme_title),
-                description = stringResource(R.string.feature_theme_desc)
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Components Section
+            // Features
             Text(
-                text = stringResource(R.string.about_components),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Components Cards
-            ComponentCard(
-                title = stringResource(R.string.component_section_ui),
-                components = listOf(
-                    ComponentInfo(
-                        R.string.component_jetpack_compose,
-                        "https://developer.android.com/jetpack/compose"
-                    ),
-                    ComponentInfo(
-                        R.string.component_material_design,
-                        "https://m3.material.io/"
-                    )
-                )
-            )
-            
-            ComponentCard(
-                title = stringResource(R.string.component_section_core),
-                components = listOf(
-                    ComponentInfo(
-                        R.string.component_coroutines,
-                        "https://github.com/Kotlin/kotlinx.coroutines"
-                    ),
-                    ComponentInfo(
-                        R.string.component_retrofit,
-                        "https://github.com/square/retrofit"
-                    ),
-                    ComponentInfo(
-                        R.string.component_coil,
-                        "https://github.com/coil-kt/coil"
-                    )
-                )
-            )
-            
-            ComponentCard(
-                title = stringResource(R.string.component_section_android),
-                components = listOf(
-                    ComponentInfo(
-                        R.string.component_datastore,
-                        "https://developer.android.com/topic/libraries/architecture/datastore"
-                    ),
-                    ComponentInfo(
-                        R.string.component_play_services,
-                        "https://developers.google.com/android/guides/setup"
-                    ),
-                    ComponentInfo(
-                        R.string.component_navigation,
-                        "https://developer.android.com/guide/navigation"
-                    ),
-                    ComponentInfo(
-                        R.string.component_lifecycle,
-                        "https://developer.android.com/topic/libraries/architecture/lifecycle"
-                    )
-                )
-            )
-        }
-    }
-}
-
-@Composable
-private fun FeatureCard(
-    icon: ImageVector,
-    title: String,
-    description: String
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ComponentCard(
-    title: String,
-    components: List<ComponentInfo>
-) {
-    val uriHandler = LocalUriHandler.current
-    
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
+                text = "KEY FEATURES",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.dp),
                 color = MaterialTheme.colorScheme.primary
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AboutFeatureItem(Icons.Outlined.AutoGraph, "Robust Scraper", "Intelligent parsing of Allsky Portal galleries.")
+            AboutFeatureItem(Icons.Outlined.NightsStay, "Night Conditions", "Automated 'Best Viewing' night detection.")
+            AboutFeatureItem(Icons.Outlined.ViewQuilt, "Custom Layout", "Fully modular home screen reordering.")
+            AboutFeatureItem(Icons.Outlined.History, "Historical Explorer", "Calendar-based media discovery.")
             
-            components.forEach { component ->
-                ComponentLink(
-                    component = component,
-                    onClick = { uriHandler.openUri(component.url) }
-                )
-            }
+            Spacer(modifier = Modifier.height(48.dp))
+            
+            // Footer Credit
+            Text(
+                text = "CREDITS",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Original Concept and Logic by Thomas Jacquin",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "and the AllskyTeam community.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
-} 
+}
+
+@Composable
+private fun AboutFeatureItem(
+    icon: ImageVector,
+    title: String,
+    desc: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = desc, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}

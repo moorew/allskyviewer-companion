@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.astronarren.allsky.viewmodel.AllskyViewModel
 import de.astronarren.allsky.viewmodel.AllskyMediaUiState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +37,8 @@ fun MediaScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var dateInput by remember { mutableStateOf("All") }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
 
     val mediaItems = when (mediaType) {
         "timelapses" -> uiState.timelapses
@@ -42,6 +49,27 @@ fun MediaScreen(
         else -> emptyList()
     }
 
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDatePicker = false
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                        dateInput = sdf.format(Date(millis))
+                        viewModel.fetchContentForDate(dateInput)
+                    }
+                }) { Text("Select") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -49,6 +77,11 @@ fun MediaScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Select Date")
                     }
                 }
             )
@@ -62,23 +95,21 @@ fun MediaScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = dateInput,
-                    onValueChange = { dateInput = it },
-                    label = { Text("Date (e.g. 20260405 or All)") },
+                Text(
+                    text = "Showing date: $dateInput",
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        val query = if (dateInput.isBlank()) "All" else dateInput
-                        viewModel.fetchContentForDate(query)
+                        dateInput = "All"
+                        viewModel.fetchContentForDate("All")
                     }
                 ) {
-                    Text("Load")
+                    Text("Show All")
                 }
             }
 
@@ -90,6 +121,10 @@ fun MediaScreen(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
                 }
+            } else if (mediaItems.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "No content available for this date.")
+                }
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 150.dp),
@@ -99,6 +134,7 @@ fun MediaScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(mediaItems) { item ->
+                        val isVideo = item.url.lowercase().run { contains(".mp4") || contains(".webm") || contains(".mov") || contains(".mkv") }
                         Card(
                             modifier = Modifier
                                 .aspectRatio(1f)
@@ -106,13 +142,29 @@ fun MediaScreen(
                             onClick = { onMediaClick(item) },
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            Box(modifier = Modifier.fillMaxSize()) {
+                            Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
                                 AsyncImage(
                                     model = item.url,
                                     contentDescription = item.date,
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
                                 )
+                                if (isVideo) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .size(48.dp)
+                                            .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(24.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayCircle,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(32.dp),
+                                            tint = Color.White
+                                        )
+                                    }
+                                }
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.BottomStart)

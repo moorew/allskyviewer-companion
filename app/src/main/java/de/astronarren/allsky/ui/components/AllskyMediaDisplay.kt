@@ -126,7 +126,7 @@ private fun MediaCard(
             containerColor = Color.White.copy(alpha = 0.05f)
         )
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
             AsyncImage(
                 model = media.url,
                 contentDescription = stringResource(R.string.media_from_date, media.date),

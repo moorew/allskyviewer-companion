@@ -7,7 +7,12 @@ import android.os.Environment
 import android.widget.Toast
 import java.io.File
 
-class DownloadHelper(private val context: Context) {
+import de.astronarren.allsky.data.UserPreferences
+
+class DownloadHelper(
+    private val context: Context,
+    private val userPreferences: UserPreferences
+) {
     fun downloadMedia(url: String, fileName: String, isVideo: Boolean = false) {
         try {
             val request = DownloadManager.Request(Uri.parse(url))
@@ -20,6 +25,16 @@ class DownloadHelper(private val context: Context) {
                 )
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true)
+
+            val username = userPreferences.getUsername()
+            val password = userPreferences.getPassword()
+            if (username.isNotEmpty() && password.isNotEmpty()) {
+                val auth = "Basic " + android.util.Base64.encodeToString(
+                    "$username:$password".toByteArray(),
+                    android.util.Base64.NO_WRAP
+                )
+                request.addRequestHeader("Authorization", auth)
+            }
 
             val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             downloadManager.enqueue(request)

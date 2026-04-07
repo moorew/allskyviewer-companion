@@ -26,10 +26,11 @@ import de.astronarren.allsky.utils.DownloadHelper
 @Composable
 fun FullScreenImageViewer(
     imageUrl: String,
+    userPreferences: de.astronarren.allsky.data.UserPreferences,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val downloadHelper = remember { DownloadHelper(context) }
+    val downloadHelper = remember { DownloadHelper(context, userPreferences) }
     
     var scale by remember { mutableStateOf(1f) }
     var offsetX by remember { mutableStateOf(0f) }

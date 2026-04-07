@@ -22,7 +22,13 @@ class WeatherViewModel(
 
     init {
         viewModelScope.launch {
-            userPreferences.getApiKeyFlow().collect { apiKey ->
+            kotlinx.coroutines.flow.combine(
+                userPreferences.getApiKeyFlow(),
+                userPreferences.getLatitudeFlow(),
+                userPreferences.getLongitudeFlow()
+            ) { apiKey, lat, lon ->
+                Triple(apiKey, lat, lon)
+            }.collect { (apiKey, lat, lon) ->
                 if (apiKey.isNotBlank()) {
                     updateWeather()
                 }
@@ -44,8 +50,24 @@ class WeatherViewModel(
                 }
                 return@launch
             }
+
+            val latStr = userPreferences.getLatitude()
+            val lonStr = userPreferences.getLongitude()
             
-            weatherRepository.getForecast()
+            val lat = latStr.toDoubleOrNull()
+            val lon = lonStr.toDoubleOrNull()
+
+            if (lat == null || lon == null) {
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        error = "Station coordinates required in Settings"
+                    )
+                }
+                return@launch
+            }
+            
+            weatherRepository.getForecast(lat, lon)
                 .onSuccess { response ->
                     val dailyForecasts = response.list
                         .groupBy { formatDay(it.dt) }
@@ -54,25 +76,35 @@ class WeatherViewModel(
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            weatherData = Pair(response.city, dailyForecasts)
+                            weatherData = Pair(response.city, dailyForecasts),
+                            fullForecast = response.list
                         )
                     }
                 }
                 .onFailure { error ->
-                    val errorMessage = when {
-                        error.message?.contains("permission", ignoreCase = true) == true -> 
-                            "Location permission required"
-                        error.message?.contains("location", ignoreCase = true) == true ->
-                            "Location services not available"
-                        else -> error.message ?: "Unknown error occurred"
-                    }
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            error = errorMessage
+                            error = error.message ?: "Unknown error occurred"
                         )
                     }
                 }
+        }
+    }
+
+    fun getBestViewingNight(): WeatherData? {
+        val data = _uiState.value.fullForecast ?: return null
+        // Find forecast points between 21:00 and 05:00
+        val nightPoints = data.filter { 
+            val hour = SimpleDateFormat("HH", Locale.getDefault()).format(Date(it.dt * 1000)).toInt()
+            hour >= 21 || hour <= 5
+        }
+        
+        if (nightPoints.isEmpty()) return null
+
+        // Pick the point with lowest cloud cover and no rain
+        return nightPoints.minByOrNull { 
+            it.clouds.all + (if (it.weather.any { w -> w.main.contains("Rain", true) || w.main.contains("Snow", true) }) 1000 else 0)
         }
     }
 

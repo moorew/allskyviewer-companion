@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 val ALL_MODULES = listOf(
     "LIVE_VIEW",
+    "BEST_VIEWING",
     "WEATHER",
     "MOON",
     "TIMELAPSES",
@@ -25,6 +26,19 @@ val ALL_MODULES = listOf(
     "KEOGRAMS",
     "STARTRAILS"
 )
+
+private fun getModuleLabel(key: String): String = when (key) {
+    "LIVE_VIEW" -> "Live View"
+    "BEST_VIEWING" -> "Best Viewing Night"
+    "WEATHER" -> "Weather Forecast"
+    "MOON" -> "Moon Phase"
+    "TIMELAPSES" -> "Timelapses"
+    "METEORS" -> "Meteor Recordings"
+    "IMAGES" -> "Raw Images"
+    "KEOGRAMS" -> "Keograms"
+    "STARTRAILS" -> "Startrails"
+    else -> key
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +87,7 @@ fun LayoutEditorScreen(
                                 layout = newLayout
                             }
                         )
-                        Text(text = module, modifier = Modifier.weight(1f))
+                        Text(text = getModuleLabel(module), modifier = Modifier.weight(1f))
                         
                         if (isVisible) {
                             val activeIndex = layout.indexOf(module)

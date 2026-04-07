@@ -18,6 +18,44 @@ class UserPreferences(private val context: Context) {
         private val USERNAME = stringPreferencesKey("username")
         private val PASSWORD = stringPreferencesKey("password")
         private val MAIN_LAYOUT = stringPreferencesKey("main_layout")
+        private val LATITUDE = stringPreferencesKey("latitude")
+        private val LONGITUDE = stringPreferencesKey("longitude")
+    }
+
+    suspend fun saveLatitude(lat: String) {
+        context.dataStore.edit { preferences ->
+            preferences[LATITUDE] = lat
+        }
+    }
+
+    fun getLatitude(): String {
+        return runBlocking {
+            context.dataStore.data.first()[LATITUDE] ?: ""
+        }
+    }
+
+    fun getLatitudeFlow(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[LATITUDE] ?: ""
+        }
+    }
+
+    suspend fun saveLongitude(lon: String) {
+        context.dataStore.edit { preferences ->
+            preferences[LONGITUDE] = lon
+        }
+    }
+
+    fun getLongitude(): String {
+        return runBlocking {
+            context.dataStore.data.first()[LONGITUDE] ?: ""
+        }
+    }
+
+    fun getLongitudeFlow(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[LONGITUDE] ?: ""
+        }
     }
 
     suspend fun saveMainLayout(layout: List<String>) {

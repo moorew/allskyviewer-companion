@@ -6,5 +6,6 @@ import de.astronarren.allsky.data.WeatherData
 data class WeatherUiState(
     val isLoading: Boolean = false,
     val weatherData: Pair<City, List<WeatherData>>? = null,
+    val fullForecast: List<WeatherData>? = null,
     val error: String? = null
 ) 

@@ -219,6 +219,8 @@ fun SettingsScreen(
                 onClick = {
                     scope.launch {
                         userPreferences.saveAllskyUrl(urlInput)
+                        userPreferences.saveLatitude(latInput)
+                        userPreferences.saveLongitude(lonInput)
                         userPreferences.saveUsername(usernameInput)
                         userPreferences.savePassword(passwordInput)
                         userPreferences.saveApiKey(apiKeyInput)
@@ -226,6 +228,29 @@ fun SettingsScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(
+                    text = stringResource(R.string.save),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+
+    if (showLanguageDialog) {
+        LanguageSelector(
+            currentLanguage = currentLanguage,
+            onLanguageSelected = { language ->
+                currentLanguage = language
+                languageManager.setLanguage(language)
+            },
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
+}xWidth(),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
