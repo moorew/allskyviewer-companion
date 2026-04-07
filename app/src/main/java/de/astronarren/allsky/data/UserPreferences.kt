@@ -52,6 +52,12 @@ class UserPreferences(private val context: Context) {
         }
     }
 
+    fun getUsernameFlow(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[USERNAME] ?: ""
+        }
+    }
+
     suspend fun savePassword(password: String) {
         context.dataStore.edit { preferences ->
             preferences[PASSWORD] = password
@@ -61,6 +67,12 @@ class UserPreferences(private val context: Context) {
     fun getPassword(): String {
         return runBlocking {
             context.dataStore.data.first()[PASSWORD] ?: ""
+        }
+    }
+
+    fun getPasswordFlow(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[PASSWORD] ?: ""
         }
     }
 

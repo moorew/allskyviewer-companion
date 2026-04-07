@@ -34,8 +34,13 @@ class AllskyViewModel(
 
     init {
         viewModelScope.launch {
-            // Observe URL changes
-            userPreferences.getAllskyUrlFlow().collect { _ ->
+            kotlinx.coroutines.flow.combine(
+                userPreferences.getAllskyUrlFlow(),
+                userPreferences.getUsernameFlow(),
+                userPreferences.getPasswordFlow()
+            ) { url, username, password ->
+                Triple(url, username, password)
+            }.collect {
                 loadContent()
             }
         }

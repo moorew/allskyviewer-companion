@@ -35,27 +35,6 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     return conn
                 }
 
-                // Check if we need to append /allsky
-                try {
-                    val testConn = createConnection("$baseUrl/videos/")
-                    testConn.execute()
-                } catch (e: org.jsoup.HttpStatusException) {
-                    if (e.statusCode == 404) {
-                        try {
-                            val altConn = createConnection("$baseUrl/allsky/videos/")
-                            if (altConn.execute().statusCode() == 200) {
-                                baseUrl = "$baseUrl/allsky"
-                                userPreferences.saveAllskyUrl(baseUrl)
-                                println("Debug: Auto-corrected baseUrl to $baseUrl")
-                            }
-                        } catch (e2: Exception) {
-                            println("Debug: Auto-correct failed: ${e2.message}")
-                        }
-                    }
-                } catch (e: Exception) {
-                    println("Debug: BaseUrl test failed: ${e.message}")
-                }
-                
                 // Base URL for Jsoup (without credentials to avoid parsing issues)
                 val jsoupBaseUrl = baseUrl
                 

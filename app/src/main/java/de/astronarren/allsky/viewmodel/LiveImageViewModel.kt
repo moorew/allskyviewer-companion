@@ -81,8 +81,6 @@ class LiveImageViewModel(
 
                         // Priority 3: Check /allsky/image.jpg
                         if (!cleanUrl.endsWith("/allsky") && testPath("$cleanUrl/allsky/image.jpg") == 200) {
-                            // Update the saved base URL if /allsky is found
-                            userPreferences.saveAllskyUrl("$cleanUrl/allsky")
                             return@withContext "$cleanUrl/allsky/image.jpg"
                         }
 
