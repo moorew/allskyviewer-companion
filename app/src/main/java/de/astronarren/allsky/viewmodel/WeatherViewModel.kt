@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.astronarren.allsky.data.WeatherRepository
 import de.astronarren.allsky.data.UserPreferences
+import de.astronarren.allsky.data.WeatherData
 import de.astronarren.allsky.ui.state.WeatherUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

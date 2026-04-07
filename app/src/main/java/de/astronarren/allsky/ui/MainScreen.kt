@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import coil.compose.AsyncImage
 import de.astronarren.allsky.ui.components.*
 import de.astronarren.allsky.data.UserPreferences
+import de.astronarren.allsky.data.WeatherData
 import de.astronarren.allsky.viewmodel.*
 import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -271,7 +272,7 @@ fun MainScreen(
                                             )
                                             Spacer(modifier = Modifier.height(12.dp))
                                             Text(
-                                                text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date(bestNight.dt * 1000)).uppercase(),
+                                                text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date(bestNight.dt * 1000L)).uppercase(),
                                                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
                                             )
                                             Text(
@@ -398,6 +399,8 @@ private fun formatTime(timestamp: Long): String {
     return if (timestamp == 0L) {
         ""
     } else {
-        SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(timestamp))
+        // Assume timestamp is in millis if it's large, otherwise seconds
+        val millis = if (timestamp < 1000000000000L) timestamp * 1000L else timestamp
+        SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(millis))
     }
 }

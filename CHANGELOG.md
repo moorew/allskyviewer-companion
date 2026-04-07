@@ -4,6 +4,11 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-04-07
+### Fixed
+- Fixed critical compilation errors in MainScreen, AboutScreen, SettingsScreen, and AllskyRepository.
+- Improved Date handling and units in UI.
+
 ## [1.4.0] - 2026-04-07
 ### Added
 - **New App Icon**: Completely updated the application identity with a fresh new icon.

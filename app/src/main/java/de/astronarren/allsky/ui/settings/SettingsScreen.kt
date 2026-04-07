@@ -33,6 +33,8 @@ fun SettingsScreen(
 ) {
     var apiKeyInput by remember { mutableStateOf("") }
     var urlInput by remember { mutableStateOf("") }
+    var latInput by remember { mutableStateOf("") }
+    var lonInput by remember { mutableStateOf("") }
     var usernameInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -43,6 +45,8 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         apiKeyInput = userPreferences.getApiKey()
         urlInput = userPreferences.getAllskyUrl()
+        latInput = userPreferences.getLatitude()
+        lonInput = userPreferences.getLongitude()
         usernameInput = userPreferences.getUsername()
         passwordInput = userPreferences.getPassword()
     }
@@ -141,6 +145,27 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Lat/Lon Inputs
+            Row(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = latInput,
+                    onValueChange = { latInput = it },
+                    label = { Text("Station Latitude") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedTextField(
+                    value = lonInput,
+                    onValueChange = { lonInput = it },
+                    label = { Text("Station Longitude") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Username Input
             OutlinedTextField(
                 value = usernameInput,
@@ -228,29 +253,6 @@ fun SettingsScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text(
-                    text = stringResource(R.string.save),
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-    }
-
-    if (showLanguageDialog) {
-        LanguageSelector(
-            currentLanguage = currentLanguage,
-            onLanguageSelected = { language ->
-                currentLanguage = language
-                languageManager.setLanguage(language)
-            },
-            onDismiss = { showLanguageDialog = false }
-        )
-    }
-}xWidth(),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
