@@ -4,6 +4,14 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-04-07
+### Fixed
+- **App Icon Overhaul**: Removed legacy vector assets that were preventing the new custom icon from appearing on modern Android devices.
+- **Layout Persistence**: Improved the layout logic to ensure new modules like "Best Viewing Night" appear for all users, even if they had a previous layout saved.
+- **Restore Defaults**: Added a "Restore Defaults" button to the Layout Editor.
+- **Robust Media Fetching**: Added a realistic User-Agent and fixed nested URL authentication issues to ensure galleries populate correctly.
+- **Full Screen Media**: Fixed a bug where clicking media in the full-screen gallery view wouldn't open the image/video player.
+
 ## [1.4.1] - 2026-04-07
 ### Fixed
 - Fixed critical compilation errors in MainScreen, AboutScreen, SettingsScreen, and AllskyRepository.

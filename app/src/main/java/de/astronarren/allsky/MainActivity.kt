@@ -159,14 +159,7 @@ class MainActivity : ComponentActivity() {
                                 title = title,
                                 mediaType = type,
                                 viewModel = allskyViewModel,
-                                onMediaClick = { media ->
-                                    if (media.url.lowercase().contains(".mp4") || media.url.lowercase().contains(".webm")) {
-                                        // You could pass this back to main screen or handle video playing here
-                                        imageViewerViewModel.showImage(media.url) // reusing imageviewer for simplicity or implement video player
-                                    } else {
-                                        imageViewerViewModel.showImage(media.url)
-                                    }
-                                },
+                                userPreferences = userPreferences,
                                 onNavigateBack = { navController.popBackStack() }
                             )
                         }

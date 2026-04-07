@@ -65,16 +65,42 @@ class UserPreferences(private val context: Context) {
     }
 
     fun getMainLayout(): List<String> {
-        val defaultLayout = "LIVE_VIEW,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
+        val defaultLayout = "LIVE_VIEW,BEST_VIEWING,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
         return runBlocking {
-            (context.dataStore.data.first()[MAIN_LAYOUT] ?: defaultLayout).split(",")
+            val saved = context.dataStore.data.first()[MAIN_LAYOUT] ?: defaultLayout
+            val list = saved.split(",").toMutableList()
+            // Ensure all default modules are present (e.g. after an update)
+            defaultLayout.split(",").forEach { module ->
+                if (!list.contains(module)) {
+                    // Find logical place to insert
+                    if (module == "BEST_VIEWING") {
+                        val index = list.indexOf("LIVE_VIEW")
+                        if (index != -1) list.add(index + 1, module) else list.add(0, module)
+                    } else {
+                        list.add(module)
+                    }
+                }
+            }
+            list
         }
     }
 
     fun getMainLayoutFlow(): Flow<List<String>> {
-        val defaultLayout = "LIVE_VIEW,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
+        val defaultLayout = "LIVE_VIEW,BEST_VIEWING,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
         return context.dataStore.data.map { preferences ->
-            (preferences[MAIN_LAYOUT] ?: defaultLayout).split(",")
+            val saved = preferences[MAIN_LAYOUT] ?: defaultLayout
+            val list = saved.split(",").toMutableList()
+            defaultLayout.split(",").forEach { module ->
+                if (!list.contains(module)) {
+                    if (module == "BEST_VIEWING") {
+                        val index = list.indexOf("LIVE_VIEW")
+                        if (index != -1) list.add(index + 1, module) else list.add(0, module)
+                    } else {
+                        list.add(module)
+                    }
+                }
+            }
+            list
         }
     }
 

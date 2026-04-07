@@ -32,13 +32,16 @@ fun MediaScreen(
     title: String,
     mediaType: String,
     viewModel: AllskyViewModel,
-    onMediaClick: (AllskyMediaUiState) -> Unit,
+    userPreferences: de.astronarren.allsky.data.UserPreferences,
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var dateInput by remember { mutableStateOf("All") }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+    
+    var currentVideo by remember { mutableStateOf<String?>(null) }
+    var currentImage by remember { mutableStateOf<String?>(null) }
 
     val mediaItems = when (mediaType) {
         "timelapses" -> uiState.timelapses
@@ -87,103 +90,128 @@ fun MediaScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            Row(
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .padding(padding)
             ) {
-                Text(
-                    text = "Showing date: $dateInput",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
-                Button(
-                    onClick = {
-                        dateInput = "All"
-                        viewModel.fetchContentForDate("All")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Showing date: $dateInput",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Button(
+                        onClick = {
+                            dateInput = "All"
+                            viewModel.fetchContentForDate("All")
+                        }
+                    ) {
+                        Text("Show All")
                     }
-                ) {
-                    Text("Show All")
                 }
-            }
 
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (uiState.error != null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
-                }
-            } else if (mediaItems.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No content available for this date.")
-                }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 150.dp),
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(mediaItems) { item ->
-                        val isVideo = item.url.lowercase().run { contains(".mp4") || contains(".webm") || contains(".mov") || contains(".mkv") }
-                        Card(
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .fillMaxWidth(),
-                            onClick = { onMediaClick(item) },
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
-                                AsyncImage(
-                                    model = item.url,
-                                    contentDescription = item.date,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                                if (isVideo) {
+                if (uiState.isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else if (uiState.error != null) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
+                    }
+                } else if (mediaItems.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = "No content available for this date.")
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 150.dp),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(mediaItems) { item ->
+                            val isVideo = item.url.lowercase().run { contains(".mp4") || contains(".webm") || contains(".mov") || contains(".mkv") }
+                            Card(
+                                modifier = Modifier
+                                    .aspectRatio(1f)
+                                    .fillMaxWidth(),
+                                onClick = { 
+                                    if (isVideo) {
+                                        currentVideo = item.url
+                                    } else {
+                                        currentImage = item.url
+                                    }
+                                },
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
+                                    AsyncImage(
+                                        model = item.url,
+                                        contentDescription = item.date,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    if (isVideo) {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                                .size(48.dp)
+                                                .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(24.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.PlayCircle,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(32.dp),
+                                                tint = Color.White
+                                            )
+                                        }
+                                    }
                                     Box(
                                         modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .size(48.dp)
-                                            .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(24.dp)),
-                                        contentAlignment = Alignment.Center
+                                            .align(Alignment.BottomStart)
+                                            .fillMaxWidth()
+                                            .background(
+                                                Color.Black.copy(alpha = 0.5f)
+                                            )
+                                            .padding(8.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.PlayCircle,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(32.dp),
-                                            tint = Color.White
+                                        Text(
+                                            text = item.date,
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.bodySmall
                                         )
                                     }
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .fillMaxWidth()
-                                        .background(
-                                            Color.Black.copy(alpha = 0.5f)
-                                        )
-                                        .padding(8.dp)
-                                ) {
-                                    Text(
-                                        text = item.date,
-                                        color = Color.White,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            // Overlays
+            if (currentImage != null) {
+                de.astronarren.allsky.ui.components.FullScreenImageViewer(
+                    imageUrl = currentImage!!,
+                    userPreferences = userPreferences,
+                    onDismiss = { currentImage = null }
+                )
+            }
+
+            if (currentVideo != null) {
+                de.astronarren.allsky.ui.components.VideoPlayer(
+                    videoUrl = currentVideo!!,
+                    userPreferences = userPreferences,
+                    onDismiss = { currentVideo = null }
+                )
             }
         }
     }

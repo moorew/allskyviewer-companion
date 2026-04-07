@@ -125,6 +125,23 @@ fun LayoutEditorScreen(
                 }
             }
             
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    layout = ALL_MODULES
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            ) {
+                Text("Restore Defaults")
+            }
+
             Button(
                 onClick = {
                     scope.launch {

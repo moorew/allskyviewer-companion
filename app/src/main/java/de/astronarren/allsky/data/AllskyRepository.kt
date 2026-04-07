@@ -28,6 +28,10 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 
                 fun createConnection(url: String): Connection {
                     val conn = Jsoup.connect(url)
+                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                        .timeout(15000)
+                        .followRedirects(true)
+                    
                     if (username.isNotEmpty() && password.isNotEmpty()) {
                         val basicAuth = "Basic " + Base64.encodeToString("$username:$password".toByteArray(), Base64.NO_WRAP)
                         conn.header("Authorization", basicAuth)
@@ -54,20 +58,31 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 suspend fun fetchDoc(path: String, portalPage: String): org.jsoup.nodes.Document? {
                     var doc: org.jsoup.nodes.Document? = null
                     try {
-                        doc = createConnection("$jsoupBaseUrl/index.php?page=$portalPage").get()
+                        val portalUrl = "$jsoupBaseUrl/index.php?page=$portalPage"
+                        println("Debug: Trying portal page: $portalUrl")
+                        doc = createConnection(portalUrl).get()
                     } catch (e: org.jsoup.HttpStatusException) {
                         if (e.statusCode == 401 || e.statusCode == 403) throw e
-                    } catch (e: Exception) {}
+                        println("Debug: Portal page returned ${e.statusCode}")
+                    } catch (e: Exception) {
+                        println("Debug: Portal page fetch failed: ${e.message}")
+                    }
 
                     // Simple heuristic: if the document contains list_ or media elements, it's likely the right page
-                    val hasPortalContent = doc != null && doc.select("a[href], img[src], source[src]").isNotEmpty()
+                    val hasPortalContent = doc != null && (
+                        doc.select("a[href*=.mp4], a[href*=.jpg], img[src*=.jpg], source[src*=.mp4]").isNotEmpty() ||
+                        doc.select("div.functionsListFileType, div.functionsListTypeImg").isNotEmpty()
+                    )
                     
                     if (doc != null && hasPortalContent) {
+                        println("Debug: Portal page has valid content")
                         return doc
                     }
 
                     return try {
-                        createConnection("$jsoupBaseUrl/$path").get()
+                        val dirUrl = "$jsoupBaseUrl/$path"
+                        println("Debug: Falling back to direct directory: $dirUrl")
+                        createConnection(dirUrl).get()
                     } catch (e: org.jsoup.HttpStatusException) {
                         if (e.statusCode == 401 || e.statusCode == 403) throw e
                         doc // Return the portal doc even if it didn't have obvious content, as a last resort
@@ -83,24 +98,30 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val imagesDoc = if (date != null && date != "All") fetchDoc("images/", "list_images&day=$date") else fetchDoc("images/", "list_days")
                 val meteorDoc = fetchDoc("meteors/", "list_meteors&day=$dayParam")
 
-                println("Debug: Successfully fetched HTML documents")
-
                 val keograms = keogramDoc?.let { parseKeograms(it, authBaseUrl) } ?: emptyList()
-                println("Debug: Found ${keograms.size} keograms")
-                
                 val startrails = startrailDoc?.let { parseStartrails(it, authBaseUrl) } ?: emptyList()
-                println("Debug: Found ${startrails.size} startrails")
-                
                 val timelapses = timelapseDoc?.let { parseTimelapses(it, authBaseUrl) } ?: emptyList()
-                println("Debug: Found ${timelapses.size} timelapses")
 
                 var images = imagesDoc?.let { parseImages(it, authBaseUrl) } ?: emptyList()
                 
                 // If we found day-links in images, try to fetch the most recent day to get actual images
+                // Use jsoupBaseUrl for fetching, not authBaseUrl!
                 val dayLink = images.firstOrNull { it.url.contains("day=") || it.url.endsWith("/") }
-                if (dayLink != null && (images.isEmpty() || images.all { it.url.endsWith("/") || it.url.contains("day=") })) {
+                if (dayLink != null && (images.isEmpty() || images.all { it.url.contains("page=list_images") || it.url.endsWith("/") })) {
                     try {
-                        val dayDoc = createConnection(dayLink.url).get()
+                        // Extract the query part or path from the dayLink.url
+                        val fetchUrl = if (dayLink.url.contains("?")) {
+                            "$jsoupBaseUrl/index.php?" + dayLink.url.substringAfter("?")
+                        } else if (dayLink.url.startsWith("http")) {
+                            // If it's a full URL, we need to strip credentials if they exist
+                            val uri = android.net.Uri.parse(dayLink.url)
+                            uri.buildUpon().encodedAuthority(uri.authority?.substringAfter("@")).build().toString()
+                        } else {
+                            "$jsoupBaseUrl/${dayLink.url.removePrefix("/")}"
+                        }
+
+                        println("Debug: Fetching nested day content: $fetchUrl")
+                        val dayDoc = createConnection(fetchUrl).get()
                         val dailyImages = parseImages(dayDoc, authBaseUrl)
                         if (dailyImages.isNotEmpty()) {
                             images = dailyImages
