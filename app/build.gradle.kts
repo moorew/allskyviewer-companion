@@ -12,8 +12,8 @@ android {
         applicationId = "de.astronarren.allsky"
         minSdk = 29
         targetSdk = 35
-        versionCode = 21
-        versionName = "1.4.2"
+        versionCode = 22
+        versionName = "1.4.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
