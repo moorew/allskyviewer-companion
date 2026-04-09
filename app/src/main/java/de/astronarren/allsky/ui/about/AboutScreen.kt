@@ -7,7 +7,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Brightness3
+import androidx.compose.material.icons.outlined.ViewQuilt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -140,8 +143,8 @@ fun AboutScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
 
-            AboutFeatureItem(Icons.Outlined.AutoGraph, "Intelligent Scraping", "Robust parsing of Allsky Portal galleries for seamless media access.")
-            AboutFeatureItem(Icons.Outlined.NightsStay, "Observation Planning", "Automated 'Best Viewing' night detection based on station coordinates.")
+            AboutFeatureItem(Icons.Outlined.Explore, "Intelligent Scraping", "Robust parsing of Allsky Portal galleries for seamless media access.")
+            AboutFeatureItem(Icons.Outlined.Brightness3, "Observation Planning", "Automated 'Best Viewing' night detection based on station coordinates.")
             AboutFeatureItem(Icons.Outlined.ViewQuilt, "Modular Design", "Fully customizable dashboard layout tailored to your workflow.")
             AboutFeatureItem(Icons.Outlined.History, "Media Explorer", "Powerful calendar-based discovery for your entire capture history.")
             
