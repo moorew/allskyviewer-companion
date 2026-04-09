@@ -224,7 +224,7 @@ private fun ApiKeyStep(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "Note: Weather forecasts require GPS permission to detect your current location.",
+                    text = "Note: Weather forecasts require you to enter your station's latitude and longitude below.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

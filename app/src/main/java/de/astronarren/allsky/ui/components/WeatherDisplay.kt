@@ -25,8 +25,7 @@ import de.astronarren.allsky.R
 @Composable
 fun WeatherDisplay(
     modifier: Modifier = Modifier,
-    uiState: WeatherUiState,
-    onRequestPermission: () -> Unit = {}
+    uiState: WeatherUiState
 ) {
     Box(
         modifier = modifier
@@ -39,28 +38,7 @@ fun WeatherDisplay(
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
-            uiState.error?.contains("permission", ignoreCase = true) == true -> {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(32.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(24.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.location_permission_required),
-                            style = MaterialTheme.typography.titleLarge,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onRequestPermission, shape = RoundedCornerShape(16.dp)) {
-                            Text(stringResource(R.string.grant_location_permission))
-                        }
-                    }
-                }
-            }
+            
             uiState.weatherData != null -> {
                 val (city, forecasts) = uiState.weatherData
                 Column {

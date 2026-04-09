@@ -1,11 +1,9 @@
 package de.astronarren.allsky.data
 
-import de.astronarren.allsky.utils.LocationManager
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class WeatherRepository(
-    private val locationManager: LocationManager,
     private val weatherService: WeatherService,
     private val userPreferences: UserPreferences
 ) {
@@ -23,15 +21,7 @@ class WeatherRepository(
                 finalLat = lat
                 finalLon = lon
             } else {
-                if (!locationManager.isLocationPermissionGranted()) {
-                    return Result.failure(Exception("Location permission required"))
-                }
-                
-                val location = locationManager.getCurrentLocation() ?: 
-                    return Result.failure(Exception("Location not available"))
-                
-                finalLat = location.latitude
-                finalLon = location.longitude
+                return Result.failure(Exception("Station location not set in preferences"))
             }
 
             val response = weatherService.getForecast(

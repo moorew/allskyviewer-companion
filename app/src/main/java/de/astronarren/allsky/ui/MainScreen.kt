@@ -47,8 +47,7 @@ fun MainScreen(
     imageViewerViewModel: ImageViewerViewModel,
     liveImageViewModel: LiveImageViewModel,
     languageManager: LanguageManager,
-    onRequestLocationPermission: () -> Unit
-) {
+    ) {
     var isSettingsOpen by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -316,8 +315,7 @@ fun MainScreen(
                                 } else {
                                     WeatherDisplay(
                                         uiState = weatherUiState,
-                                        onRequestPermission = onRequestLocationPermission
-                                    )
+                                        )
                                 }
                             }
                             "MOON" -> {

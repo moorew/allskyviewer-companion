@@ -23,6 +23,10 @@ import coil.compose.AsyncImage
 import de.astronarren.allsky.viewmodel.AllskyMediaUiState
 import de.astronarren.allsky.R
 
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+
 @Composable
 fun AllskyMediaSection(
     title: String,
@@ -108,6 +112,8 @@ fun AllskyMediaSection(
     }
 }
 
+import de.astronarren.allsky.ui.theme.*
+
 @Composable
 private fun MediaCard(
     media: AllskyMediaUiState,
@@ -126,12 +132,18 @@ private fun MediaCard(
             containerColor = Color.White.copy(alpha = 0.05f)
         )
     ) {
-        Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
+        val placeholderGradient = Brush.verticalGradient(
+            colors = listOf(DeepNavy, NightPurple)
+        )
+        
+        Box(modifier = Modifier.fillMaxSize().background(placeholderGradient)) {
             AsyncImage(
                 model = media.url,
                 contentDescription = stringResource(R.string.media_from_date, media.date),
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                placeholder = rememberVectorPainter(if (isVideo || isMeteor) Icons.Default.PlayCircle else Icons.Default.Image),
+                error = rememberVectorPainter(if (isVideo || isMeteor) Icons.Default.PlayCircle else Icons.Default.Image)
             )
             
             // Gradient Overlay for readability

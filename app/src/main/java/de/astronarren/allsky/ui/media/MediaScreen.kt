@@ -13,8 +13,23 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material3.*
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +40,11 @@ import de.astronarren.allsky.viewmodel.AllskyMediaUiState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
+
+import de.astronarren.allsky.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,24 +116,66 @@ fun MediaScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
+                // Modern Date Selection Trigger
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Showing date: $dateInput",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.weight(1f)
+                    FilterChip(
+                        selected = dateInput != "All",
+                        onClick = { showDatePicker = true },
+                        label = { 
+                            Text(
+                                if (dateInput == "All") "Select Date" 
+                                else {
+                                    // Format for display: 20240101 -> Jan 01, 2024
+                                    try {
+                                        val inputSdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                                        val displaySdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                                        displaySdf.format(inputSdf.parse(dateInput)!!)
+                                    } catch (e: Exception) {
+                                        dateInput
+                                    }
+                                }
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        shape = RoundedCornerShape(12.dp)
                     )
-                    Button(
-                        onClick = {
-                            dateInput = "All"
-                            viewModel.fetchContentForDate("All")
-                        }
-                    ) {
-                        Text("Show All")
+
+                    if (dateInput != "All") {
+                        FilterChip(
+                            selected = false,
+                            onClick = {
+                                dateInput = "All"
+                                viewModel.fetchContentForDate("All")
+                            },
+                            label = { Text("Show All") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.History,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            },
+                            shape = RoundedCornerShape(12.dp)
+                        )
                     }
                 }
 
@@ -152,12 +214,17 @@ fun MediaScreen(
                                 },
                                 shape = RoundedCornerShape(16.dp)
                             ) {
-                                Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
+                                val placeholderGradient = Brush.verticalGradient(
+                                    colors = listOf(DeepNavy, NightPurple)
+                                )
+                                Box(modifier = Modifier.fillMaxSize().background(placeholderGradient)) {
                                     AsyncImage(
                                         model = item.url,
                                         contentDescription = item.date,
                                         modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop
+                                        contentScale = ContentScale.Crop,
+                                        placeholder = androidx.compose.ui.graphics.vector.rememberVectorPainter(if (isVideo) Icons.Default.PlayCircle else Icons.Default.Image),
+                                        error = androidx.compose.ui.graphics.vector.rememberVectorPainter(if (isVideo) Icons.Default.PlayCircle else Icons.Default.Image)
                                     )
                                     if (isVideo) {
                                         Box(

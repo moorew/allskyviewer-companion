@@ -32,6 +32,15 @@ fun FullScreenImageViewer(
     val context = LocalContext.current
     val downloadHelper = remember { DownloadHelper(context, userPreferences) }
     
+    val fileName = remember(imageUrl) {
+        val lastPathSegment = imageUrl.substringAfterLast("/").substringBefore("?")
+        if (lastPathSegment.endsWith(".jpg") || lastPathSegment.endsWith(".png") || lastPathSegment.endsWith(".jpeg")) {
+            lastPathSegment
+        } else {
+            "allsky_img_${System.currentTimeMillis()}.jpg"
+        }
+    }
+    
     var scale by remember { mutableStateOf(1f) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
@@ -59,7 +68,7 @@ fun FullScreenImageViewer(
                 )
                 .pointerInput(Unit) {
                     detectTransformGestures { _, pan, zoom, _ ->
-                        scale = (scale * zoom).coerceIn(1f, 3f)
+                        scale = (scale * zoom).coerceIn(1f, 5f)
                         if (scale > 1f) {
                             val maxX = size.width * (scale - 1) / 2
                             val maxY = size.height * (scale - 1) / 2
@@ -73,13 +82,13 @@ fun FullScreenImageViewer(
                 }
                 .pointerInput(Unit) {
                     detectTapGestures(
-                        onDoubleTap = { offset ->
-                            scale = if (scale > 1f) 1f else 2f
+                        onDoubleTap = {
+                            scale = if (scale > 1f) 1f else 3f
                             offsetX = 0f
                             offsetY = 0f
                         },
                         onTap = {
-                            if (scale <= 1f) onDismiss()
+                            if (scale <= 1.1f) onDismiss()
                         }
                     )
                 },
@@ -95,12 +104,11 @@ fun FullScreenImageViewer(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                color = Color.Black.copy(alpha = 0.6f),
+            IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
                 onClick = {
-                    val fileName = "allsky_${System.currentTimeMillis()}.jpg"
                     downloadHelper.downloadMedia(imageUrl, fileName, isVideo = false)
                 }
             ) {
@@ -108,23 +116,23 @@ fun FullScreenImageViewer(
                     imageVector = Icons.Default.Download,
                     contentDescription = "Download",
                     tint = Color.White,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            Surface(
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                color = Color.Black.copy(alpha = 0.6f),
+            IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
                 onClick = onDismiss
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close",
                     tint = Color.White,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }

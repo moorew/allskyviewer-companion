@@ -1,18 +1,14 @@
 package de.astronarren.allsky
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
@@ -23,7 +19,6 @@ import de.astronarren.allsky.ui.MainScreen
 import de.astronarren.allsky.ui.about.AboutScreen
 import de.astronarren.allsky.ui.setup.SetupScreen
 import de.astronarren.allsky.ui.theme.AllskyTheme
-import de.astronarren.allsky.utils.LocationManager
 import de.astronarren.allsky.viewmodel.*
 import de.astronarren.allsky.data.WeatherRepository
 import de.astronarren.allsky.data.AllskyRepository
@@ -39,17 +34,6 @@ import de.astronarren.allsky.ui.media.MediaScreen
 import de.astronarren.allsky.ui.settings.SettingsScreen
 
 class MainActivity : ComponentActivity() {
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) ||
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                weatherViewModel.updateWeather()
-            }
-        }
-    }
-
     private lateinit var weatherViewModel: WeatherViewModel
     private lateinit var allskyViewModel: AllskyViewModel
     private lateinit var imageViewerViewModel: ImageViewerViewModel
@@ -68,13 +52,10 @@ class MainActivity : ComponentActivity() {
         languageViewModel = LanguageViewModel(languageManager)
         
         val userPreferences = UserPreferences(applicationContext)
-        val locationManager = LocationManager(applicationContext)
-        
         // Get WeatherService from provider
         val weatherService = WeatherApiProvider.provideWeatherService()
         
         val weatherRepository = WeatherRepository(
-            locationManager = locationManager,
             weatherService = weatherService,
             userPreferences = userPreferences
         )
@@ -90,7 +71,6 @@ class MainActivity : ComponentActivity() {
         setupViewModel = SetupViewModel(userPreferences)
         liveImageViewModel = LiveImageViewModel(userPreferences)
         
-        checkAndRequestLocationPermissions()
         scheduleWeatherWorker()
         
         enableEdgeToEdge()
@@ -136,15 +116,7 @@ class MainActivity : ComponentActivity() {
                                 imageViewerViewModel = imageViewerViewModel,
                                 liveImageViewModel = liveImageViewModel,
                                 languageManager = languageManager,
-                                onRequestLocationPermission = {
-                                    locationPermissionRequest.launch(
-                                        arrayOf(
-                                            Manifest.permission.ACCESS_FINE_LOCATION,
-                                            Manifest.permission.ACCESS_COARSE_LOCATION
-                                        )
-                                    )
-                                }
-                            )
+                                )
                         }
                         composable("layout_editor") {
                             LayoutEditorScreen(
@@ -181,27 +153,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private fun checkAndRequestLocationPermissions() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                // Permission already granted
-                weatherViewModel.updateWeather()
-            }
-            else -> {
-                // Request permissions
-                locationPermissionRequest.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
-                )
             }
         }
     }

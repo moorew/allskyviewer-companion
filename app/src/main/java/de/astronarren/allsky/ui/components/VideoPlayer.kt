@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +39,16 @@ fun VideoPlayer(
             setMediaItem(MediaItem.fromUri(videoUrl))
             prepare()
             playWhenReady = true
+        }
+    }
+
+    val fileName = remember(videoUrl) {
+        val lastPathSegment = videoUrl.substringAfterLast("/").substringBefore("?")
+        if (lastPathSegment.endsWith(".mp4") || lastPathSegment.endsWith(".webm") || 
+            lastPathSegment.endsWith(".mov") || lastPathSegment.endsWith(".mkv")) {
+            lastPathSegment
+        } else {
+            "allsky_video_${System.currentTimeMillis()}.mp4"
         }
     }
 
@@ -76,12 +87,11 @@ fun VideoPlayer(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                color = Color.Black.copy(alpha = 0.6f),
+            IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
                 onClick = {
-                    val fileName = "allsky_${System.currentTimeMillis()}.mp4"
                     downloadHelper.downloadMedia(videoUrl, fileName, isVideo = true)
                 }
             ) {
@@ -89,23 +99,23 @@ fun VideoPlayer(
                     imageVector = Icons.Default.Download,
                     contentDescription = "Download",
                     tint = Color.White,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            Surface(
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                color = Color.Black.copy(alpha = 0.6f),
+            IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
                 onClick = onDismiss
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close",
                     tint = Color.White,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }

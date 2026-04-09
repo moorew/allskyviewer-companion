@@ -273,8 +273,16 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val url = normalizeUrl(rawHref, baseUrl, "keograms") ?: return@mapNotNull null
                 val lowerUrl = url.lowercase()
                 
-                if (lowerUrl.contains("keogram") && (lowerUrl.contains(".jpg") || lowerUrl.contains(".png")) &&
-                    !lowerUrl.contains("allsky-logo") && !lowerUrl.contains("image.jpg") && !lowerUrl.contains("image-resize")) {
+                val isExcluded = lowerUrl.contains("allsky-logo") || 
+                                 lowerUrl.contains("image.jpg") || 
+                                 lowerUrl.contains("image.png") ||
+                                 lowerUrl.contains("image-resize") ||
+                                 lowerUrl.contains("placeholder") || 
+                                 lowerUrl.contains("default") ||
+                                 lowerUrl.contains("logo")
+
+                if (lowerUrl.contains("keogram") && (lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".png") || lowerUrl.endsWith(".jpeg")) &&
+                    !isExcluded) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -297,7 +305,16 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val url = normalizeUrl(rawHref, baseUrl, "startrails") ?: return@mapNotNull null
                 val lowerUrl = url.lowercase()
                 
-                if (lowerUrl.contains("startrail") && (lowerUrl.contains(".jpg") || lowerUrl.contains(".png"))) {
+                val isExcluded = lowerUrl.contains("allsky-logo") || 
+                                 lowerUrl.contains("image.jpg") || 
+                                 lowerUrl.contains("image.png") ||
+                                 lowerUrl.contains("image-resize") ||
+                                 lowerUrl.contains("placeholder") || 
+                                 lowerUrl.contains("default") ||
+                                 lowerUrl.contains("logo")
+
+                if (lowerUrl.contains("startrail") && (lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".png") || lowerUrl.endsWith(".jpeg")) &&
+                    !isExcluded) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -320,7 +337,18 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val url = normalizeUrl(rawHref, baseUrl, "meteors") ?: return@mapNotNull null
                 val lowerUrl = url.lowercase()
                 
-                if (lowerUrl.contains(".jpg") || lowerUrl.contains(".png") || lowerUrl.contains(".mp4")) {
+                val isExcluded = lowerUrl.contains("allsky-logo") || 
+                                 lowerUrl.contains("image.jpg") || 
+                                 lowerUrl.contains("image.png") ||
+                                 lowerUrl.contains("image-resize") ||
+                                 lowerUrl.contains("placeholder") || 
+                                 lowerUrl.contains("default") ||
+                                 lowerUrl.contains("logo")
+                
+                val isMedia = lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".png") || lowerUrl.endsWith(".jpeg") || 
+                              lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".webm")
+                
+                if (isMedia && !isExcluded) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -331,4 +359,4 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
             }
         }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
     }
-} 
+} } 

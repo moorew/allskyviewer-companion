@@ -5,7 +5,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.astronarren.allsky.data.UserPreferences
 import de.astronarren.allsky.data.WeatherService
-import de.astronarren.allsky.utils.LocationManager
 import de.astronarren.allsky.utils.NotificationHelper
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -26,14 +25,22 @@ class WeatherWorker(
             .build()
         val weatherService = retrofit.create(WeatherService::class.java)
         
-        val locationManager = LocationManager(applicationContext)
+        // Use station coordinates from preferences instead of device GPS
+        val latStr = userPreferences.getLatitude()
+        val lonStr = userPreferences.getLongitude()
+        
+        val lat = latStr.toDoubleOrNull()
+        val lon = lonStr.toDoubleOrNull()
+
+        if (lat == null || lon == null) {
+            println("Debug: WeatherWorker - Station coordinates not set")
+            return Result.failure()
+        }
         
         return try {
-            val location = locationManager.getCurrentLocation() ?: return Result.retry()
-            
             val response = weatherService.getForecast(
-                lat = location.latitude,
-                lon = location.longitude,
+                lat = lat,
+                lon = lon,
                 apiKey = apiKey
             )
             
