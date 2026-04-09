@@ -26,6 +26,7 @@ import de.astronarren.allsky.R
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import de.astronarren.allsky.ui.theme.*
 
 @Composable
 fun AllskyMediaSection(
@@ -111,8 +112,6 @@ fun AllskyMediaSection(
         }
     }
 }
-
-import de.astronarren.allsky.ui.theme.*
 
 @Composable
 private fun MediaCard(

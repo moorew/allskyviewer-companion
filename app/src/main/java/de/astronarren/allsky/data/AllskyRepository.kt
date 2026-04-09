@@ -359,4 +359,4 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
             }
         }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
     }
-} } 
+}
