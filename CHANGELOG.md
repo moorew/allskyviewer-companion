@@ -4,6 +4,18 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] - 2026-04-09
+### Added
+- **Native Date Picker**: Replaced legacy text entry with a modern Material3 DatePickerDialog.
+- **Themed Placeholders**: Added a dynamic vertical gradient for missing or loading media thumbnails.
+- **Station-Centric Weather**: Forecasts now accurately use the Allsky station's coordinates instead of the device GPS.
+
+### Fixed
+- **Refined Media Filtering**: Tightened logic to accurately exclude system/generic files without breaking URL query strings or causing false positives.
+- **Image Viewer Usability**: Enlarged the 'X' (Close) button tap area and improved dismissal gesture consistency.
+- **Download Authentication**: Fixed the download functionality to ensure Basic Auth headers are correctly passed to Android's DownloadManager.
+- **About Page Update**: Refreshed content, updated authorship, and added proper credit to the original concept creators.
+
 ## [1.4.3] - 2026-04-07
 ### Fixed
 - Fixed a build failure caused by missing adaptive icon background resources.
