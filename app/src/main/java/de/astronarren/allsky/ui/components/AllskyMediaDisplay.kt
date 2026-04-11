@@ -110,6 +110,7 @@ fun AllskyMediaSection(
                     val fallbackResId = when {
                         isMeteor -> de.astronarren.allsky.R.drawable.meteors_thumbnail
                         isStartrail -> de.astronarren.allsky.R.drawable.startrails_thumbnail
+                        isTimelapse -> de.astronarren.allsky.R.drawable.timelapses_thumbnail
                         isRaw && !isMeteor && !isStartrail && !isTimelapse -> de.astronarren.allsky.R.drawable.raw_images_thumbnail
                         else -> null
                     }
