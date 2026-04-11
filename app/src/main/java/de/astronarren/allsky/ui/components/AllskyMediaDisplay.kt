@@ -101,11 +101,24 @@ fun AllskyMediaSection(
                                               item.url.lowercase().contains(".webm") || 
                                               item.url.lowercase().contains(".mov") || 
                                               item.url.lowercase().contains(".mkv"))
+                                              
+                    val isMeteor = title.contains("Meteor", ignoreCase = true)
+                    val isStartrail = title.contains("Startrail", ignoreCase = true)
+                    val isRaw = title.contains("Raw Images", ignoreCase = true) || title.contains("Images", ignoreCase = true)
+
+                    val fallbackResId = when {
+                        isMeteor -> de.astronarren.allsky.R.drawable.meteors_thumbnail
+                        isStartrail -> de.astronarren.allsky.R.drawable.startrails_thumbnail
+                        isRaw && !isMeteor && !isStartrail -> de.astronarren.allsky.R.drawable.raw_images_thumbnail
+                        else -> null
+                    }
+                    
                     MediaCard(
                         media = item,
                         onClick = { onMediaClick(item) },
                         isVideo = isItemVideo,
-                        isMeteor = title.contains("Meteor", ignoreCase = true)
+                        isMeteor = isMeteor,
+                        fallbackResId = fallbackResId
                     )
                 }
             }
@@ -118,7 +131,8 @@ private fun MediaCard(
     media: AllskyMediaUiState,
     onClick: () -> Unit,
     isVideo: Boolean = false,
-    isMeteor: Boolean = false
+    isMeteor: Boolean = false,
+    fallbackResId: Int? = null
 ) {
     Card(
         modifier = Modifier
@@ -136,13 +150,19 @@ private fun MediaCard(
         )
         
         Box(modifier = Modifier.fillMaxSize().background(placeholderGradient)) {
+            val fallbackPainter = if (fallbackResId != null) {
+                androidx.compose.ui.res.painterResource(id = fallbackResId)
+            } else {
+                rememberVectorPainter(if (isVideo || isMeteor) Icons.Default.PlayCircle else Icons.Default.Image)
+            }
+            
             AsyncImage(
                 model = media.url,
                 contentDescription = stringResource(R.string.media_from_date, media.date),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
-                placeholder = rememberVectorPainter(if (isVideo || isMeteor) Icons.Default.PlayCircle else Icons.Default.Image),
-                error = rememberVectorPainter(if (isVideo || isMeteor) Icons.Default.PlayCircle else Icons.Default.Image)
+                placeholder = fallbackPainter,
+                error = fallbackPainter
             )
             
             // Gradient Overlay for readability

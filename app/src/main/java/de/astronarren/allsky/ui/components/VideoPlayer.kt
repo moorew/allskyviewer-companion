@@ -4,6 +4,8 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -66,6 +68,10 @@ fun VideoPlayer(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { /* Consume clicks to prevent background interaction */ }
     ) {
         AndroidView(
             factory = { context ->
@@ -82,6 +88,7 @@ fun VideoPlayer(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsPadding()
                 .padding(24.dp)
                 .align(Alignment.TopEnd),
             horizontalArrangement = Arrangement.End,
