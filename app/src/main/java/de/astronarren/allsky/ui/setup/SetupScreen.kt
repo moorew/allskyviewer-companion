@@ -268,7 +268,7 @@ private fun UrlStep(
             label = { Text("Username (Optional)") },
             modifier = Modifier
                 .fillMaxWidth()
-                .semantics { autofillHints = listOf(AutofillType.Username) },
+                .semantics { autofillHints = listOf(AutofillType.Username.hint) },
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -293,7 +293,7 @@ private fun UrlStep(
             label = { Text("Password (Optional)") },
             modifier = Modifier
                 .fillMaxWidth()
-                .semantics { autofillHints = listOf(AutofillType.Password) },
+                .semantics { autofillHints = listOf(AutofillType.Password.hint) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             shape = RoundedCornerShape(16.dp),

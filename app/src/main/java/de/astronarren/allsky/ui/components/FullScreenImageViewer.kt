@@ -107,7 +107,7 @@ fun FullScreenImageViewer(
                 .statusBarsPadding()
                 .padding(24.dp)
                 .align(Alignment.TopEnd)
-                .graphicsLayer { translationZ = 100f }, // Ensure it's on top
+                .graphicsLayer { shadowElevation = 100f }, // Ensure it's on top
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {

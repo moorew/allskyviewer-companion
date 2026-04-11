@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,10 +21,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import de.astronarren.allsky.utils.DownloadHelper
+import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
 fun VideoPlayer(
@@ -83,17 +82,15 @@ fun VideoPlayer(
             },
             modifier = Modifier.fillMaxSize()
         )
-import androidx.compose.ui.graphics.graphicsLayer
 
-@Composable
-fun VideoPlayer(
-...
+        // Control Buttons
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .padding(24.dp)
                 .align(Alignment.TopEnd)
-                .graphicsLayer { translationZ = 100f }, // Ensure it's on top
+                .graphicsLayer { shadowElevation = 100f }, // Ensure it's on top
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
