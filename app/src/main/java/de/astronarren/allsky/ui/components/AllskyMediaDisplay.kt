@@ -104,12 +104,13 @@ fun AllskyMediaSection(
                                               
                     val isMeteor = title.contains("Meteor", ignoreCase = true)
                     val isStartrail = title.contains("Startrail", ignoreCase = true)
-                    val isRaw = title.contains("Raw Images", ignoreCase = true) || title.contains("Images", ignoreCase = true)
+                    val isRaw = title.contains("Raw Images", ignoreCase = true)
+                    val isTimelapse = title.contains("Timelapse", ignoreCase = true)
 
                     val fallbackResId = when {
                         isMeteor -> de.astronarren.allsky.R.drawable.meteors_thumbnail
                         isStartrail -> de.astronarren.allsky.R.drawable.startrails_thumbnail
-                        isRaw && !isMeteor && !isStartrail -> de.astronarren.allsky.R.drawable.raw_images_thumbnail
+                        isRaw && !isMeteor && !isStartrail && !isTimelapse -> de.astronarren.allsky.R.drawable.raw_images_thumbnail
                         else -> null
                     }
                     

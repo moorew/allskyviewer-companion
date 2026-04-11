@@ -204,7 +204,7 @@ fun MediaScreen(
                                 val placeholderGradient = Brush.verticalGradient(
                                     colors = listOf(DeepNavy, NightPurple)
                                 )
-                                val placeholderPainter = if (isVideo) {
+                                val placeholderPainter = if (isVideo || mediaType != "images") {
                                     androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.PlayCircle)
                                 } else {
                                     androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.raw_images_thumbnail)

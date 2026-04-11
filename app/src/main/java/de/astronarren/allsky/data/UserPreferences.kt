@@ -178,13 +178,13 @@ class UserPreferences(private val context: Context) {
 
     fun getApiKey(): String {
         return runBlocking {
-            context.dataStore.data.first()[API_KEY] ?: ""
+            context.dataStore.data.first()[API_KEY] ?: "9908d92979873f12ec6eaecc05335284"
         }
     }
 
     fun getApiKeyFlow(): Flow<String> {
         return context.dataStore.data.map { preferences ->
-            preferences[API_KEY] ?: ""
+            preferences[API_KEY] ?: "9908d92979873f12ec6eaecc05335284"
         }
     }
 

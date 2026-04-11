@@ -4,6 +4,13 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.6] - 2026-04-11
+### Added
+- **Built-in Weather API Key**: The default OpenWeather API key is now baked into the app, so you don't have to enter it manually during setup.
+
+### Fixed
+- **Timelapse Placeholders**: Fixed an issue where timelapses were incorrectly using the raw image placeholder.
+
 ## [1.4.5] - 2026-04-11
 ### Added
 - **GPS Integration**: Added ability to capture station's Latitude and Longitude during setup using the phone's GPS.
