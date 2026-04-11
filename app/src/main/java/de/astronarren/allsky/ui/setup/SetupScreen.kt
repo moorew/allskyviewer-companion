@@ -20,17 +20,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalAutofill
-import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.autofillHints
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -229,9 +226,6 @@ private fun UrlStep(
     var usernameInput by remember { mutableStateOf(currentUsername) }
     var passwordInput by remember { mutableStateOf(currentPassword) }
 
-    val autofill = LocalAutofill.current
-    val autofillTree = LocalAutofillTree.current
-
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "CONNECT TO SERVER",
@@ -265,13 +259,6 @@ private fun UrlStep(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        val usernameAutofillNode = remember {
-            AutofillNode(
-                autofillTypes = listOf(AutofillType.Username),
-                onFill = { usernameInput = it; onUsernameChange(it) }
-            )
-        }
-        
         OutlinedTextField(
             value = usernameInput,
             onValueChange = { 
@@ -281,16 +268,7 @@ private fun UrlStep(
             label = { Text("Username (Optional)") },
             modifier = Modifier
                 .fillMaxWidth()
-                .onGloballyPositioned { usernameAutofillNode.boundingBox = it.localBoundingBoxOf(it) }
-                .onFocusChanged { focusState ->
-                    autofill?.run {
-                        if (focusState.isFocused) {
-                            requestAutofillForNode(usernameAutofillNode)
-                        } else {
-                            cancelAutofillForNode(usernameAutofillNode)
-                        }
-                    }
-                },
+                .semantics { autofillHints = listOf("username") },
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -304,19 +282,8 @@ private fun UrlStep(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
         
-        SideEffect {
-            autofillTree += usernameAutofillNode
-        }
-        
         Spacer(modifier = Modifier.height(16.dp))
         
-        val passwordAutofillNode = remember {
-            AutofillNode(
-                autofillTypes = listOf(AutofillType.Password),
-                onFill = { passwordInput = it; onPasswordChange(it) }
-            )
-        }
-
         OutlinedTextField(
             value = passwordInput,
             onValueChange = { 
@@ -326,16 +293,7 @@ private fun UrlStep(
             label = { Text("Password (Optional)") },
             modifier = Modifier
                 .fillMaxWidth()
-                .onGloballyPositioned { passwordAutofillNode.boundingBox = it.localBoundingBoxOf(it) }
-                .onFocusChanged { focusState ->
-                    autofill?.run {
-                        if (focusState.isFocused) {
-                            requestAutofillForNode(passwordAutofillNode)
-                        } else {
-                            cancelAutofillForNode(passwordAutofillNode)
-                        }
-                    }
-                },
+                .semantics { autofillHints = listOf("password") },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             shape = RoundedCornerShape(16.dp),
@@ -349,10 +307,6 @@ private fun UrlStep(
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
-        
-        SideEffect {
-            autofillTree += passwordAutofillNode
-        }
         
         Spacer(modifier = Modifier.height(32.dp))
         
