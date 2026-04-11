@@ -147,7 +147,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
     private fun scheduleWeatherWorker() {
         val constraints = Constraints.Builder()
