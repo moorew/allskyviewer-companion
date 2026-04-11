@@ -20,6 +20,8 @@ class SetupViewModel(
             val apiKey = userPreferences.getApiKey()
             val username = userPreferences.getUsername()
             val password = userPreferences.getPassword()
+            val latitude = userPreferences.getLatitude()
+            val longitude = userPreferences.getLongitude()
             
             _uiState.update { state ->
                 state.copy(
@@ -27,7 +29,9 @@ class SetupViewModel(
                     allskyUrl = url,
                     apiKey = apiKey,
                     username = username,
-                    password = password
+                    password = password,
+                    latitude = latitude,
+                    longitude = longitude
                 )
             }
         }
@@ -62,6 +66,24 @@ class SetupViewModel(
             userPreferences.savePassword(password)
             _uiState.update { state ->
                 state.copy(password = password)
+            }
+        }
+    }
+
+    fun updateLatitude(latitude: String) {
+        viewModelScope.launch {
+            userPreferences.saveLatitude(latitude)
+            _uiState.update { state ->
+                state.copy(latitude = latitude)
+            }
+        }
+    }
+
+    fun updateLongitude(longitude: String) {
+        viewModelScope.launch {
+            userPreferences.saveLongitude(longitude)
+            _uiState.update { state ->
+                state.copy(longitude = longitude)
             }
         }
     }

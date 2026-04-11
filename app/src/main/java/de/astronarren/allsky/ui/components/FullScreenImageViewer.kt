@@ -106,40 +106,45 @@ fun FullScreenImageViewer(
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .padding(24.dp)
-                .align(Alignment.TopEnd),
+                .align(Alignment.TopEnd)
+                .graphicsLayer(translationZ = 100f), // Ensure it's on top
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
+            Surface(
                 onClick = {
                     downloadHelper.downloadMedia(imageUrl, fileName, isVideo = false)
-                }
+                },
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.6f)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Download,
-                    contentDescription = "Download",
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = "Download",
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            IconButton(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
-                onClick = onDismiss
+            Surface(
+                onClick = { onDismiss() },
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.6f)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         }
     }

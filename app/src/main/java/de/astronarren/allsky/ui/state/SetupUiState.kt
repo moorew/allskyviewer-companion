@@ -6,6 +6,8 @@ data class SetupUiState(
     val apiKey: String = "",
     val username: String = "",
     val password: String = "",
+    val latitude: String = "",
+    val longitude: String = "",
     val isComplete: Boolean = false,
     val error: String? = null
 ) 

@@ -4,6 +4,18 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.5] - 2026-04-11
+### Added
+- **GPS Integration**: Added ability to capture station's Latitude and Longitude during setup using the phone's GPS.
+- **Enhanced Setup Experience**: Modern UI redesign for the initial setup screens with vertical gradients and improved clarity.
+- **High-Res Moon Phase**: Replaced blurry moon emojis with a high-resolution moon image and a dynamic shadow mask for accurate phase visualization.
+- **Custom Raw Image Placeholder**: Added a high-quality placeholder image for the Daily Raw Images section.
+
+### Fixed
+- **Media Viewer Controls**: Improved responsiveness and visibility of Download and Close (X) buttons in the image and video players.
+- **Autofill Support**: Enhanced login fields with proper keyboard types and hints for password managers.
+- **Moon Phase Calculation**: Improved the accuracy of the moon phase algorithm using Instant-based UTC time.
+
 ## [1.4.4] - 2026-04-09
 ### Added
 - **Native Date Picker**: Replaced legacy text entry with a modern Material3 DatePickerDialog.

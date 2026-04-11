@@ -37,7 +37,7 @@ class MoonPhaseCalculator {
         }
 
         private fun getCurrentMoonCycleFraction(): Double {
-            val now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+            val now = java.time.Instant.now().epochSecond
             val totalSeconds = now - NEW_MOON_2000
             val lunarSeconds = LUNAR_CYCLE * 24 * 60 * 60
             

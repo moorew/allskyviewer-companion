@@ -204,14 +204,19 @@ fun MediaScreen(
                                 val placeholderGradient = Brush.verticalGradient(
                                     colors = listOf(DeepNavy, NightPurple)
                                 )
+                                val placeholderPainter = if (isVideo) {
+                                    androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.PlayCircle)
+                                } else {
+                                    androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.raw_images_thumbnail)
+                                }
                                 Box(modifier = Modifier.fillMaxSize().background(placeholderGradient)) {
                                     AsyncImage(
                                         model = item.url,
                                         contentDescription = item.date,
                                         modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop,
-                                        placeholder = androidx.compose.ui.graphics.vector.rememberVectorPainter(if (isVideo) Icons.Default.PlayCircle else Icons.Default.Image),
-                                        error = androidx.compose.ui.graphics.vector.rememberVectorPainter(if (isVideo) Icons.Default.PlayCircle else Icons.Default.Image)
+                                        placeholder = placeholderPainter,
+                                        error = placeholderPainter
                                     )
                                     if (isVideo) {
                                         Box(
