@@ -25,6 +25,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import de.astronarren.allsky.utils.DownloadHelper
 import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.launch
 
 @Composable
 fun VideoPlayer(
@@ -34,6 +35,7 @@ fun VideoPlayer(
 ) {
     val context = LocalContext.current
     val downloadHelper = remember { DownloadHelper(context, userPreferences) }
+    val scope = rememberCoroutineScope()
     
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -96,7 +98,9 @@ fun VideoPlayer(
         ) {
             Surface(
                 onClick = {
-                    downloadHelper.downloadMedia(videoUrl, fileName, isVideo = true)
+                    scope.launch {
+                        downloadHelper.downloadMedia(videoUrl, fileName, isVideo = true)
+                    }
                 },
                 modifier = Modifier.size(56.dp),
                 shape = CircleShape,

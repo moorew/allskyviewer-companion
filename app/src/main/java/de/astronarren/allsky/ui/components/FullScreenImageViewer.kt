@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import de.astronarren.allsky.utils.DownloadHelper
+import kotlinx.coroutines.launch
 
 @Composable
 fun FullScreenImageViewer(
@@ -32,6 +33,7 @@ fun FullScreenImageViewer(
 ) {
     val context = LocalContext.current
     val downloadHelper = remember { DownloadHelper(context, userPreferences) }
+    val scope = rememberCoroutineScope()
     
     val fileName = remember(imageUrl) {
         val lastPathSegment = imageUrl.substringAfterLast("/").substringBefore("?")
@@ -113,7 +115,9 @@ fun FullScreenImageViewer(
         ) {
             Surface(
                 onClick = {
-                    downloadHelper.downloadMedia(imageUrl, fileName, isVideo = false)
+                    scope.launch {
+                        downloadHelper.downloadMedia(imageUrl, fileName, isVideo = false)
+                    }
                 },
                 modifier = Modifier.size(56.dp),
                 shape = CircleShape,

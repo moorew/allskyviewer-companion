@@ -13,7 +13,7 @@ class DownloadHelper(
     private val context: Context,
     private val userPreferences: UserPreferences
 ) {
-    fun downloadMedia(url: String, fileName: String, isVideo: Boolean = false) {
+    suspend fun downloadMedia(url: String, fileName: String, isVideo: Boolean = false) {
         try {
             val request = DownloadManager.Request(Uri.parse(url))
                 .setTitle(fileName)
