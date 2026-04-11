@@ -14,26 +14,24 @@ class SetupViewModel(
     val uiState: StateFlow<SetupUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            val isComplete = userPreferences.isSetupComplete()
-            val url = userPreferences.getAllskyUrl()
-            val apiKey = userPreferences.getApiKey()
-            val username = userPreferences.getUsername()
-            val password = userPreferences.getPassword()
-            val latitude = userPreferences.getLatitude()
-            val longitude = userPreferences.getLongitude()
-            
-            _uiState.update { state ->
-                state.copy(
-                    isComplete = isComplete,
-                    allskyUrl = url,
-                    apiKey = apiKey,
-                    username = username,
-                    password = password,
-                    latitude = latitude,
-                    longitude = longitude
-                )
-            }
+        val isComplete = userPreferences.isSetupComplete()
+        val url = userPreferences.getAllskyUrl()
+        val apiKey = userPreferences.getApiKey()
+        val username = userPreferences.getUsername()
+        val password = userPreferences.getPassword()
+        val latitude = userPreferences.getLatitude()
+        val longitude = userPreferences.getLongitude()
+        
+        _uiState.update { state ->
+            state.copy(
+                isComplete = isComplete,
+                allskyUrl = url,
+                apiKey = apiKey,
+                username = username,
+                password = password,
+                latitude = latitude,
+                longitude = longitude
+            )
         }
     }
 

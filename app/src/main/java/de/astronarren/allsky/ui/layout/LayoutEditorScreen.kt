@@ -47,11 +47,7 @@ fun LayoutEditorScreen(
     onNavigateBack: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var layout by remember { mutableStateOf<List<String>>(emptyList()) }
-
-    LaunchedEffect(Unit) {
-        layout = userPreferences.getMainLayout()
-    }
+    var layout by remember { mutableStateOf(userPreferences.getMainLayout()) }
 
     Scaffold(
         topBar = {

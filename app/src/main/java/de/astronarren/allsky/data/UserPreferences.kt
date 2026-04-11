@@ -7,8 +7,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class UserPreferences(private val context: Context) {
     companion object {
@@ -33,8 +31,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getLatitude(): String = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[LATITUDE] ?: ""
+    fun getLatitude(): String {
+        return runBlocking {
+            context.dataStore.data.first()[LATITUDE] ?: ""
+        }
     }
 
     fun getLatitudeFlow(): Flow<String> {
@@ -49,8 +49,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getLongitude(): String = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[LONGITUDE] ?: ""
+    fun getLongitude(): String {
+        return runBlocking {
+            context.dataStore.data.first()[LONGITUDE] ?: ""
+        }
     }
 
     fun getLongitudeFlow(): Flow<String> {
@@ -65,20 +67,22 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getMainLayout(): List<String> = withContext(Dispatchers.IO) {
-        val saved = context.dataStore.data.first()[MAIN_LAYOUT] ?: DEFAULT_LAYOUT
-        val list = saved.split(",").toMutableList()
-        DEFAULT_LAYOUT.split(",").forEach { module ->
-            if (!list.contains(module)) {
-                if (module == "BEST_VIEWING") {
-                    val index = list.indexOf("LIVE_VIEW")
-                    if (index != -1) list.add(index + 1, module) else list.add(0, module)
-                } else {
-                    list.add(module)
+    fun getMainLayout(): List<String> {
+        return runBlocking {
+            val saved = context.dataStore.data.first()[MAIN_LAYOUT] ?: DEFAULT_LAYOUT
+            val list = saved.split(",").toMutableList()
+            DEFAULT_LAYOUT.split(",").forEach { module ->
+                if (!list.contains(module)) {
+                    if (module == "BEST_VIEWING") {
+                        val index = list.indexOf("LIVE_VIEW")
+                        if (index != -1) list.add(index + 1, module) else list.add(0, module)
+                    } else {
+                        list.add(module)
+                    }
                 }
             }
+            list
         }
-        list
     }
 
     fun getMainLayoutFlow(): Flow<List<String>> {
@@ -105,8 +109,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getUsername(): String = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[USERNAME] ?: ""
+    fun getUsername(): String {
+        return runBlocking {
+            context.dataStore.data.first()[USERNAME] ?: ""
+        }
     }
 
     fun getUsernameFlow(): Flow<String> {
@@ -121,8 +127,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getPassword(): String = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[PASSWORD] ?: ""
+    fun getPassword(): String {
+        return runBlocking {
+            context.dataStore.data.first()[PASSWORD] ?: ""
+        }
     }
 
     fun getPasswordFlow(): Flow<String> {
@@ -137,8 +145,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getLastNotificationDate(): String = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[LAST_NOTIFICATION_DATE] ?: ""
+    fun getLastNotificationDate(): String {
+        return runBlocking {
+            context.dataStore.data.first()[LAST_NOTIFICATION_DATE] ?: ""
+        }
     }
 
     suspend fun saveAllskyUrl(url: String) {
@@ -147,8 +157,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getAllskyUrl(): String = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[ALLSKY_URL] ?: ""
+    fun getAllskyUrl(): String {
+        return runBlocking {
+            context.dataStore.data.first()[ALLSKY_URL] ?: ""
+        }
     }
 
     fun getAllskyUrlFlow(): Flow<String> {
@@ -163,8 +175,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getApiKey(): String = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[API_KEY] ?: DEFAULT_API_KEY
+    fun getApiKey(): String {
+        return runBlocking {
+            context.dataStore.data.first()[API_KEY] ?: DEFAULT_API_KEY
+        }
     }
 
     fun getApiKeyFlow(): Flow<String> {
@@ -179,8 +193,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun isSetupComplete(): Boolean = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[SETUP_COMPLETE] ?: false
+    fun isSetupComplete(): Boolean {
+        return runBlocking {
+            context.dataStore.data.first()[SETUP_COMPLETE] ?: false
+        }
     }
 
     suspend fun saveLanguage(languageCode: String) {
@@ -189,7 +205,9 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getLanguage(): String = withContext(Dispatchers.IO) {
-        context.dataStore.data.first()[LANGUAGE_KEY] ?: ""
+    fun getLanguage(): String {
+        return runBlocking {
+            context.dataStore.data.first()[LANGUAGE_KEY] ?: ""
+        }
     }
 } 

@@ -4,6 +4,18 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-04-11
+### Added
+- **GPS Integration**: Capture station's Latitude and Longitude during setup using phone's GPS.
+- **Enhanced Setup Experience**: Modern UI redesign for the initial setup screens.
+- **High-Res Moon Phase**: High-resolution moon image with dynamic shadow mask.
+- **Custom Placeholders**: New custom high-quality placeholders for Raw Images and Timelapses.
+- **Built-in Weather API Key**: The default OpenWeather API key is now baked into the app.
+
+### Fixed
+- **Startup Stability**: Reverted to a proven synchronous preference loading system to eliminate "crash on load" issues.
+- **Media Viewer Controls**: Fixed visibility and responsiveness of viewer buttons.
+
 ## [1.4.8] - 2026-04-11
 ### Fixed
 - **App Stability**: Replaced blocking data calls with asynchronous operations to prevent deadlocks and crashes during app initialization.

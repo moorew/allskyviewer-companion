@@ -81,22 +81,12 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    var showSetup by remember { mutableStateOf<Boolean?>(null) }
+                    var showSetup by remember { mutableStateOf(!userPreferences.isSetupComplete()) }
                     
-                    LaunchedEffect(Unit) {
-                        showSetup = !userPreferences.isSetupComplete()
-                        if (showSetup == false) {
-                            navController.navigate("home") {
-                                popUpTo("setup") { inclusive = true }
-                            }
-                        }
-                    }
-                    
-                    if (showSetup != null) {
-                        NavHost(
-                            navController = navController,
-                            startDestination = if (showSetup == true) "setup" else "home"
-                        ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = if (showSetup) "setup" else "home"
+                    ) {
                         composable("setup") {
                             SetupScreen(
                                 viewModel = setupViewModel,
