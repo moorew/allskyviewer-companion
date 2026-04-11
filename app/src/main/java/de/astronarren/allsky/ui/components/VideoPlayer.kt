@@ -83,15 +83,17 @@ fun VideoPlayer(
             },
             modifier = Modifier.fillMaxSize()
         )
+import androidx.compose.ui.graphics.graphicsLayer
 
-        // Control Buttons
-        Row(
+@Composable
+fun VideoPlayer(
+...
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .padding(24.dp)
                 .align(Alignment.TopEnd)
-                .graphicsLayer(translationZ = 100f), // Ensure it's on top
+                .graphicsLayer { translationZ = 100f }, // Ensure it's on top
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {

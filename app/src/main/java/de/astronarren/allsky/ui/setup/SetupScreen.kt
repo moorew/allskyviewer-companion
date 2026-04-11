@@ -41,6 +41,8 @@ import de.astronarren.allsky.R
 import de.astronarren.allsky.ui.theme.DeepNavy
 import de.astronarren.allsky.ui.theme.NightPurple
 import de.astronarren.allsky.viewmodel.SetupViewModel
+import androidx.compose.ui.semantics.autofillHints
+import androidx.compose.ui.semantics.semantics
 
 @Composable
 fun SetupScreen(
@@ -209,9 +211,6 @@ private fun WelcomeStep(onNext: () -> Unit) {
     }
 }
 
-import androidx.compose.ui.semantics.autofillHints
-import androidx.compose.ui.semantics.semantics
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun UrlStep(
@@ -269,7 +268,7 @@ private fun UrlStep(
             label = { Text("Username (Optional)") },
             modifier = Modifier
                 .fillMaxWidth()
-                .semantics { autofillHints = listOf(AutofillType.Username.hint) },
+                .semantics { autofillHints = listOf(AutofillType.Username) },
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -294,7 +293,7 @@ private fun UrlStep(
             label = { Text("Password (Optional)") },
             modifier = Modifier
                 .fillMaxWidth()
-                .semantics { autofillHints = listOf(AutofillType.Password.hint) },
+                .semantics { autofillHints = listOf(AutofillType.Password) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             shape = RoundedCornerShape(16.dp),
@@ -474,4 +473,4 @@ private fun ApiKeyStep(
             Text("FINISH", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
         }
     }
-} 
+}
