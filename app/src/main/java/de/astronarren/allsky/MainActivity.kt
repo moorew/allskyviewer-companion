@@ -81,66 +81,77 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    var showSetup by remember { mutableStateOf(!userPreferences.isSetupComplete()) }
+                    var showSetup by remember { mutableStateOf<Boolean?>(null) }
                     
-                    NavHost(
-                        navController = navController,
-                        startDestination = if (showSetup) "setup" else "home"
-                    ) {
-                        composable("setup") {
-                            SetupScreen(
-                                viewModel = setupViewModel,
-                                onSetupComplete = { 
-                                    showSetup = false
-                                    navController.navigate("home") {
-                                        popUpTo("setup") { inclusive = true }
+                    LaunchedEffect(Unit) {
+                        showSetup = !userPreferences.isSetupComplete()
+                        if (showSetup == false) {
+                            navController.navigate("home") {
+                                popUpTo("setup") { inclusive = true }
+                            }
+                        }
+                    }
+                    
+                    if (showSetup != null) {
+                        NavHost(
+                            navController = navController,
+                            startDestination = if (showSetup == true) "setup" else "home"
+                        ) {
+                            composable("setup") {
+                                SetupScreen(
+                                    viewModel = setupViewModel,
+                                    onSetupComplete = { 
+                                        showSetup = false
+                                        navController.navigate("home") {
+                                            popUpTo("setup") { inclusive = true }
+                                        }
                                     }
-                                }
-                            )
-                        }
-                        composable("home") {
-                            MainScreen(
-                                navController = navController,
-                                userPreferences = userPreferences,
-                                weatherViewModel = weatherViewModel,
-                                allskyViewModel = allskyViewModel,
-                                imageViewerViewModel = imageViewerViewModel,
-                                liveImageViewModel = liveImageViewModel,
-                                languageManager = languageManager,
                                 )
-                        }
-                        composable("layout_editor") {
-                            LayoutEditorScreen(
-                                userPreferences = userPreferences,
-                                onNavigateBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable("media/{type}") { backStackEntry ->
-                            val type = backStackEntry.arguments?.getString("type") ?: "timelapses"
-                            val title = type.replaceFirstChar { it.uppercase() }
-                            MediaScreen(
-                                title = title,
-                                mediaType = type,
-                                viewModel = allskyViewModel,
-                                userPreferences = userPreferences,
-                                onNavigateBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable("settings") {
-                            val updateViewModel: de.astronarren.allsky.viewmodel.UpdateViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-                                factory = de.astronarren.allsky.viewmodel.UpdateViewModelFactory(applicationContext as android.app.Application)
-                            )
-                            SettingsScreen(
-                                userPreferences = userPreferences,
-                                languageManager = languageManager,
-                                updateViewModel = updateViewModel,
-                                onNavigateBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable("about") {
-                            AboutScreen(
-                                onNavigateBack = { navController.popBackStack() }
-                            )
+                            }
+                            composable("home") {
+                                MainScreen(
+                                    navController = navController,
+                                    userPreferences = userPreferences,
+                                    weatherViewModel = weatherViewModel,
+                                    allskyViewModel = allskyViewModel,
+                                    imageViewerViewModel = imageViewerViewModel,
+                                    liveImageViewModel = liveImageViewModel,
+                                    languageManager = languageManager,
+                                )
+                            }
+                            composable("layout_editor") {
+                                LayoutEditorScreen(
+                                    userPreferences = userPreferences,
+                                    onNavigateBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable("media/{type}") { backStackEntry ->
+                                val type = backStackEntry.arguments?.getString("type") ?: "timelapses"
+                                val title = type.replaceFirstChar { it.uppercase() }
+                                MediaScreen(
+                                    title = title,
+                                    mediaType = type,
+                                    viewModel = allskyViewModel,
+                                    userPreferences = userPreferences,
+                                    onNavigateBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable("settings") {
+                                val updateViewModel: de.astronarren.allsky.viewmodel.UpdateViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                                    factory = de.astronarren.allsky.viewmodel.UpdateViewModelFactory(applicationContext as android.app.Application)
+                                )
+                                SettingsScreen(
+                                    userPreferences = userPreferences,
+                                    languageManager = languageManager,
+                                    updateViewModel = updateViewModel,
+                                    onNavigateBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable("about") {
+                                AboutScreen(
+                                    onNavigateBack = { navController.popBackStack() }
+                                )
+                            }
                         }
                     }
                 }

@@ -1,5 +1,11 @@
 package de.astronarren.allsky.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -22,6 +28,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
@@ -39,6 +46,7 @@ import de.astronarren.allsky.data.UserPreferences
 import de.astronarren.allsky.data.WeatherData
 import de.astronarren.allsky.viewmodel.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.text.SimpleDateFormat
 import java.util.*
@@ -63,12 +71,13 @@ fun MainScreen(
     imageViewerViewModel: ImageViewerViewModel,
     liveImageViewModel: LiveImageViewModel,
     languageManager: LanguageManager,
-    ) {
+) {
     var isSettingsOpen by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var apiKey by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
+    var isRefreshing by remember { mutableStateOf(false) }
     
     val weatherUiState by weatherViewModel.uiState.collectAsStateWithLifecycle()
     val allskyUiState by allskyViewModel.uiState.collectAsStateWithLifecycle()
@@ -182,210 +191,228 @@ fun MainScreen(
                     .fillMaxSize()
                     .background(brush = Brush.verticalGradient(colors = backgroundColors))
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = padding.calculateTopPadding())
-                        .verticalScroll(scrollState),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        scope.launch {
+                            isRefreshing = true
+                            if (apiKey.isNotEmpty()) weatherViewModel.updateWeather()
+                            if (allskyUrl.isNotEmpty()) allskyViewModel.fetchContentForDate()
+                            delay(1000) // Ensure spinner shows for at least 1s for UX
+                            isRefreshing = false
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    
-                    mainLayout.forEach { moduleName ->
-                        when (moduleName) {
-                            "LIVE_VIEW" -> {
-                                if (allskyUrl.isNotEmpty()) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(400.dp)
-                                            .padding(20.dp)
-                                    ) {
-                                        Card(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .clickable { 
-                                                    imageViewerViewModel.showImage(liveImageState.imageUrl)
-                                                },
-                                            shape = RoundedCornerShape(40.dp),
-                                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                                        ) {
-                                            Box(modifier = Modifier.fillMaxSize()) {
-                                                AsyncImage(
-                                                    model = liveImageState.imageUrl,
-                                                    contentDescription = stringResource(R.string.live_allsky_image),
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentScale = ContentScale.Crop
-                                                )
-                                                
-                                                Surface(
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = padding.calculateTopPadding())
+                            .verticalScroll(scrollState),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        
+                        mainLayout.forEach { moduleName ->
+                            when (moduleName) {
+                                "LIVE_VIEW" -> {
+                                    if (allskyUrl.isNotEmpty()) {
+                                        AnimatedContent(
+                                            targetState = liveImageState.imageUrl,
+                                            transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
+                                            label = "LiveImageCrossfade"
+                                        ) { targetUrl ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(400.dp)
+                                                    .padding(20.dp)
+                                            ) {
+                                                Card(
                                                     modifier = Modifier
-                                                        .align(Alignment.TopStart)
-                                                        .padding(20.dp),
-                                                    color = Color.Black.copy(alpha = 0.5f),
-                                                    shape = RoundedCornerShape(12.dp)
+                                                        .fillMaxSize()
+                                                        .clickable { 
+                                                            imageViewerViewModel.showImage(targetUrl)
+                                                        },
+                                                    shape = RoundedCornerShape(40.dp),
+                                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                                                 ) {
-                                                    Row(
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                                    ) {
-                                                        Box(
+                                                    Box(modifier = Modifier.fillMaxSize()) {
+                                                        AsyncImage(
+                                                            model = targetUrl,
+                                                            contentDescription = stringResource(R.string.live_allsky_image),
+                                                            modifier = Modifier.fillMaxSize(),
+                                                            contentScale = ContentScale.Crop
+                                                        )
+                                                        
+                                                        Surface(
                                                             modifier = Modifier
-                                                                .size(8.dp)
-                                                                .background(Color.Green, RoundedCornerShape(4.dp))
-                                                        )
-                                                        Spacer(modifier = Modifier.width(8.dp))
-                                                        Text(
-                                                            text = "LIVE",
-                                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                                            color = Color.White
-                                                        )
+                                                                .align(Alignment.TopStart)
+                                                                .padding(20.dp),
+                                                            color = Color.Black.copy(alpha = 0.5f),
+                                                            shape = RoundedCornerShape(12.dp)
+                                                        ) {
+                                                            Row(
+                                                                verticalAlignment = Alignment.CenterVertically,
+                                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                                            ) {
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .size(8.dp)
+                                                                        .background(Color.Green, RoundedCornerShape(4.dp))
+                                                                )
+                                                                Spacer(modifier = Modifier.width(8.dp))
+                                                                Text(
+                                                                    text = "LIVE",
+                                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                                    color = Color.White
+                                                                )
+                                                            }
+                                                        }
+
+                                                        Surface(
+                                                            modifier = Modifier
+                                                                .align(Alignment.BottomEnd)
+                                                                .padding(20.dp),
+                                                            color = Color.Black.copy(alpha = 0.5f),
+                                                            shape = RoundedCornerShape(12.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = formatTime(liveImageState.lastUpdate),
+                                                                style = MaterialTheme.typography.labelMedium,
+                                                                color = Color.White,
+                                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                                            )
+                                                        }
                                                     }
                                                 }
-
-                                                Surface(
-                                                    modifier = Modifier
-                                                        .align(Alignment.BottomEnd)
-                                                        .padding(20.dp),
-                                                    color = Color.Black.copy(alpha = 0.5f),
-                                                    shape = RoundedCornerShape(12.dp)
+                                            }
+                                        }
+                                    }
+                                }
+                                "BEST_VIEWING" -> {
+                                    val bestNight = weatherViewModel.getBestViewingNight()
+                                    if (bestNight != null) {
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(20.dp),
+                                            shape = RoundedCornerShape(32.dp),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = Color.White.copy(alpha = 0.1f)
+                                            )
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.padding(24.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    text = "BEST VIEWING NIGHT",
+                                                    style = MaterialTheme.typography.labelLarge.copy(
+                                                        fontWeight = FontWeight.Black,
+                                                        letterSpacing = 2.sp
+                                                    ),
+                                                    color = Color.Yellow
+                                                )
+                                                Spacer(modifier = Modifier.height(12.dp))
+                                                Text(
+                                                    text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date(bestNight.dt * 1000L)).uppercase(),
+                                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+                                                )
+                                                Text(
+                                                    text = "${bestNight.weather.firstOrNull()?.description?.uppercase() ?: ""} • ${bestNight.clouds.all}% CLOUDS",
+                                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                                    color = Color.White.copy(alpha = 0.7f)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                "WEATHER" -> {
+                                    if (apiKey.isEmpty()) {
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(20.dp),
+                                            shape = RoundedCornerShape(32.dp),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                            )
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.padding(24.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    text = "Weather Forecast",
+                                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                                                )
+                                                Spacer(modifier = Modifier.height(12.dp))
+                                                val uriHandler = LocalUriHandler.current
+                                                Button(
+                                                    onClick = { uriHandler.openUri("https://home.openweathermap.org/api_keys") },
+                                                    shape = RoundedCornerShape(16.dp)
                                                 ) {
-                                                    Text(
-                                                        text = formatTime(liveImageState.lastUpdate),
-                                                        style = MaterialTheme.typography.labelMedium,
-                                                        color = Color.White,
-                                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                                    )
+                                                    Text("Get API Key")
                                                 }
                                             }
                                         }
+                                    } else {
+                                        WeatherDisplay(uiState = weatherUiState)
                                     }
                                 }
-                            }
-                            "BEST_VIEWING" -> {
-                                val bestNight = weatherViewModel.getBestViewingNight()
-                                if (bestNight != null) {
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(20.dp),
-                                        shape = RoundedCornerShape(32.dp),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = Color.White.copy(alpha = 0.1f)
-                                        )
-                                    ) {
-                                        Column(
-                                            modifier = Modifier.padding(24.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(
-                                                text = "BEST VIEWING NIGHT",
-                                                style = MaterialTheme.typography.labelLarge.copy(
-                                                    fontWeight = FontWeight.Black,
-                                                    letterSpacing = 2.sp
-                                                ),
-                                                color = Color.Yellow
-                                            )
-                                            Spacer(modifier = Modifier.height(12.dp))
-                                            Text(
-                                                text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date(bestNight.dt * 1000L)).uppercase(),
-                                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
-                                            )
-                                            Text(
-                                                text = "${bestNight.weather.firstOrNull()?.description?.uppercase() ?: ""} • ${bestNight.clouds.all}% CLOUDS",
-                                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                                color = Color.White.copy(alpha = 0.7f)
-                                            )
-                                        }
+                                "MOON" -> {
+                                    Box(modifier = Modifier.padding(horizontal = 4.dp)) {
+                                        MoonPhaseDisplay()
                                     }
+                                    Spacer(modifier = Modifier.height(16.dp))
                                 }
-                            }
-                            "WEATHER" -> {
-                                if (apiKey.isEmpty()) {
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(20.dp),
-                                        shape = RoundedCornerShape(32.dp),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                        )
-                                    ) {
-                                        Column(
-                                            modifier = Modifier.padding(24.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(
-                                                text = "Weather Forecast",
-                                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                                            )
-                                            Spacer(modifier = Modifier.height(12.dp))
-                                            val uriHandler = LocalUriHandler.current
-                                            Button(
-                                                onClick = { uriHandler.openUri("https://home.openweathermap.org/api_keys") },
-                                                shape = RoundedCornerShape(16.dp)
-                                            ) {
-                                                Text("Get API Key")
+                                "TIMELAPSES" -> {
+                                    AllskyMediaSection(
+                                        title = "Recent Timelapses",
+                                        media = allskyUiState.timelapses,
+                                        onMediaClick = { media -> currentVideo = media.url }
+                                    )
+                                }
+                                "METEORS" -> {
+                                    AllskyMediaSection(
+                                        title = "Meteor Recordings",
+                                        media = allskyUiState.meteors,
+                                        onMediaClick = { media -> 
+                                            if (media.url.lowercase().contains(".mp4") || 
+                                                media.url.lowercase().contains(".webm")) {
+                                                currentVideo = media.url
+                                            } else {
+                                                imageViewerViewModel.showImage(media.url)
                                             }
                                         }
-                                    }
-                                } else {
-                                    WeatherDisplay(
-                                        uiState = weatherUiState,
-                                        )
+                                    )
                                 }
-                            }
-                            "MOON" -> {
-                                Box(modifier = Modifier.padding(horizontal = 4.dp)) {
-                                    MoonPhaseDisplay()
+                                "IMAGES" -> {
+                                    AllskyMediaSection(
+                                        title = "Daily Raw Images",
+                                        media = allskyUiState.images,
+                                        onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
+                                    )
                                 }
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
-                            "TIMELAPSES" -> {
-                                AllskyMediaSection(
-                                    title = "Recent Timelapses",
-                                    media = allskyUiState.timelapses,
-                                    onMediaClick = { media -> currentVideo = media.url }
-                                )
-                            }
-                            "METEORS" -> {
-                                AllskyMediaSection(
-                                    title = "Meteor Recordings",
-                                    media = allskyUiState.meteors,
-                                    onMediaClick = { media -> 
-                                        if (media.url.lowercase().contains(".mp4") || 
-                                            media.url.lowercase().contains(".webm")) {
-                                            currentVideo = media.url
-                                        } else {
-                                            imageViewerViewModel.showImage(media.url)
-                                        }
-                                    }
-                                )
-                            }
-                            "IMAGES" -> {
-                                AllskyMediaSection(
-                                    title = "Daily Raw Images",
-                                    media = allskyUiState.images,
-                                    onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
-                                )
-                            }
-                            "KEOGRAMS" -> {
-                                AllskyMediaSection(
-                                    title = "Keograms",
-                                    media = allskyUiState.keograms,
-                                    onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
-                                )
-                            }
-                            "STARTRAILS" -> {
-                                AllskyMediaSection(
-                                    title = "Startrails",
-                                    media = allskyUiState.startrails,
-                                    onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
-                                )
+                                "KEOGRAMS" -> {
+                                    AllskyMediaSection(
+                                        title = "Keograms",
+                                        media = allskyUiState.keograms,
+                                        onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
+                                    )
+                                }
+                                "STARTRAILS" -> {
+                                    AllskyMediaSection(
+                                        title = "Startrails",
+                                        media = allskyUiState.startrails,
+                                        onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
+                                    )
+                                }
                             }
                         }
+                        
+                        Spacer(modifier = Modifier.height(40.dp))
                     }
-                    
-                    Spacer(modifier = Modifier.height(40.dp))
                 }
 
                 // Overlay components

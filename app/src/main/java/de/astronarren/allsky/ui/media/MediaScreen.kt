@@ -1,5 +1,10 @@
 package de.astronarren.allsky.ui.media
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +22,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +33,8 @@ import de.astronarren.allsky.viewmodel.AllskyMediaUiState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
@@ -49,6 +57,8 @@ fun MediaScreen(
     
     var currentVideo by remember { mutableStateOf<String?>(null) }
     var currentImage by remember { mutableStateOf<String?>(null) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val mediaItems = when (mediaType) {
         "timelapses" -> uiState.timelapses
@@ -98,156 +108,173 @@ fun MediaScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    scope.launch {
+                        isRefreshing = true
+                        viewModel.fetchContentForDate(dateInput)
+                        delay(1000)
+                        isRefreshing = false
+                    }
+                },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                // Modern Date Selection Trigger
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    FilterChip(
-                        selected = dateInput != "All",
-                        onClick = { showDatePicker = true },
-                        label = { 
-                            Text(
-                                if (dateInput == "All") "Select Date" 
-                                else {
-                                    // Format for display: 20240101 -> Jan 01, 2024
-                                    try {
-                                        val inputSdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-                                        val displaySdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                                        displaySdf.format(inputSdf.parse(dateInput)!!)
-                                    } catch (e: Exception) {
-                                        dateInput
-                                    }
-                                }
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp)
-                    )
-
-                    if (dateInput != "All") {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Modern Date Selection Trigger
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         FilterChip(
-                            selected = false,
-                            onClick = {
-                                dateInput = "All"
-                                viewModel.fetchContentForDate("All")
+                            selected = dateInput != "All",
+                            onClick = { showDatePicker = true },
+                            label = { 
+                                Text(
+                                    if (dateInput == "All") "Select Date" 
+                                    else {
+                                        // Format for display: 20240101 -> Jan 01, 2024
+                                        try {
+                                            val inputSdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                                            val displaySdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                                            displaySdf.format(inputSdf.parse(dateInput)!!)
+                                        } catch (e: Exception) {
+                                            dateInput
+                                        }
+                                    }
+                                )
                             },
-                            label = { Text("Show All") },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Default.History,
+                                    imageVector = Icons.Default.DateRange,
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp)
                                 )
                             },
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            },
                             shape = RoundedCornerShape(12.dp)
                         )
-                    }
-                }
 
-                if (uiState.isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                } else if (uiState.error != null) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
-                    }
-                } else if (mediaItems.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "No content available for this date.")
-                    }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 150.dp),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(mediaItems) { item ->
-                            val isVideo = item.url.lowercase().run { contains(".mp4") || contains(".webm") || contains(".mov") || contains(".mkv") }
-                            Card(
-                                modifier = Modifier
-                                    .aspectRatio(1f)
-                                    .fillMaxWidth(),
-                                onClick = { 
-                                    if (isVideo) {
-                                        currentVideo = item.url
-                                    } else {
-                                        currentImage = item.url
-                                    }
+                        if (dateInput != "All") {
+                            FilterChip(
+                                selected = false,
+                                onClick = {
+                                    dateInput = "All"
+                                    viewModel.fetchContentForDate("All")
                                 },
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                val placeholderGradient = Brush.verticalGradient(
-                                    colors = listOf(DeepNavy, NightPurple)
-                                )
-                                val placeholderPainter = when {
-                                    mediaType == "timelapses" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.timelapses_thumbnail)
-                                    mediaType == "images" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.raw_images_thumbnail)
-                                    else -> androidx.compose.ui.graphics.vector.rememberVectorPainter(if (isVideo) Icons.Default.PlayCircle else Icons.Default.Image)
-                                }
-                                Box(modifier = Modifier.fillMaxSize().background(placeholderGradient)) {
-                                    AsyncImage(
-                                        model = item.url,
-                                        contentDescription = item.date,
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop,
-                                        placeholder = placeholderPainter,
-                                        error = placeholderPainter
+                                label = { Text("Show All") },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.History,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
                                     )
-                                    if (isVideo) {
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.Center)
-                                                .size(48.dp)
-                                                .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(24.dp)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.PlayCircle,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(32.dp),
-                                                tint = Color.White
-                                            )
-                                        }
-                                    }
-                                    Box(
+                                },
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                },
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                        }
+                    }
+
+                    AnimatedContent(
+                        targetState = uiState.isLoading to mediaItems.isEmpty(),
+                        transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
+                        label = "MediaContentAnimation"
+                    ) { (isLoading, isEmpty) ->
+                        if (isLoading && mediaItems.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        } else if (uiState.error != null && mediaItems.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
+                            }
+                        } else if (isEmpty) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(text = "No content available for this date.")
+                            }
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(minSize = 150.dp),
+                                contentPadding = PaddingValues(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(mediaItems) { item ->
+                                    val isVideo = item.url.lowercase().run { contains(".mp4") || contains(".webm") || contains(".mov") || contains(".mkv") }
+                                    Card(
                                         modifier = Modifier
-                                            .align(Alignment.BottomStart)
-                                            .fillMaxWidth()
-                                            .background(
-                                                Color.Black.copy(alpha = 0.5f)
-                                            )
-                                            .padding(8.dp)
+                                            .aspectRatio(1f)
+                                            .fillMaxWidth(),
+                                        onClick = { 
+                                            if (isVideo) {
+                                                currentVideo = item.url
+                                            } else {
+                                                currentImage = item.url
+                                            }
+                                        },
+                                        shape = RoundedCornerShape(16.dp)
                                     ) {
-                                        Text(
-                                            text = item.date,
-                                            color = Color.White,
-                                            style = MaterialTheme.typography.bodySmall
+                                        val placeholderGradient = Brush.verticalGradient(
+                                            colors = listOf(DeepNavy, NightPurple)
                                         )
+                                        val placeholderPainter = when {
+                                            mediaType == "timelapses" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.timelapses_thumbnail)
+                                            mediaType == "images" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.raw_images_thumbnail)
+                                            else -> androidx.compose.ui.graphics.vector.rememberVectorPainter(if (isVideo) Icons.Default.PlayCircle else Icons.Default.Image)
+                                        }
+                                        Box(modifier = Modifier.fillMaxSize().background(placeholderGradient)) {
+                                            AsyncImage(
+                                                model = item.url,
+                                                contentDescription = item.date,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop,
+                                                placeholder = placeholderPainter,
+                                                error = placeholderPainter
+                                            )
+                                            if (isVideo) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .align(Alignment.Center)
+                                                        .size(48.dp)
+                                                        .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(24.dp)),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.PlayCircle,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(32.dp),
+                                                        tint = Color.White
+                                                    )
+                                                }
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomStart)
+                                                    .fillMaxWidth()
+                                                    .background(
+                                                        Color.Black.copy(alpha = 0.5f)
+                                                    )
+                                                    .padding(8.dp)
+                                            ) {
+                                                Text(
+                                                    text = item.date,
+                                                    color = Color.White,
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }

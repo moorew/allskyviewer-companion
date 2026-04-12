@@ -4,6 +4,15 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-04-11
+### Added
+- **Pull-to-Refresh**: Easily refresh content natively by swiping down on the Main and Media screens.
+- **Smooth Animations**: Added beautiful crossfade and fade-in animations for loading states and live views to enhance the overall feel and align with Android design standards.
+
+### Fixed
+- **Critical Crash Fix**: Completely refactored data storage and synchronization logic to strictly utilize asynchronous Flow and Suspend architecture, permanently resolving the "crash on load" issue after entering credentials.
+- **Performance**: Optimized Main Screen state observation.
+
 ## [1.5.0] - 2026-04-11
 ### Added
 - **GPS Integration**: Capture station's Latitude and Longitude during setup using phone's GPS.

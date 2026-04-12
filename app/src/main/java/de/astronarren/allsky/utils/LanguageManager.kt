@@ -12,6 +12,10 @@ import de.astronarren.allsky.data.dataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Manages the application's language settings following Android architecture guidelines.
@@ -47,8 +51,7 @@ class LanguageManager(
     private var isChangingLanguage = false
 
     init {
-        // Apply saved language on initialization without triggering callback
-        runBlocking {
+        CoroutineScope(Dispatchers.Main).launch {
             val savedLanguage = getSavedLanguage()
             if (savedLanguage != AppLanguage.SYSTEM) {
                 applyLanguage(savedLanguage)
@@ -60,21 +63,23 @@ class LanguageManager(
         if (isChangingLanguage) return
         isChangingLanguage = true
         
-        try {
-            // Only apply and save if it's different from current
-            val currentLanguage = getCurrentLanguage()
-            if (language != currentLanguage) {
-                applyLanguage(language)
-                runBlocking {
-                    context.dataStore.edit { preferences ->
-                        preferences[LANGUAGE_KEY] = language.code
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                // Only apply and save if it's different from current
+                val currentLanguage = getSavedLanguage()
+                if (language != currentLanguage) {
+                    applyLanguage(language)
+                    withContext(Dispatchers.IO) {
+                        context.dataStore.edit { preferences ->
+                            preferences[LANGUAGE_KEY] = language.code
+                        }
                     }
+                    // Only trigger callback if language actually changed
+                    onLanguageChanged?.invoke()
                 }
-                // Only trigger callback if language actually changed
-                onLanguageChanged?.invoke()
+            } finally {
+                isChangingLanguage = false
             }
-        } finally {
-            isChangingLanguage = false
         }
     }
 
@@ -109,12 +114,12 @@ class LanguageManager(
         }
     }
 
-    fun getCurrentLanguage(): AppLanguage {
-        return runBlocking { getSavedLanguage() }
+    suspend fun getCurrentLanguage(): AppLanguage {
+        return getSavedLanguage()
     }
 
-    private suspend fun getSavedLanguage(): AppLanguage {
+    private suspend fun getSavedLanguage(): AppLanguage = withContext(Dispatchers.IO) {
         val languageCode = context.dataStore.data.first()[LANGUAGE_KEY] ?: ""
-        return AppLanguage.fromCode(languageCode)
+        AppLanguage.fromCode(languageCode)
     }
 } 

@@ -12,8 +12,14 @@ import kotlinx.coroutines.launch
 class LanguageViewModel(
     private val languageManager: LanguageManager
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(languageManager.getCurrentLanguage())
+    private val _uiState = MutableStateFlow(AppLanguage.SYSTEM)
     val uiState: StateFlow<AppLanguage> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _uiState.value = languageManager.getCurrentLanguage()
+        }
+    }
 
     fun setLanguage(language: AppLanguage) {
         viewModelScope.launch {

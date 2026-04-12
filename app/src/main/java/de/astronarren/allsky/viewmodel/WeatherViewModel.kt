@@ -30,8 +30,8 @@ class WeatherViewModel(
             ) { apiKey, lat, lon ->
                 Triple(apiKey, lat, lon)
             }.collect { (apiKey, lat, lon) ->
-                if (apiKey.isNotBlank()) {
-                    updateWeather()
+                if (apiKey.isNotBlank() && lat.isNotBlank() && lon.isNotBlank()) {
+                    updateWeather(apiKey, lat, lon)
                 }
             }
         }
@@ -39,9 +39,17 @@ class WeatherViewModel(
 
     fun updateWeather() {
         viewModelScope.launch {
+            val apiKey = userPreferences.getApiKey()
+            val lat = userPreferences.getLatitude()
+            val lon = userPreferences.getLongitude()
+            updateWeather(apiKey, lat, lon)
+        }
+    }
+
+    private fun updateWeather(apiKey: String, latStr: String, lonStr: String) {
+        viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            val apiKey = userPreferences.getApiKey()
             if (apiKey.isBlank()) {
                 _uiState.update { 
                     it.copy(
@@ -52,9 +60,6 @@ class WeatherViewModel(
                 return@launch
             }
 
-            val latStr = userPreferences.getLatitude()
-            val lonStr = userPreferences.getLongitude()
-            
             val lat = latStr.toDoubleOrNull()
             val lon = lonStr.toDoubleOrNull()
 
