@@ -4,6 +4,11 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] - 2026-04-12
+### Fixed
+- **NavHost Crash**: Resolved a critical issue where the app would crash immediately after setup because the navigation start destination changed dynamically.
+- **1Password Autofill**: Enhanced accessibility labels and semantic properties on username and password fields to ensure proper triggering of password managers like 1Password.
+
 ## [1.5.1] - 2026-04-11
 ### Added
 - **Pull-to-Refresh**: Easily refresh content natively by swiping down on the Main and Media screens.

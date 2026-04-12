@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.astronarren.allsky.R
@@ -172,7 +174,7 @@ fun SettingsScreen(
                 value = usernameInput,
                 onValueChange = { usernameInput = it },
                 label = { Text("Username (Optional)") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().semantics { contentDescription = "username" },
                 singleLine = true
             )
             
@@ -183,8 +185,10 @@ fun SettingsScreen(
                 value = passwordInput,
                 onValueChange = { passwordInput = it },
                 label = { Text("Password (Optional)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                modifier = Modifier.fillMaxWidth().semantics { contentDescription = "password" },
+                singleLine = true,
+                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Password)
             )
             
             Spacer(modifier = Modifier.height(16.dp))
