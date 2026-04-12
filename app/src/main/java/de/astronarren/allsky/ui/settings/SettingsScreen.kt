@@ -39,10 +39,11 @@ fun SettingsScreen(
     var passwordInput by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     var showLanguageDialog by remember { mutableStateOf(false) }
-    var currentLanguage by remember { mutableStateOf(languageManager.getCurrentLanguage()) }
+    var currentLanguage by remember { mutableStateOf(de.astronarren.allsky.utils.AppLanguage.SYSTEM) }
     val updateState by updateViewModel.uiState.collectAsStateWithLifecycle()
     
     LaunchedEffect(Unit) {
+        currentLanguage = languageManager.getCurrentLanguage()
         apiKeyInput = userPreferences.getApiKey()
         urlInput = userPreferences.getAllskyUrl()
         latInput = userPreferences.getLatitude()
