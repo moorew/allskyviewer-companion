@@ -4,6 +4,11 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.4] - 2026-04-12
+### Fixed
+- **Critical Startup Crash on Android 13+**: Resolved a hard crash that occurred immediately after entering logon details and latitude/longitude. This was caused by the app's background weather worker attempting to display a push notification without declaring or requesting the `POST_NOTIFICATIONS` permission required in newer Android versions. The permission is now correctly declared, and safety checks are in place to prevent the app from forcefully closing if permission hasn't been granted.
+- **Autofill Tuning**: Further stabilized the keyboard input settings to maximize the chance of password managers like 1Password successfully detecting the login fields during setup.
+
 ## [1.5.3] - 2026-04-12
 ### Fixed
 - **NavHost Crash**: Resolved a critical issue where the app would crash immediately after setup because the navigation start destination changed dynamically.

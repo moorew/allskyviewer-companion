@@ -10,6 +10,10 @@ import de.astronarren.allsky.MainActivity
 import android.app.PendingIntent
 import android.content.Intent
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+
 class NotificationHelper(private val context: Context) {
     companion object {
         const val CHANNEL_ID = "allsky_weather_alerts"
@@ -34,6 +38,11 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun showClearSkyNotification(cloudCover: Int, temp: Double) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -55,6 +64,11 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun showNightConditionsNotification(cloudCover: Int, minTemp: Double) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
         val condition = when {
             cloudCover < 20 -> "Excellent"
             cloudCover < 50 -> "Fair"
