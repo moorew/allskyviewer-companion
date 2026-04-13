@@ -4,6 +4,10 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.5] - 2026-04-12
+### Fixed
+- **Fatal Rendering Crash on Startup**: Resolved a critical `ResourceResolutionException` caused by unsupported placeholder image formats (WebP/HTML masquerading as WebP). All custom thumbnails (timelapses, raw images, moon phase) have been rigorously verified and converted to clean `.jpg` formats to ensure guaranteed decoding via Jetpack Compose's `painterResource`, preventing the app from crashing after setup.
+
 ## [1.5.4] - 2026-04-12
 ### Fixed
 - **Critical Startup Crash on Android 13+**: Resolved a hard crash that occurred immediately after entering logon details and latitude/longitude. This was caused by the app's background weather worker attempting to display a push notification without declaring or requesting the `POST_NOTIFICATIONS` permission required in newer Android versions. The permission is now correctly declared, and safety checks are in place to prevent the app from forcefully closing if permission hasn't been granted.
