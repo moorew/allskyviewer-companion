@@ -4,6 +4,10 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-04-13
+### Fixed
+- **Build Stabilization**: Addressed minor compiler errors related to the Room database integration to ensure successful release packaging.
+
 ## [1.7.0] - 2026-04-12
 ### Added
 - **Smart Caching (Room Database)**: The app now uses a local SQLite database (Room) to cache your timelapses, startrails, and other media. This makes the Media Screens load instantly while it checks for updates in the background.

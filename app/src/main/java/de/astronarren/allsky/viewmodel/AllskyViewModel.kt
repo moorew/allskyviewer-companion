@@ -73,7 +73,8 @@ class AllskyViewModel(
                     },
                     meteors = content.meteors.map {
                         AllskyMediaUiState(it.date, it.url)
-                    }
+                    },
+                    systemInfo = content.systemInfo
                 )
             } catch (e: Exception) {
                 _uiState.value = AllskyUiState(
@@ -83,4 +84,4 @@ class AllskyViewModel(
             }
         }
     }
-} 
+}  
