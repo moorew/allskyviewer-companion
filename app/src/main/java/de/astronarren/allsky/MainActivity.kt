@@ -170,7 +170,3 @@ class MainActivity : ComponentActivity() {
         )
     }
 }
-herWorkRequest
-        )
-    }
-}
