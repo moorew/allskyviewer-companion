@@ -4,6 +4,11 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-04-12
+### Added
+- **Live View Home Screen Widget**: Re-engineered the Android home screen widget to accurately resolve the live image stream path and handle Basic Authentication credentials securely. Tapping the widget image now launches the app directly for a seamless experience.
+- **Fully Integrated Weather API**: The OpenWeather API key is now completely integrated into the app. The manual API key input fields have been permanently removed from both the Setup and Settings screens, simplifying the onboarding process for new users.
+
 ## [1.5.5] - 2026-04-12
 ### Fixed
 - **Fatal Rendering Crash on Startup**: Resolved a critical `ResourceResolutionException` caused by unsupported placeholder image formats (WebP/HTML masquerading as WebP). All custom thumbnails (timelapses, raw images, moon phase) have been rigorously verified and converted to clean `.jpg` formats to ensure guaranteed decoding via Jetpack Compose's `painterResource`, preventing the app from crashing after setup.

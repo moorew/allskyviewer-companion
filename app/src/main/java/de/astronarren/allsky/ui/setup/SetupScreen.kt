@@ -121,11 +121,9 @@ fun SetupScreen(
                             onPasswordChange = { viewModel.updatePassword(it) },
                             onNext = { viewModel.nextStep() }
                         )
-                        3 -> ApiKeyStep(
-                            currentApiKey = uiState.apiKey,
+                        3 -> LocationStep(
                             currentLat = uiState.latitude,
                             currentLon = uiState.longitude,
-                            onApiKeyChange = { viewModel.updateApiKey(it) },
                             onLatChange = { viewModel.updateLatitude(it) },
                             onLonChange = { viewModel.updateLongitude(it) },
                             onComplete = { viewModel.completeSetup() }
@@ -319,17 +317,14 @@ private fun UrlStep(
 
 @SuppressLint("MissingPermission")
 @Composable
-private fun ApiKeyStep(
-    currentApiKey: String,
+private fun LocationStep(
     currentLat: String,
     currentLon: String,
-    onApiKeyChange: (String) -> Unit,
     onLatChange: (String) -> Unit,
     onLonChange: (String) -> Unit,
     onComplete: () -> Unit
 ) {
     val context = LocalContext.current
-    var apiKeyInput by remember { mutableStateOf(currentApiKey) }
     var latInput by remember { mutableStateOf(currentLat) }
     var lonInput by remember { mutableStateOf(currentLon) }
     
@@ -354,31 +349,9 @@ private fun ApiKeyStep(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "LOCATION & WEATHER",
+            text = "LOCATION",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black, letterSpacing = 2.sp),
             color = Color.White
-        )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        OutlinedTextField(
-            value = apiKeyInput,
-            onValueChange = { 
-                apiKeyInput = it
-                onApiKeyChange(it)
-            },
-            label = { Text("OpenWeather API Key (Optional)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                focusedBorderColor = Color.White,
-                unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
-                focusedLabelColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedTextColor = Color.White
-            )
         )
         
         Spacer(modifier = Modifier.height(24.dp))

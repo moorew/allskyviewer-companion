@@ -33,7 +33,6 @@ fun SettingsScreen(
     updateViewModel: UpdateViewModel,
     onNavigateBack: () -> Unit
 ) {
-    var apiKeyInput by remember { mutableStateOf("") }
     var urlInput by remember { mutableStateOf("") }
     var latInput by remember { mutableStateOf("") }
     var lonInput by remember { mutableStateOf("") }
@@ -46,7 +45,6 @@ fun SettingsScreen(
     
     LaunchedEffect(Unit) {
         currentLanguage = languageManager.getCurrentLanguage()
-        apiKeyInput = userPreferences.getApiKey()
         urlInput = userPreferences.getAllskyUrl()
         latInput = userPreferences.getLatitude()
         lonInput = userPreferences.getLongitude()
@@ -193,22 +191,6 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // API Key Input
-            OutlinedTextField(
-                value = apiKeyInput,
-                onValueChange = { apiKeyInput = it },
-                label = { Text(stringResource(R.string.openweather_api_key)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = MaterialTheme.shapes.medium,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                )
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
             // Language Selection
             Surface(
                 modifier = Modifier
@@ -253,7 +235,6 @@ fun SettingsScreen(
                         userPreferences.saveLongitude(lonInput)
                         userPreferences.saveUsername(usernameInput)
                         userPreferences.savePassword(passwordInput)
-                        userPreferences.saveApiKey(apiKeyInput)
                         onNavigateBack()
                     }
                 },
