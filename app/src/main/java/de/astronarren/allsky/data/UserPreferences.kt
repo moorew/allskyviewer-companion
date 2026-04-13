@@ -22,7 +22,7 @@ class UserPreferences(private val context: Context) {
         private val LATITUDE = stringPreferencesKey("latitude")
         private val LONGITUDE = stringPreferencesKey("longitude")
         
-        private const val DEFAULT_LAYOUT = "LIVE_VIEW,BEST_VIEWING,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
+        private const val DEFAULT_LAYOUT = "LIVE_VIEW,SYSTEM,BEST_VIEWING,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
         private const val DEFAULT_API_KEY = "9908d92979873f12ec6eaecc05335284"
     }
 

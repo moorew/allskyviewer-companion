@@ -4,6 +4,14 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-04-12
+### Added
+- **Smart Caching (Room Database)**: The app now uses a local SQLite database (Room) to cache your timelapses, startrails, and other media. This makes the Media Screens load instantly while it checks for updates in the background.
+- **Dynamic Theming (Material You / Palette)**: The app's background and UI elements now intelligently extract colors from the live sky image and adapt their theme to match your current sky conditions in real-time.
+- **System Monitoring Hub**: Added a new "System Monitoring" module to the Main Screen that scrapes your Allsky Raspberry Pi's health metrics (CPU Temp, Disk Usage, etc.) directly from the web interface.
+- **Interactive Forecast Widget**: Expanded the Android home screen widget to display a sleek 3-day weather forecast directly beneath the live sky image.
+- **Advanced Video Streaming**: Integrated Media3 ExoPlayer with HLS (`.m3u8`) support and optimized buffering parameters to ensure smooth, adaptive streaming of your high-resolution timelapses.
+
 ## [1.6.0] - 2026-04-12
 ### Added
 - **Live View Home Screen Widget**: Re-engineered the Android home screen widget to accurately resolve the live image stream path and handle Basic Authentication credentials securely. Tapping the widget image now launches the app directly for a seamless experience.

@@ -8,7 +8,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.util.Base64
 
-class AllskyRepository(private val userPreferences: UserPreferences) {
+import de.astronarren.allsky.data.database.MediaDao
+
+class AllskyRepository(
+    private val userPreferences: UserPreferences,
+    private val mediaDao: MediaDao
+) {
     suspend fun getAllContent(date: String? = null): AllskyContent {
         return withContext(Dispatchers.IO) {
             try {
@@ -71,9 +76,10 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     // Simple heuristic: if the document contains list_ or media elements, it's likely the right page
                     val hasPortalContent = doc != null && (
                         doc.select("a[href*=.mp4], a[href*=.jpg], img[src*=.jpg], source[src*=.mp4]").isNotEmpty() ||
-                        doc.select("div.functionsListFileType, div.functionsListTypeImg").isNotEmpty()
+                        doc.select("div.functionsListFileType, div.functionsListTypeImg").isNotEmpty() ||
+                        portalPage == "system"
                     )
-                    
+
                     if (doc != null && hasPortalContent) {
                         println("Debug: Portal page has valid content")
                         return doc
@@ -97,10 +103,12 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val startrailDoc = fetchDoc("startrails/", "list_startrails&day=$dayParam")
                 val imagesDoc = if (date != null && date != "All") fetchDoc("images/", "list_images&day=$date") else fetchDoc("images/", "list_days")
                 val meteorDoc = fetchDoc("meteors/", "list_meteors&day=$dayParam")
+                val systemDoc = fetchDoc("", "system")
 
                 val keograms = keogramDoc?.let { parseKeograms(it, authBaseUrl) } ?: emptyList()
                 val startrails = startrailDoc?.let { parseStartrails(it, authBaseUrl) } ?: emptyList()
                 val timelapses = timelapseDoc?.let { parseTimelapses(it, authBaseUrl) } ?: emptyList()
+                val systemInfo = systemDoc?.let { parseSystemInfo(it) } ?: emptyMap()
 
                 var images = imagesDoc?.let { parseImages(it, authBaseUrl) } ?: emptyList()
                 
@@ -138,6 +146,23 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 val meteors = meteorDoc?.let { parseMeteors(it, authBaseUrl) } ?: emptyList()
                 println("Debug: Found ${meteors.size} meteors")
 
+                val cachedTimelapses = timelapses.map { de.astronarren.allsky.data.database.CachedMedia(type = "timelapses", date = it.date, url = it.url) }
+                val cachedKeograms = keograms.map { de.astronarren.allsky.data.database.CachedMedia(type = "keograms", date = it.date, url = it.url) }
+                val cachedStartrails = startrails.map { de.astronarren.allsky.data.database.CachedMedia(type = "startrails", date = it.date, url = it.url) }
+                val cachedImages = images.map { de.astronarren.allsky.data.database.CachedMedia(type = "images", date = it.date, url = it.url) }
+                val cachedMeteors = meteors.map { de.astronarren.allsky.data.database.CachedMedia(type = "meteors", date = it.date, url = it.url) }
+
+                mediaDao.deleteByType("timelapses")
+                mediaDao.insertAll(cachedTimelapses)
+                mediaDao.deleteByType("keograms")
+                mediaDao.insertAll(cachedKeograms)
+                mediaDao.deleteByType("startrails")
+                mediaDao.insertAll(cachedStartrails)
+                mediaDao.deleteByType("images")
+                mediaDao.insertAll(cachedImages)
+                mediaDao.deleteByType("meteors")
+                mediaDao.insertAll(cachedMeteors)
+
                 AllskyContent(
                     timelapses = timelapses,
                     keograms = keograms,
@@ -145,15 +170,33 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                     images = images,
                     meteors = meteors
                 )
-            } catch (e: org.jsoup.HttpStatusException) {
-                println("Debug: HTTP Error fetching allsky content: ${e.statusCode}")
-                if (e.statusCode == 401 || e.statusCode == 403) {
-                    throw Exception("Authentication Required (401). Please enter your Username and Password in Settings.")
-                }
-                throw Exception("Server returned error: ${e.statusCode}")
             } catch (e: Exception) {
-                println("Debug: Error fetching allsky content: ${e.message}")
-                throw e
+                println("Debug: Error fetching allsky content: ${e.message}, trying cache")
+                val cachedTimelapses = mediaDao.getMediaByType("timelapses").map { AllskyMedia(it.date, it.url) }
+                val cachedKeograms = mediaDao.getMediaByType("keograms").map { AllskyMedia(it.date, it.url) }
+                val cachedStartrails = mediaDao.getMediaByType("startrails").map { AllskyMedia(it.date, it.url) }
+                val cachedImages = mediaDao.getMediaByType("images").map { AllskyMedia(it.date, it.url) }
+                val cachedMeteors = mediaDao.getMediaByType("meteors").map { AllskyMedia(it.date, it.url) }
+
+                if (cachedTimelapses.isEmpty() && cachedKeograms.isEmpty() && cachedStartrails.isEmpty() && cachedImages.isEmpty() && cachedMeteors.isEmpty()) {
+                    if (e is org.jsoup.HttpStatusException) {
+                        println("Debug: HTTP Error fetching allsky content: ${e.statusCode}")
+                        if (e.statusCode == 401 || e.statusCode == 403) {
+                            throw Exception("Authentication Required (401). Please enter your Username and Password in Settings.")
+                        }
+                        throw Exception("Server returned error: ${e.statusCode}")
+                    }
+                    throw e
+                }
+
+                AllskyContent(
+                    timelapses = cachedTimelapses,
+                    keograms = cachedKeograms,
+                    startrails = cachedStartrails,
+                    images = cachedImages,
+                    meteors = cachedMeteors,
+                    systemInfo = emptyMap() // We don't cache system info in the DB for now
+                )
             }
         }
     }
@@ -364,5 +407,24 @@ class AllskyRepository(private val userPreferences: UserPreferences) {
                 null
             }
         }.sortedByDescending { it.date }.distinctBy { it.url }.take(20)
+    }
+
+    private fun parseSystemInfo(doc: org.jsoup.nodes.Document): Map<String, String> {
+        val info = mutableMapOf<String, String>()
+        
+        doc.select("tr").forEach { row ->
+            val cols = row.select("td")
+            if (cols.size >= 2) {
+                val key = cols[0].text().trim().trimEnd(':')
+                // Progress bars often have text directly in a span or div
+                val value = cols[1].text().trim()
+                if (key.isNotEmpty() && value.isNotEmpty()) {
+                    // Try to avoid extracting whole HTML if it's messy, but .text() just gets the text content.
+                    info[key] = value
+                }
+            }
+        }
+        
+        return info
     }
 }

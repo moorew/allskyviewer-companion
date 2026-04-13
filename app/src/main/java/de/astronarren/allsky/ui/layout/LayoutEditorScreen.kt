@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 val ALL_MODULES = listOf(
     "LIVE_VIEW",
+    "SYSTEM",
     "BEST_VIEWING",
     "WEATHER",
     "MOON",
@@ -29,6 +30,7 @@ val ALL_MODULES = listOf(
 
 private fun getModuleLabel(key: String): String = when (key) {
     "LIVE_VIEW" -> "Live View"
+    "SYSTEM" -> "System Monitoring"
     "BEST_VIEWING" -> "Best Viewing Night"
     "WEATHER" -> "Weather Forecast"
     "MOON" -> "Moon Phase"

@@ -27,6 +27,10 @@ import de.astronarren.allsky.utils.DownloadHelper
 import androidx.compose.ui.graphics.graphicsLayer
 import kotlinx.coroutines.launch
 
+import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.datasource.DefaultDataSource
+
 @Composable
 fun VideoPlayer(
     videoUrl: String,
@@ -38,11 +42,30 @@ fun VideoPlayer(
     val scope = rememberCoroutineScope()
     
     val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(videoUrl))
-            prepare()
-            playWhenReady = true
-        }
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                32000, // min buffer
+                64000, // max buffer
+                2000,  // buffer for playback
+                5000   // buffer for playback after rebuffer
+            ).build()
+            
+        ExoPlayer.Builder(context)
+            .setLoadControl(loadControl)
+            .build().apply {
+                val dataSourceFactory = DefaultDataSource.Factory(context)
+                val mediaItem = MediaItem.fromUri(videoUrl)
+                
+                val mediaSource = if (videoUrl.lowercase().endsWith(".m3u8")) {
+                    HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
+                } else {
+                    androidx.media3.exoplayer.source.DefaultMediaSourceFactory(dataSourceFactory).createMediaSource(mediaItem)
+                }
+                
+                setMediaSource(mediaSource)
+                prepare()
+                playWhenReady = true
+            }
     }
 
     val fileName = remember(videoUrl) {

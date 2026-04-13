@@ -7,10 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.util.Base64
+import android.view.View
 import android.widget.RemoteViews
 import de.astronarren.allsky.MainActivity
 import de.astronarren.allsky.R
 import de.astronarren.allsky.data.UserPreferences
+import de.astronarren.allsky.data.network.WeatherApiProvider
 import kotlinx.coroutines.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -83,8 +85,51 @@ class AllskyWidgetProvider : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
 
         scope.launch(Dispatchers.IO) {
+            val userPrefs = UserPreferences(context)
+            
+            // 1. Fetch Weather Data
             try {
-                val userPrefs = UserPreferences(context)
+                val apiKey = userPrefs.getApiKey()
+                val latStr = userPrefs.getLatitude()
+                val lonStr = userPrefs.getLongitude()
+                val lat = latStr.toDoubleOrNull()
+                val lon = lonStr.toDoubleOrNull()
+                
+                if (lat != null && lon != null && apiKey.isNotBlank()) {
+                    val weatherService = WeatherApiProvider.provideWeatherService()
+                    val response = weatherService.getForecast(lat = lat, lon = lon, apiKey = apiKey)
+                    
+                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val displaySdf = SimpleDateFormat("EEE", Locale.getDefault())
+                    
+                    val dailyForecasts = response.list
+                        .groupBy { sdf.format(Date(it.dt * 1000)) }
+                        .map { it.value.first() }
+                        .take(3)
+                        
+                    if (dailyForecasts.size == 3) {
+                        withContext(Dispatchers.Main) {
+                            views.setViewVisibility(R.id.widget_weather_container, View.VISIBLE)
+                            
+                            views.setTextViewText(R.id.widget_weather_day1_date, displaySdf.format(Date(dailyForecasts[0].dt * 1000)).uppercase())
+                            views.setTextViewText(R.id.widget_weather_day1_desc, "${Math.round(dailyForecasts[0].main.temp)}°C | ${dailyForecasts[0].clouds.all}%")
+                            
+                            views.setTextViewText(R.id.widget_weather_day2_date, displaySdf.format(Date(dailyForecasts[1].dt * 1000)).uppercase())
+                            views.setTextViewText(R.id.widget_weather_day2_desc, "${Math.round(dailyForecasts[1].main.temp)}°C | ${dailyForecasts[1].clouds.all}%")
+                            
+                            views.setTextViewText(R.id.widget_weather_day3_date, displaySdf.format(Date(dailyForecasts[2].dt * 1000)).uppercase())
+                            views.setTextViewText(R.id.widget_weather_day3_desc, "${Math.round(dailyForecasts[2].main.temp)}°C | ${dailyForecasts[2].clouds.all}%")
+                            
+                            appWidgetManager.updateAppWidget(appWidgetId, views)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore weather fetch errors, let the image fetch proceed
+            }
+
+            // 2. Fetch Live Image Data
+            try {
                 var allskyUrl = userPrefs.getAllskyUrl()
                 val username = userPrefs.getUsername()
                 val password = userPrefs.getPassword()

@@ -47,7 +47,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun AllskyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Disable dynamic for custom Allsky branding
+    dynamicColor: Boolean = true, // Enable dynamic color for Android 12+
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

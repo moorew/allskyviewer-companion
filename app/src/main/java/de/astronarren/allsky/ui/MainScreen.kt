@@ -91,6 +91,7 @@ fun MainScreen(
     var allskyUrl by remember { mutableStateOf("") }
     
     var currentVideo by remember { mutableStateOf<String?>(null) }
+    var paletteColors by remember { mutableStateOf<List<Color>?>(null) }
     
     LaunchedEffect(Unit) {
         apiKey = userPreferences.getApiKey()
@@ -174,15 +175,19 @@ fun MainScreen(
             containerColor = Color.Transparent
         ) { padding ->
             
-            // Dynamic Background based on Weather
+            // Dynamic Background based on Weather and Live Image Palette
             val weatherCondition = weatherUiState.weatherData?.second?.firstOrNull()?.weather?.firstOrNull()?.main ?: "Clear"
-            val backgroundColors = remember(weatherCondition) {
-                when (weatherCondition) {
-                    "Clear" -> listOf(DeepNavy, NightPurple, ClearNight)
-                    "Clouds" -> listOf(Color(0xFF37474F), Color(0xFF455A64), Color(0xFF607D8B)) // Grey/Blue-Grey
-                    "Rain", "Drizzle", "Thunderstorm" -> listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)) // Dark Rain Blue
-                    "Snow" -> listOf(Color(0xFF78909C), Color(0xFF90A4AE), Color(0xFFB0BEC5)) // Cool bright
-                    else -> listOf(DeepNavy, NightPurple, ClearNight)
+            val backgroundColors = remember(weatherCondition, paletteColors) {
+                if (paletteColors != null && paletteColors!!.size >= 2) {
+                    paletteColors!!
+                } else {
+                    when (weatherCondition) {
+                        "Clear" -> listOf(DeepNavy, NightPurple, ClearNight)
+                        "Clouds" -> listOf(Color(0xFF37474F), Color(0xFF455A64), Color(0xFF607D8B)) // Grey/Blue-Grey
+                        "Rain", "Drizzle", "Thunderstorm" -> listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)) // Dark Rain Blue
+                        "Snow" -> listOf(Color(0xFF78909C), Color(0xFF90A4AE), Color(0xFFB0BEC5)) // Cool bright
+                        else -> listOf(DeepNavy, NightPurple, ClearNight)
+                    }
                 }
             }
 
@@ -238,7 +243,25 @@ fun MainScreen(
                                                 ) {
                                                     Box(modifier = Modifier.fillMaxSize()) {
                                                         AsyncImage(
-                                                            model = targetUrl,
+                                                            model = coil.request.ImageRequest.Builder(LocalContext.current)
+                                                                .data(targetUrl)
+                                                                .allowHardware(false) // Required for Palette
+                                                                .listener(
+                                                                    onSuccess = { _, result ->
+                                                                        val bmp = (result.drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                                                                        if (bmp != null) {
+                                                                            androidx.palette.graphics.Palette.from(bmp).generate { p ->
+                                                                                val dom = p?.dominantSwatch?.rgb
+                                                                                val darkMuted = p?.darkMutedSwatch?.rgb
+                                                                                val darkVibrant = p?.darkVibrantSwatch?.rgb
+                                                                                if (dom != null && darkMuted != null) {
+                                                                                    paletteColors = listOf(Color(dom), Color(darkVibrant ?: darkMuted), Color(darkMuted))
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                )
+                                                                .build(),
                                                             contentDescription = stringResource(R.string.live_allsky_image),
                                                             modifier = Modifier.fillMaxSize(),
                                                             contentScale = ContentScale.Crop
@@ -287,6 +310,11 @@ fun MainScreen(
                                                 }
                                             }
                                         }
+                                    }
+                                }
+                                "SYSTEM" -> {
+                                    if (allskyUiState.systemInfo.isNotEmpty()) {
+                                        SystemDisplay(systemInfo = allskyUiState.systemInfo)
                                     }
                                 }
                                 "BEST_VIEWING" -> {
