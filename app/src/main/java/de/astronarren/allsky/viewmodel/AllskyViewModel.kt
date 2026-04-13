@@ -17,7 +17,8 @@ data class AllskyUiState(
     val keograms: List<AllskyMediaUiState> = emptyList(),
     val startrails: List<AllskyMediaUiState> = emptyList(),
     val images: List<AllskyMediaUiState> = emptyList(),
-    val meteors: List<AllskyMediaUiState> = emptyList()
+    val meteors: List<AllskyMediaUiState> = emptyList(),
+    val systemInfo: Map<String, String> = emptyMap()
 )
 
 data class AllskyMediaUiState(
@@ -29,21 +30,11 @@ class AllskyViewModel(
     private val allskyRepository: AllskyRepository,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(AllskyUiState(isLoading = true))
+    private val _uiState = MutableStateFlow(AllskyUiState())
     val uiState: StateFlow<AllskyUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            kotlinx.coroutines.flow.combine(
-                userPreferences.getAllskyUrlFlow(),
-                userPreferences.getUsernameFlow(),
-                userPreferences.getPasswordFlow()
-            ) { url, username, password ->
-                Triple(url, username, password)
-            }.collect {
-                loadContent()
-            }
-        }
+        loadContent()
     }
 
     fun fetchContentForDate(date: String? = null) {
@@ -52,21 +43,21 @@ class AllskyViewModel(
 
     private fun loadContent(date: String? = null) {
         viewModelScope.launch {
-            _uiState.update { currentState -> 
-                currentState.copy(isLoading = true, error = null) 
+            _uiState.update { currentState ->
+                currentState.copy(isLoading = true, error = null)
             }
             try {
                 val content = allskyRepository.getAllContent(date)
                 _uiState.value = AllskyUiState(
                     isLoading = false,
-                    timelapses = content.timelapses.map { 
-                        AllskyMediaUiState(it.date, it.url) 
+                    timelapses = content.timelapses.map {
+                        AllskyMediaUiState(it.date, it.url)
                     },
-                    keograms = content.keograms.map { 
-                        AllskyMediaUiState(it.date, it.url) 
+                    keograms = content.keograms.map {
+                        AllskyMediaUiState(it.date, it.url)
                     },
-                    startrails = content.startrails.map { 
-                        AllskyMediaUiState(it.date, it.url) 
+                    startrails = content.startrails.map {
+                        AllskyMediaUiState(it.date, it.url)
                     },
                     images = content.images.map {
                         AllskyMediaUiState(it.date, it.url)
@@ -84,4 +75,4 @@ class AllskyViewModel(
             }
         }
     }
-}  
+}
