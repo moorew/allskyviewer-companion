@@ -207,7 +207,6 @@ class AllskyRepository(
                 throw e
             }
         }
-    }
 
     private fun extractDate(href: String, element: org.jsoup.nodes.Element): String {
         // First try the specific div if it exists (for certain portal versions)
