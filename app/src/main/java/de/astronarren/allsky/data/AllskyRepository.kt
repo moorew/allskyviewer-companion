@@ -10,26 +10,48 @@ import android.util.Base64
 
 import de.astronarren.allsky.data.database.MediaDao
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+
 class AllskyRepository(
     private val userPreferences: UserPreferences,
-    private val mediaDao: MediaDao
+    private val mediaDao: de.astronarren.allsky.data.database.MediaDao
 ) {
-    suspend fun getAllContent(date: String? = null): AllskyContent {
-        return withContext(Dispatchers.IO) {
-            try {
-                var baseUrl = userPreferences.getAllskyUrl()
-                if (baseUrl.isEmpty()) {
-                    return@withContext AllskyContent(emptyList(), emptyList(), emptyList())
-                }
+    suspend fun getAllContent(date: String? = null): Flow<AllskyContent> = flow {
+        // 1. Emit cached content first for instant loading
+        val cachedTimelapses = mediaDao.getMediaByType("timelapses").map { AllskyMedia(it.date, it.url) }
+        val cachedKeograms = mediaDao.getMediaByType("keograms").map { AllskyMedia(it.date, it.url) }
+        val cachedStartrails = mediaDao.getMediaByType("startrails").map { AllskyMedia(it.date, it.url) }
+        val cachedImages = mediaDao.getMediaByType("images").map { AllskyMedia(it.date, it.url) }
+        val cachedMeteors = mediaDao.getMediaByType("meteors").map { AllskyMedia(it.date, it.url) }
 
-                if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-                    throw IllegalArgumentException("Invalid URL format")
-                }
+        emit(
+            AllskyContent(
+                timelapses = cachedTimelapses,
+                keograms = cachedKeograms,
+                startrails = cachedStartrails,
+                images = cachedImages,
+                meteors = cachedMeteors,
+                systemInfo = emptyMap(), // We don't cache system info in the DB for now
+                isFromCache = true
+            )
+        )
 
-                baseUrl = baseUrl.trimEnd('/')
+        // 2. Fetch fresh content from network
+        try {
+            var baseUrl = userPreferences.getAllskyUrl()
+            if (baseUrl.isEmpty()) {
+                return@flow
+            }
 
-                val username = userPreferences.getUsername()
-                val password = userPreferences.getPassword()
+            if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+                throw IllegalArgumentException("Invalid URL format")
+            }
+
+            baseUrl = baseUrl.trimEnd('/')
+
+            val username = userPreferences.getUsername()
+            val password = userPreferences.getPassword()
                 
                 fun createConnection(url: String): Connection {
                     val conn = Jsoup.connect(url)
@@ -163,40 +185,26 @@ class AllskyRepository(
                 mediaDao.deleteByType("meteors")
                 mediaDao.insertAll(cachedMeteors)
 
-                AllskyContent(
-                    timelapses = timelapses,
-                    keograms = keograms,
-                    startrails = startrails,
-                    images = images,
-                    meteors = meteors
+                emit(
+                    AllskyContent(
+                        timelapses = timelapses,
+                        keograms = keograms,
+                        startrails = startrails,
+                        images = images,
+                        meteors = meteors,
+                        systemInfo = systemInfo
+                    )
                 )
             } catch (e: Exception) {
-                println("Debug: Error fetching allsky content: ${e.message}, trying cache")
-                val cachedTimelapses = mediaDao.getMediaByType("timelapses").map { AllskyMedia(it.date, it.url) }
-                val cachedKeograms = mediaDao.getMediaByType("keograms").map { AllskyMedia(it.date, it.url) }
-                val cachedStartrails = mediaDao.getMediaByType("startrails").map { AllskyMedia(it.date, it.url) }
-                val cachedImages = mediaDao.getMediaByType("images").map { AllskyMedia(it.date, it.url) }
-                val cachedMeteors = mediaDao.getMediaByType("meteors").map { AllskyMedia(it.date, it.url) }
-
-                if (cachedTimelapses.isEmpty() && cachedKeograms.isEmpty() && cachedStartrails.isEmpty() && cachedImages.isEmpty() && cachedMeteors.isEmpty()) {
-                    if (e is org.jsoup.HttpStatusException) {
-                        println("Debug: HTTP Error fetching allsky content: ${e.statusCode}")
-                        if (e.statusCode == 401 || e.statusCode == 403) {
-                            throw Exception("Authentication Required (401). Please enter your Username and Password in Settings.")
-                        }
-                        throw Exception("Server returned error: ${e.statusCode}")
+                println("Debug: Error fetching allsky content: ${e.message}")
+                if (e is org.jsoup.HttpStatusException) {
+                    println("Debug: HTTP Error fetching allsky content: ${e.statusCode}")
+                    if (e.statusCode == 401 || e.statusCode == 403) {
+                        throw Exception("Authentication Required (401). Please enter your Username and Password in Settings.")
                     }
-                    throw e
+                    throw Exception("Server returned error: ${e.statusCode}")
                 }
-
-                AllskyContent(
-                    timelapses = cachedTimelapses,
-                    keograms = cachedKeograms,
-                    startrails = cachedStartrails,
-                    images = cachedImages,
-                    meteors = cachedMeteors,
-                    systemInfo = emptyMap() // We don't cache system info in the DB for now
-                )
+                throw e
             }
         }
     }

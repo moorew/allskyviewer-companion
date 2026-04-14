@@ -229,9 +229,11 @@ fun MediaScreen(
                                         val placeholderGradient = Brush.verticalGradient(
                                             colors = listOf(DeepNavy, NightPurple)
                                         )
-                                        val placeholderPainter = when {
-                                            mediaType == "timelapses" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.timelapses_thumbnail)
-                                            mediaType == "images" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.raw_images_thumbnail)
+                                        val placeholderPainter = when (mediaType) {
+                                            "timelapses" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.timelapses_thumbnail)
+                                            "images" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.raw_images_thumbnail)
+                                            "startrails" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.startrails_thumbnail)
+                                            "meteors" -> androidx.compose.ui.res.painterResource(id = de.astronarren.allsky.R.drawable.meteors_thumbnail)
                                             else -> androidx.compose.ui.graphics.vector.rememberVectorPainter(if (isVideo) Icons.Default.PlayCircle else Icons.Default.Image)
                                         }
                                         Box(modifier = Modifier.fillMaxSize().background(placeholderGradient)) {

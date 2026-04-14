@@ -4,6 +4,12 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.3] - 2026-04-13
+### Fixed
+- **Smart Caching UX**: Resolved the issue where the app would briefly display "No content available" before content popped in. The app now correctly displays a loading spinner if the local database is empty while seamlessly fetching fresh network data in the background.
+- **Fallback Thumbnails**: Fixed a bug where video files lacking a native thumbnail would display as a blank square instead of the designated fallback thumbnail in the Media screens.
+- **System Monitoring**: Completed the implementation of the System Status module. The app now correctly parses and displays your Allsky Raspberry Pi's CPU Load, CPU Temperature, Disk Usage, Memory Used, and Uptime directly on the Main Screen.
+
 ## [1.7.2] - 2026-04-13
 ### Fixed
 - **Build Stabilization**: Fixed a critical compiler error in the ViewModel layer related to the newly introduced System Info data mapping.

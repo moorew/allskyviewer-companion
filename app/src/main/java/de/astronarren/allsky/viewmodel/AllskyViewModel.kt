@@ -47,26 +47,31 @@ class AllskyViewModel(
                 currentState.copy(isLoading = true, error = null)
             }
             try {
-                val content = allskyRepository.getAllContent(date)
-                _uiState.value = AllskyUiState(
-                    isLoading = false,
-                    timelapses = content.timelapses.map {
-                        AllskyMediaUiState(it.date, it.url)
-                    },
-                    keograms = content.keograms.map {
-                        AllskyMediaUiState(it.date, it.url)
-                    },
-                    startrails = content.startrails.map {
-                        AllskyMediaUiState(it.date, it.url)
-                    },
-                    images = content.images.map {
-                        AllskyMediaUiState(it.date, it.url)
-                    },
-                    meteors = content.meteors.map {
-                        AllskyMediaUiState(it.date, it.url)
-                    },
-                    systemInfo = content.systemInfo
-                )
+                allskyRepository.getAllContent(date).collect { content ->
+                    val isCacheEmpty = content.timelapses.isEmpty() && content.keograms.isEmpty() && 
+                                       content.startrails.isEmpty() && content.images.isEmpty() && 
+                                       content.meteors.isEmpty()
+                    
+                    _uiState.value = AllskyUiState(
+                        isLoading = if (content.isFromCache) isCacheEmpty else false,
+                        timelapses = content.timelapses.map {
+                            AllskyMediaUiState(it.date, it.url)
+                        },
+                        keograms = content.keograms.map {
+                            AllskyMediaUiState(it.date, it.url)
+                        },
+                        startrails = content.startrails.map {
+                            AllskyMediaUiState(it.date, it.url)
+                        },
+                        images = content.images.map {
+                            AllskyMediaUiState(it.date, it.url)
+                        },
+                        meteors = content.meteors.map {
+                            AllskyMediaUiState(it.date, it.url)
+                        },
+                        systemInfo = content.systemInfo
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.value = AllskyUiState(
                     isLoading = false,

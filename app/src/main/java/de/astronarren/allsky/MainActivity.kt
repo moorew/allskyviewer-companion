@@ -30,6 +30,9 @@ import java.util.concurrent.TimeUnit
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.Coil
+import coil.ImageLoader
+import coil.decode.VideoFrameDecoder
 import de.astronarren.allsky.ui.layout.LayoutEditorScreen
 import de.astronarren.allsky.ui.media.MediaScreen
 import de.astronarren.allsky.ui.settings.SettingsScreen
@@ -73,6 +76,13 @@ class MainActivity : ComponentActivity() {
         setupViewModel = SetupViewModel(userPreferences)
         liveImageViewModel = LiveImageViewModel(userPreferences)
         
+        val imageLoader = ImageLoader.Builder(applicationContext)
+            .components {
+                add(VideoFrameDecoder.Factory())
+            }
+            .build()
+        Coil.setImageLoader(imageLoader)
+
         scheduleWeatherWorker()
         
         enableEdgeToEdge()
