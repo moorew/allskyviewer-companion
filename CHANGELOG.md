@@ -4,6 +4,10 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.6] - 2026-04-14
+### Fixed
+- **Compilation Error**: Removed lingering import statement for the removed database module that was preventing successful compilation of the previous release.
+
 ## [1.7.5] - 2026-04-14
 ### Changed
 - **Removed Smart Caching**: Temporarily reverted the Room Database caching system to ensure media screens reliably load without displaying blank thumbnails on the initial launch.

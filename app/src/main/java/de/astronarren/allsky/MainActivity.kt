@@ -22,7 +22,6 @@ import de.astronarren.allsky.ui.theme.AllskyTheme
 import de.astronarren.allsky.viewmodel.*
 import de.astronarren.allsky.data.WeatherRepository
 import de.astronarren.allsky.data.AllskyRepository
-import de.astronarren.allsky.data.database.AppDatabase
 import de.astronarren.allsky.utils.LanguageManager
 import de.astronarren.allsky.workers.WeatherWorker
 import java.util.concurrent.TimeUnit
