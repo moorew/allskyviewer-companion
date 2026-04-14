@@ -24,9 +24,7 @@ data class AllskyContent(
     val keograms: List<AllskyMedia>,
     val startrails: List<AllskyMedia>,
     val images: List<AllskyMedia> = emptyList(),
-    val meteors: List<AllskyMedia> = emptyList(),
-    val systemInfo: Map<String, String> = emptyMap(),
-    val isFromCache: Boolean = false
+    val meteors: List<AllskyMedia> = emptyList()
 )
 
 data class AllskyMedia(

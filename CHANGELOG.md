@@ -4,6 +4,11 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.5] - 2026-04-14
+### Changed
+- **Removed Smart Caching**: Temporarily reverted the Room Database caching system to ensure media screens reliably load without displaying blank thumbnails on the initial launch.
+- **Removed System Monitoring**: Temporarily disabled the System Monitoring module as the Raspberry Pi system page HTML structures vary too wildly across different Allsky versions to be reliably parsed at this time.
+
 ## [1.7.4] - 2026-04-14
 ### Fixed
 - **Compilation Error**: Fixed an errant syntax error in the repository layer that caused the previous deployment build to fail.

@@ -64,8 +64,7 @@ class MainActivity : ComponentActivity() {
             userPreferences = userPreferences
         )
         
-        val database = de.astronarren.allsky.data.database.AppDatabase.getDatabase(applicationContext)
-        val allskyRepository = AllskyRepository(userPreferences, database.mediaDao())
+        val allskyRepository = AllskyRepository(userPreferences)
         
         weatherViewModel = WeatherViewModel(
             weatherRepository = weatherRepository,

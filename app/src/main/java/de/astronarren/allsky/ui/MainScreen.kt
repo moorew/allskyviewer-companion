@@ -312,11 +312,6 @@ fun MainScreen(
                                         }
                                     }
                                 }
-                                "SYSTEM" -> {
-                                    if (allskyUiState.systemInfo.isNotEmpty()) {
-                                        SystemDisplay(systemInfo = allskyUiState.systemInfo)
-                                    }
-                                }
                                 "BEST_VIEWING" -> {
                                     val bestNight = weatherViewModel.getBestViewingNight()
                                     if (bestNight != null) {
