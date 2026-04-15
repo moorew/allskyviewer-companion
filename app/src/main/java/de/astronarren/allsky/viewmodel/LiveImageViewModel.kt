@@ -26,100 +26,103 @@ class LiveImageViewModel(
                 try {
                     updateImage()
                 } catch (e: Exception) {
-                    _uiState.update { it.copy(error = e.message) }
+                    _uiState.update { it.copy(error = "Network drop: ${e.message}") }
                 }
-                delay(30_000) // 30 seconds
+                // Adaptive delay: wait longer if there's an error
+                val currentError = _uiState.value.error
+                if (currentError != null) {
+                    delay(60_000) // 1 minute retry if error
+                } else {
+                    delay(30_000) // 30 seconds normal refresh
+                }
             }
         }
     }
 
     private fun observeUrlChanges() {
         viewModelScope.launch {
-            userPreferences.getAllskyUrlFlow().collect { url ->
-                updateImage(url)
-            }
+            userPreferences.getAllskyUrlFlow()
+                .distinctUntilChanged()
+                .collect { url ->
+                    if (url.isNotEmpty()) {
+                        updateImage(url)
+                    }
+                }
         }
     }
 
     private suspend fun updateImage(baseUrl: String? = null) {
-        var url = baseUrl ?: userPreferences.getAllskyUrl()
+        val url = baseUrl ?: userPreferences.getAllskyUrl()
+        if (url.isEmpty()) {
+            _uiState.update { it.copy(error = "Allsky URL not configured") }
+            return
+        }
+
         val username = userPreferences.getUsername()
         val password = userPreferences.getPassword()
         
-        if (url.isNotEmpty()) {
-            try {
-                var cleanUrl = url.trimEnd('/')
-                
-                // Perform a quick check to see if /allsky is needed for the live image
-                // or if we should use the direct /current/tmp/image.jpg path
-                val liveImagePath = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    try {
-                        fun testPath(path: String): Int {
+        try {
+            val cleanUrl = url.trimEnd('/')
+            
+            val liveImagePath = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                try {
+                    suspend fun testPath(path: String): Int = withContext(Dispatchers.IO) {
+                        var conn: java.net.HttpURLConnection? = null
+                        try {
                             val testUrl = java.net.URL(path)
-                            val conn = testUrl.openConnection() as java.net.HttpURLConnection
-                            conn.requestMethod = "HEAD"
+                            conn = testUrl.openConnection() as java.net.HttpURLConnection
+                            conn!!.requestMethod = "HEAD"
                             if (username.isNotEmpty() && password.isNotEmpty()) {
                                 val basicAuth = "Basic " + android.util.Base64.encodeToString("$username:$password".toByteArray(), android.util.Base64.NO_WRAP)
-                                conn.setRequestProperty("Authorization", basicAuth)
+                                conn!!.setRequestProperty("Authorization", basicAuth)
                             }
-                            conn.connectTimeout = 3000
-                            conn.readTimeout = 3000
-                            return conn.responseCode
+                            conn!!.connectTimeout = 5000
+                            conn!!.readTimeout = 5000
+                            conn!!.responseCode
+                        } catch (e: Exception) {
+                            -1
+                        } finally {
+                            conn?.disconnect()
                         }
-
-                        // Priority 1: Check if /current/tmp/image.jpg exists (often the actual live feed)
-                        // If the base URL is already /allsky, we try to go up one level first
-                        val rootUrl = if (cleanUrl.endsWith("/allsky")) cleanUrl.substring(0, cleanUrl.length - 7) else cleanUrl
-                        if (testPath("$rootUrl/current/tmp/image.jpg") == 200) {
-                            return@withContext "$rootUrl/current/tmp/image.jpg"
-                        }
-
-                        // Priority 2: Check current base URL /image.jpg
-                        if (testPath("$cleanUrl/image.jpg") == 200) {
-                            return@withContext "$cleanUrl/image.jpg"
-                        }
-
-                        // Priority 3: Check /allsky/image.jpg
-                        if (!cleanUrl.endsWith("/allsky") && testPath("$cleanUrl/allsky/image.jpg") == 200) {
-                            return@withContext "$cleanUrl/allsky/image.jpg"
-                        }
-
-                        null
-                    } catch (e: Exception) {
-                        null
                     }
-                }
 
-                val finalImageUrl = if (liveImagePath != null) {
-                    val uri = android.net.Uri.parse(liveImagePath)
-                    if (username.isNotEmpty() && password.isNotEmpty()) {
-                        val authority = "${android.net.Uri.encode(username)}:${android.net.Uri.encode(password)}@${uri.authority}"
-                        uri.buildUpon().encodedAuthority(authority).build().toString()
-                    } else {
-                        liveImagePath
+                    // Priority 1: Check if /current/tmp/image.jpg exists (often the actual live feed)
+                    val rootUrl = if (cleanUrl.endsWith("/allsky")) cleanUrl.substring(0, cleanUrl.length - 7) else cleanUrl
+                    if (testPath("$rootUrl/current/tmp/image.jpg") == 200) {
+                        return@withContext "$rootUrl/current/tmp/image.jpg"
                     }
-                } else {
-                    // Fallback to previous logic if discovery fails
-                    val authUrl = if (username.isNotEmpty() && password.isNotEmpty()) {
-                        val uri = android.net.Uri.parse(cleanUrl)
-                        val authority = "${android.net.Uri.encode(username)}:${android.net.Uri.encode(password)}@${uri.authority}"
-                        uri.buildUpon().encodedAuthority(authority).build().toString()
-                    } else {
-                        cleanUrl
+
+                    // Priority 2: Check current base URL /image.jpg
+                    if (testPath("$cleanUrl/image.jpg") == 200) {
+                        return@withContext "$cleanUrl/image.jpg"
                     }
-                    "$authUrl/image.jpg"
+
+                    // Priority 3: Check /allsky/image.jpg
+                    if (!cleanUrl.endsWith("/allsky") && testPath("$cleanUrl/allsky/image.jpg") == 200) {
+                        return@withContext "$cleanUrl/allsky/image.jpg"
+                    }
+
+                    null
+                } catch (e: Exception) {
+                    null
                 }
-                
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        imageUrl = "$finalImageUrl?t=${System.currentTimeMillis()}",
-                        lastUpdate = System.currentTimeMillis(),
-                        error = null // Clear any previous errors
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
             }
+
+            val finalImageUrl = if (liveImagePath != null) {
+                liveImagePath
+            } else {
+                "$cleanUrl/image.jpg"
+            }
+            
+            _uiState.update { currentState ->
+                currentState.copy(
+                    imageUrl = "$finalImageUrl?t=${System.currentTimeMillis()}",
+                    lastUpdate = System.currentTimeMillis(),
+                    error = null
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = "Stream error: ${e.message}") }
         }
     }
 } 

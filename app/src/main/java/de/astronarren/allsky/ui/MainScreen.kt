@@ -75,7 +75,6 @@ fun MainScreen(
     var isSettingsOpen by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    var apiKey by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     var isRefreshing by remember { mutableStateOf(false) }
     
@@ -88,29 +87,12 @@ fun MainScreen(
         initialValue = listOf("LIVE_VIEW", "BEST_VIEWING", "WEATHER", "MOON", "TIMELAPSES", "METEORS", "IMAGES", "KEOGRAMS", "STARTRAILS")
     )
     
-    var allskyUrl by remember { mutableStateOf("") }
-    
+    val allskyUrl by userPreferences.getAllskyUrlFlow().collectAsStateWithLifecycle(initialValue = "")
+    val apiKey by userPreferences.getApiKeyFlow().collectAsStateWithLifecycle(initialValue = "")
+
     var currentVideo by remember { mutableStateOf<String?>(null) }
     var paletteColors by remember { mutableStateOf<List<Color>?>(null) }
     
-    LaunchedEffect(Unit) {
-        apiKey = userPreferences.getApiKey()
-        allskyUrl = userPreferences.getAllskyUrl()
-    }
-
-    LaunchedEffect(apiKey) {
-        if (apiKey.isNotEmpty()) {
-            weatherViewModel.updateWeather()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        userPreferences.getAllskyUrlFlow()
-            .collect { url ->
-                allskyUrl = url
-            }
-    }
-
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -142,17 +124,30 @@ fun MainScreen(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = { 
-                        Text(
-                            "ALLSKY", 
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 4.sp
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "ALLSKY", 
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 8.sp,
+                                    fontSize = 20.sp
+                                )
                             )
-                        ) 
+                            if (allskyUrl.isNotEmpty()) {
+                                Text(
+                                    allskyUrl.substringAfter("://").substringBefore("/").uppercase(),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 2.sp,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                    )
+                                )
+                            }
+                        }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = Color.Transparent,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground
+                        titleContentColor = Color.White
                     ),
                     navigationIcon = {
                         IconButton(
@@ -166,7 +161,7 @@ fun MainScreen(
                             Icon(
                                 imageVector = Icons.Default.Menu,
                                 contentDescription = "Menu",
-                                tint = MaterialTheme.colorScheme.onBackground
+                                tint = Color.White
                             )
                         }
                     }
@@ -183,9 +178,9 @@ fun MainScreen(
                 } else {
                     when (weatherCondition) {
                         "Clear" -> listOf(DeepNavy, NightPurple, ClearNight)
-                        "Clouds" -> listOf(Color(0xFF37474F), Color(0xFF455A64), Color(0xFF607D8B)) // Grey/Blue-Grey
-                        "Rain", "Drizzle", "Thunderstorm" -> listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)) // Dark Rain Blue
-                        "Snow" -> listOf(Color(0xFF78909C), Color(0xFF90A4AE), Color(0xFFB0BEC5)) // Cool bright
+                        "Clouds" -> listOf(Color(0xFF101820), Color(0xFF2D3436), Color(0xFF455A64))
+                        "Rain", "Drizzle", "Thunderstorm" -> listOf(Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364))
+                        "Snow" -> listOf(Color(0xFF1E3C72), Color(0xFF2A5298), Color(0xFF4A90E2))
                         else -> listOf(DeepNavy, NightPurple, ClearNight)
                     }
                 }
@@ -203,7 +198,7 @@ fun MainScreen(
                             isRefreshing = true
                             if (apiKey.isNotEmpty()) weatherViewModel.updateWeather()
                             if (allskyUrl.isNotEmpty()) allskyViewModel.fetchContentForDate()
-                            delay(1000) // Ensure spinner shows for at least 1s for UX
+                            delay(1200)
                             isRefreshing = false
                         }
                     },
@@ -221,91 +216,120 @@ fun MainScreen(
                             when (moduleName) {
                                 "LIVE_VIEW" -> {
                                     if (allskyUrl.isNotEmpty()) {
-                                        AnimatedContent(
-                                            targetState = liveImageState.imageUrl,
-                                            transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
-                                            label = "LiveImageCrossfade"
-                                        ) { targetUrl ->
-                                            Box(
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(420.dp)
+                                                .padding(20.dp)
+                                        ) {
+                                            Card(
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(400.dp)
-                                                    .padding(20.dp)
+                                                    .fillMaxSize()
+                                                    .clickable { 
+                                                        liveImageState.imageUrl?.let { imageViewerViewModel.showImage(it) }
+                                                    },
+                                                shape = RoundedCornerShape(40.dp),
+                                                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
                                             ) {
-                                                Card(
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                        .clickable { 
-                                                            imageViewerViewModel.showImage(targetUrl)
-                                                        },
-                                                    shape = RoundedCornerShape(40.dp),
-                                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                                                ) {
-                                                    Box(modifier = Modifier.fillMaxSize()) {
-                                                        AsyncImage(
-                                                            model = coil.request.ImageRequest.Builder(LocalContext.current)
-                                                                .data(targetUrl)
-                                                                .allowHardware(false) // Required for Palette
-                                                                .listener(
-                                                                    onSuccess = { _, result ->
-                                                                        val bmp = (result.drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
-                                                                        if (bmp != null) {
-                                                                            androidx.palette.graphics.Palette.from(bmp).generate { p ->
-                                                                                val dom = p?.dominantSwatch?.rgb
-                                                                                val darkMuted = p?.darkMutedSwatch?.rgb
-                                                                                val darkVibrant = p?.darkVibrantSwatch?.rgb
-                                                                                if (dom != null && darkMuted != null) {
-                                                                                    paletteColors = listOf(Color(dom), Color(darkVibrant ?: darkMuted), Color(darkMuted))
+                                                Box(modifier = Modifier.fillMaxSize()) {
+                                                    AnimatedContent(
+                                                        targetState = liveImageState.imageUrl,
+                                                        transitionSpec = { fadeIn(tween(800)) togetherWith fadeOut(tween(800)) },
+                                                        label = "LiveImageCrossfade",
+                                                        modifier = Modifier.fillMaxSize()
+                                                    ) { targetUrl ->
+                                                        if (targetUrl != null) {
+                                                            AsyncImage(
+                                                                model = coil.request.ImageRequest.Builder(LocalContext.current)
+                                                                    .data(targetUrl)
+                                                                    .allowHardware(false)
+                                                                    .listener(
+                                                                        onSuccess = { _, result ->
+                                                                            val bmp = (result.drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                                                                            if (bmp != null) {
+                                                                                androidx.palette.graphics.Palette.from(bmp).generate { p ->
+                                                                                    val dom = p?.dominantSwatch?.rgb
+                                                                                    val darkMuted = p?.darkMutedSwatch?.rgb
+                                                                                    val darkVibrant = p?.darkVibrantSwatch?.rgb
+                                                                                    if (dom != null) {
+                                                                                        paletteColors = listOf(Color(dom), Color(darkVibrant ?: darkMuted ?: dom).copy(alpha = 0.8f), Color(darkMuted ?: dom).copy(alpha = 0.6f))
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         }
-                                                                    }
-                                                                )
-                                                                .build(),
-                                                            contentDescription = stringResource(R.string.live_allsky_image),
-                                                            modifier = Modifier.fillMaxSize(),
-                                                            contentScale = ContentScale.Crop
-                                                        )
-                                                        
-                                                        Surface(
-                                                            modifier = Modifier
-                                                                .align(Alignment.TopStart)
-                                                                .padding(20.dp),
-                                                            color = Color.Black.copy(alpha = 0.5f),
-                                                            shape = RoundedCornerShape(12.dp)
-                                                        ) {
-                                                            Row(
-                                                                verticalAlignment = Alignment.CenterVertically,
-                                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                                            ) {
-                                                                Box(
-                                                                    modifier = Modifier
-                                                                        .size(8.dp)
-                                                                        .background(Color.Green, RoundedCornerShape(4.dp))
-                                                                )
-                                                                Spacer(modifier = Modifier.width(8.dp))
-                                                                Text(
-                                                                    text = "LIVE",
-                                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                                                    color = Color.White
-                                                                )
+                                                                    )
+                                                                    .build(),
+                                                                contentDescription = stringResource(R.string.live_allsky_image),
+                                                                modifier = Modifier.fillMaxSize(),
+                                                                contentScale = ContentScale.Crop
+                                                            )
+                                                        } else {
+                                                            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)), contentAlignment = Alignment.Center) {
+                                                                CircularProgressIndicator(color = Color.White.copy(alpha = 0.5f))
                                                             }
                                                         }
-
+                                                    }
+                                                    
+                                                    // Stream Error Overlay
+                                                    if (liveImageState.error != null) {
                                                         Surface(
-                                                            modifier = Modifier
-                                                                .align(Alignment.BottomEnd)
-                                                                .padding(20.dp),
-                                                            color = Color.Black.copy(alpha = 0.5f),
-                                                            shape = RoundedCornerShape(12.dp)
+                                                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
+                                                            color = Color.Red.copy(alpha = 0.7f)
                                                         ) {
                                                             Text(
-                                                                text = formatTime(liveImageState.lastUpdate),
-                                                                style = MaterialTheme.typography.labelMedium,
+                                                                liveImageState.error!!,
+                                                                style = MaterialTheme.typography.labelSmall,
                                                                 color = Color.White,
-                                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                                                modifier = Modifier.padding(8.dp),
+                                                                textAlign = TextAlign.Center
                                                             )
                                                         }
+                                                    }
+
+                                                    Surface(
+                                                        modifier = Modifier
+                                                            .align(Alignment.TopStart)
+                                                            .padding(24.dp),
+                                                        color = Color.Black.copy(alpha = 0.6f),
+                                                        shape = RoundedCornerShape(12.dp),
+                                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                                        ) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .size(8.dp)
+                                                                    .background(if (liveImageState.error == null) Color.Green else Color.Red, RoundedCornerShape(4.dp))
+                                                            )
+                                                            Spacer(modifier = Modifier.width(10.dp))
+                                                            Text(
+                                                                text = "LIVE",
+                                                                style = MaterialTheme.typography.labelMedium.copy(
+                                                                    fontWeight = FontWeight.Black,
+                                                                    letterSpacing = 2.sp
+                                                                ),
+                                                                color = Color.White
+                                                            )
+                                                        }
+                                                    }
+
+                                                    Surface(
+                                                        modifier = Modifier
+                                                            .align(Alignment.BottomEnd)
+                                                            .padding(24.dp),
+                                                        color = Color.Black.copy(alpha = 0.6f),
+                                                        shape = RoundedCornerShape(12.dp),
+                                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                                                    ) {
+                                                        Text(
+                                                            text = formatTime(liveImageState.lastUpdate),
+                                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                            color = Color.White.copy(alpha = 0.9f),
+                                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                                        )
                                                     }
                                                 }
                                             }
@@ -318,33 +342,39 @@ fun MainScreen(
                                         Card(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(20.dp),
+                                                .padding(horizontal = 20.dp, vertical = 10.dp),
                                             shape = RoundedCornerShape(32.dp),
                                             colors = CardDefaults.cardColors(
                                                 containerColor = Color.White.copy(alpha = 0.1f)
-                                            )
+                                            ),
+                                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
                                         ) {
                                             Column(
-                                                modifier = Modifier.padding(24.dp),
+                                                modifier = Modifier.padding(28.dp),
                                                 horizontalAlignment = Alignment.CenterHorizontally
                                             ) {
                                                 Text(
                                                     text = "BEST VIEWING NIGHT",
                                                     style = MaterialTheme.typography.labelLarge.copy(
                                                         fontWeight = FontWeight.Black,
-                                                        letterSpacing = 2.sp
+                                                        letterSpacing = 3.sp
                                                     ),
-                                                    color = Color.Yellow
+                                                    color = Color(0xFFFFD600)
                                                 )
-                                                Spacer(modifier = Modifier.height(12.dp))
+                                                Spacer(modifier = Modifier.height(16.dp))
                                                 Text(
                                                     text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date(bestNight.dt * 1000L)).uppercase(),
-                                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+                                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                                                    color = Color.White
                                                 )
+                                                Spacer(modifier = Modifier.height(8.dp))
                                                 Text(
                                                     text = "${bestNight.weather.firstOrNull()?.description?.uppercase() ?: ""} • ${bestNight.clouds.all}% CLOUDS",
-                                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                                    color = Color.White.copy(alpha = 0.7f)
+                                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        letterSpacing = 1.sp
+                                                    ),
+                                                    color = Color.White.copy(alpha = 0.5f)
                                                 )
                                             }
                                         }
@@ -358,24 +388,27 @@ fun MainScreen(
                                                 .padding(20.dp),
                                             shape = RoundedCornerShape(32.dp),
                                             colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                            )
+                                                containerColor = Color.White.copy(alpha = 0.05f)
+                                            ),
+                                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
                                         ) {
                                             Column(
-                                                modifier = Modifier.padding(24.dp),
+                                                modifier = Modifier.padding(28.dp),
                                                 horizontalAlignment = Alignment.CenterHorizontally
                                             ) {
                                                 Text(
-                                                    text = "Weather Forecast",
-                                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                                                    text = "WEATHER FORECAST",
+                                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black, letterSpacing = 2.sp),
+                                                    color = Color.White.copy(alpha = 0.7f)
                                                 )
-                                                Spacer(modifier = Modifier.height(12.dp))
+                                                Spacer(modifier = Modifier.height(16.dp))
                                                 val uriHandler = LocalUriHandler.current
                                                 Button(
                                                     onClick = { uriHandler.openUri("https://home.openweathermap.org/api_keys") },
-                                                    shape = RoundedCornerShape(16.dp)
+                                                    shape = RoundedCornerShape(16.dp),
+                                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                                                 ) {
-                                                    Text("Get API Key")
+                                                    Text("GET API KEY", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
                                                 }
                                             }
                                         }
@@ -387,18 +420,18 @@ fun MainScreen(
                                     Box(modifier = Modifier.padding(horizontal = 4.dp)) {
                                         MoonPhaseDisplay()
                                     }
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(20.dp))
                                 }
                                 "TIMELAPSES" -> {
                                     AllskyMediaSection(
-                                        title = "Recent Timelapses",
+                                        title = "RECENT TIMELAPSES",
                                         media = allskyUiState.timelapses,
                                         onMediaClick = { media -> currentVideo = media.url }
                                     )
                                 }
                                 "METEORS" -> {
                                     AllskyMediaSection(
-                                        title = "Meteor Recordings",
+                                        title = "METEOR RECORDINGS",
                                         media = allskyUiState.meteors,
                                         onMediaClick = { media -> 
                                             if (media.url.lowercase().contains(".mp4") || 
@@ -412,21 +445,21 @@ fun MainScreen(
                                 }
                                 "IMAGES" -> {
                                     AllskyMediaSection(
-                                        title = "Daily Raw Images",
+                                        title = "DAILY RAW IMAGES",
                                         media = allskyUiState.images,
                                         onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
                                     )
                                 }
                                 "KEOGRAMS" -> {
                                     AllskyMediaSection(
-                                        title = "Keograms",
+                                        title = "KEOGRAMS",
                                         media = allskyUiState.keograms,
                                         onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
                                     )
                                 }
                                 "STARTRAILS" -> {
                                     AllskyMediaSection(
-                                        title = "Startrails",
+                                        title = "STARTRAILS",
                                         media = allskyUiState.startrails,
                                         onMediaClick = { media -> imageViewerViewModel.showImage(media.url) }
                                     )
@@ -434,7 +467,7 @@ fun MainScreen(
                             }
                         }
                         
-                        Spacer(modifier = Modifier.height(40.dp))
+                        Spacer(modifier = Modifier.height(60.dp))
                     }
                 }
 

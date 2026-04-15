@@ -47,36 +47,42 @@ fun WeatherDisplay(
                         text = city.name.uppercase(),
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp
+                            letterSpacing = 4.sp
                         ),
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
                     
                     forecasts.firstOrNull()?.let { current ->
                         Row(
                             verticalAlignment = Alignment.Bottom,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            modifier = Modifier.padding(vertical = 12.dp)
                         ) {
                             Text(
                                 text = "${Math.round(current.main.temp)}°",
                                 style = MaterialTheme.typography.displayLarge.copy(
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 84.sp,
-                                    letterSpacing = (-4).sp
+                                    fontSize = 96.sp,
+                                    letterSpacing = (-6).sp
                                 ),
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = Color.White
                             )
                             
-                            Column(modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)) {
+                            Column(modifier = Modifier.padding(start = 20.dp, bottom = 24.dp)) {
                                 Text(
                                     text = current.weather.firstOrNull()?.description?.capitalize() ?: "",
-                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 1.sp
+                                    ),
+                                    color = Color.White.copy(alpha = 0.9f)
                                 )
                                 Text(
-                                    text = "Feels like ${Math.round(current.main.feels_like)}°",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text = "FEELS LIKE ${Math.round(current.main.feels_like)}°",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 2.sp
+                                    ),
+                                    color = Color.White.copy(alpha = 0.6f)
                                 )
                             }
                         }
@@ -87,11 +93,12 @@ fun WeatherDisplay(
 
                     // 5-Day Forecast Bento Box
                     Card(
-                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
                         shape = RoundedCornerShape(32.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                        )
+                            containerColor = Color.White.copy(alpha = 0.05f)
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
                     ) {
                         LazyRow(
                             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -111,19 +118,22 @@ fun WeatherDisplay(
 @Composable
 private fun DayForecast(weather: WeatherData) {
     Column(
-        modifier = Modifier.padding(horizontal = 8.dp),
+        modifier = Modifier.padding(horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = formatDay(weather.dt).uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp
+            ),
+            color = Color.White.copy(alpha = 0.4f)
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = "${Math.round(weather.main.temp)}°",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = Color.White
         )
     }
 }
@@ -131,10 +141,7 @@ private fun DayForecast(weather: WeatherData) {
 @Composable
 private fun NightConditionsDisplay(city: City, forecasts: List<WeatherData>) {
     val currentTime = System.currentTimeMillis()
-    // sunset/sunrise are for the current day. If it's already past sunset, we might be looking at the next day's sunrise.
-    // For simplicity, just find the forecasts between sunset and next 12 hours.
     val sunsetTime = city.sunset * 1000
-    // If we are well past sunset (e.g. next morning before new sunset is fetched), don't show it as "tonight"
     val endOfNight = sunsetTime + 12 * 60 * 60 * 1000L
     
     val nightForecasts = forecasts.filter { 
@@ -148,60 +155,67 @@ private fun NightConditionsDisplay(city: City, forecasts: List<WeatherData>) {
         val avgVisibility = nightForecasts.map { it.visibility }.average().toInt() / 1000 // to km
         
         val conditionText = when {
-            avgClouds < 20 -> "Excellent"
-            avgClouds < 50 -> "Fair"
-            else -> "Poor"
+            avgClouds < 20 -> "EXCELLENT"
+            avgClouds < 50 -> "FAIR"
+            else -> "POOR"
         }
         
         val color = when {
-            avgClouds < 20 -> Color(0xFF4CAF50)
-            avgClouds < 50 -> Color(0xFFFFC107)
-            else -> Color(0xFFF44336)
+            avgClouds < 20 -> Color(0xFF00E676) // Bright Green
+            avgClouds < 50 -> Color(0xFFFFD600) // Bright Amber
+            else -> Color(0xFFFF5252) // Bright Red
         }
         
         Card(
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-            shape = RoundedCornerShape(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+            shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
+                containerColor = Color.White.copy(alpha = 0.08f)
+            ),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(modifier = Modifier.padding(24.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Tonight's Viewing",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "TONIGHT'S VIEWING",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        ),
+                        color = Color.White.copy(alpha = 0.6f)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Surface(
-                        color = color.copy(alpha = 0.2f),
+                        color = color.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
                             text = conditionText,
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp
+                            ),
                             color = color,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text("Cloud Cover", style = MaterialTheme.typography.labelMedium)
-                        Text("$avgClouds%", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                        Text("CLOUDS", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.4f))
+                        Text("$avgClouds%", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black), color = Color.White)
                     }
                     Column {
-                        Text("Min Temp", style = MaterialTheme.typography.labelMedium)
-                        Text("${Math.round(minTemp)}°", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                        Text("MIN TEMP", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.4f))
+                        Text("${Math.round(minTemp)}°", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black), color = Color.White)
                     }
                     Column {
-                        Text("Visibility", style = MaterialTheme.typography.labelMedium)
-                        Text("${avgVisibility}km", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                        Text("VISIBILITY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.4f))
+                        Text("${avgVisibility}KM", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black), color = Color.White)
                     }
                 }
             }

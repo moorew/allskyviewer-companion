@@ -31,7 +31,7 @@ class WeatherViewModel(
                 Triple(apiKey, lat, lon)
             }.collect { (apiKey, lat, lon) ->
                 if (apiKey.isNotBlank() && lat.isNotBlank() && lon.isNotBlank()) {
-                    updateWeather(apiKey, lat, lon)
+                    performUpdate(apiKey, lat, lon)
                 }
             }
         }
@@ -42,60 +42,58 @@ class WeatherViewModel(
             val apiKey = userPreferences.getApiKey()
             val lat = userPreferences.getLatitude()
             val lon = userPreferences.getLongitude()
-            updateWeather(apiKey, lat, lon)
+            performUpdate(apiKey, lat, lon)
         }
     }
 
-    private fun updateWeather(apiKey: String, latStr: String, lonStr: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            
-            if (apiKey.isBlank()) {
-                _uiState.update { 
-                    it.copy(
-                        isLoading = false,
-                        error = "weather_api_required"
-                    )
-                }
-                return@launch
+    private suspend fun performUpdate(apiKey: String, latStr: String, lonStr: String) {
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        
+        if (apiKey.isBlank()) {
+            _uiState.update { 
+                it.copy(
+                    isLoading = false,
+                    error = "weather_api_required"
+                )
             }
-
-            val lat = latStr.toDoubleOrNull()
-            val lon = lonStr.toDoubleOrNull()
-
-            if (lat == null || lon == null) {
-                _uiState.update { 
-                    it.copy(
-                        isLoading = false,
-                        error = "Station coordinates required in Settings"
-                    )
-                }
-                return@launch
-            }
-            
-            weatherRepository.getForecast(lat, lon)
-                .onSuccess { response ->
-                    val dailyForecasts = response.list
-                        .groupBy { formatDay(it.dt) }
-                        .map { it.value.first() }
-                    
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            weatherData = Pair(response.city, dailyForecasts),
-                            fullForecast = response.list
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            error = error.message ?: "Unknown error occurred"
-                        )
-                    }
-                }
+            return
         }
+
+        val lat = latStr.toDoubleOrNull()
+        val lon = lonStr.toDoubleOrNull()
+
+        if (lat == null || lon == null) {
+            _uiState.update { 
+                it.copy(
+                    isLoading = false,
+                    error = "Station coordinates required in Settings"
+                )
+            }
+            return
+        }
+        
+        weatherRepository.getForecast(lat, lon)
+            .onSuccess { response ->
+                val dailyForecasts = response.list
+                    .groupBy { formatDay(it.dt) }
+                    .map { it.value.first() }
+                
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        weatherData = Pair(response.city, dailyForecasts),
+                        fullForecast = response.list
+                    )
+                }
+            }
+            .onFailure { error ->
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        error = error.message ?: "Unknown error occurred"
+                    )
+                }
+            }
     }
 
     fun getBestViewingNight(): WeatherData? {

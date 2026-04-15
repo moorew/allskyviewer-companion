@@ -4,6 +4,22 @@ All notable changes to the Allsky Companion App will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.8] - 2026-04-14
+### Added
+- **New Widget Worker**: Completely overhauled the Allsky Widget with `WorkManager` and `Coil` for robust background updates.
+- **Image Downsampling**: Implemented automatic image downsampling for the widget to prevent "TransactionTooLargeException" and ensure the widget always shows an image.
+- **Visual Placeholders**: Added dedicated background and placeholder graphics for a more polished widget look.
+
+### Changed
+- **UI/UX Refinement**: Modernized typography with high-contrast weights (Black/ExtraBold) for better nighttime and high-contrast environments.
+- **Visual Hierarchy**: Improved spacing and card contrast (`0.05f` alpha cards with border strokes) for the Weather and Media sections.
+- **Dynamic Backgrounds**: Updated the dynamic background logic for better contrast between text and various weather-based gradients.
+
+### Fixed
+- **Widget Transparency**: Resolved the issue where the widget would appear transparent instead of showing the live allsky image.
+- **ViewModel Robustness**: Refined coroutine usage in `WeatherViewModel` and `LiveImageViewModel` to prevent redundant launches and handle network drops gracefully.
+- **Stream Discovery**: Improved the adaptive path discovery for live allsky camera streams.
+
 ## [1.7.7] - 2026-04-14
 ### Fixed
 - **Media URL Normalization**: Overhauled the URL resolution logic to correctly handle absolute and relative paths from the Allsky server, resolving the "Invalid URL" warnings and ensuring content like Startrails and Timelapses appears correctly on the Home Screen.

@@ -19,23 +19,15 @@ class WeatherWorker(
         val apiKey = userPreferences.getApiKey()
         if (apiKey.isBlank()) return Result.failure()
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openweathermap.org/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        val weatherService = retrofit.create(WeatherService::class.java)
+        val weatherService = de.astronarren.allsky.data.network.WeatherApiProvider.provideWeatherService()
         
-        // Use station coordinates from preferences instead of device GPS
         val latStr = userPreferences.getLatitude()
         val lonStr = userPreferences.getLongitude()
         
         val lat = latStr.toDoubleOrNull()
         val lon = lonStr.toDoubleOrNull()
 
-        if (lat == null || lon == null) {
-            println("Debug: WeatherWorker - Station coordinates not set")
-            return Result.failure()
-        }
+        if (lat == null || lon == null) return Result.failure()
         
         return try {
             val response = weatherService.getForecast(
