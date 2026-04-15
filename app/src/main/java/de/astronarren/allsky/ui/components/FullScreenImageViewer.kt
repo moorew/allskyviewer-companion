@@ -130,7 +130,7 @@ fun FullScreenImageViewer(
                     color = Color.White,
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
                     maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsoid
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
 
                 IconButton(
