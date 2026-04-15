@@ -102,51 +102,48 @@ fun FullScreenImageViewer(
             contentScale = ContentScale.Fit
         )
         
-        // Control Buttons
-        Row(
+        // Header with Title and Buttons
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(24.dp)
-                .align(Alignment.TopEnd)
-                .graphicsLayer { shadowElevation = 100f }, // Ensure it's on top
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
+                .align(Alignment.TopCenter),
+            color = Color.Black.copy(alpha = 0.7f)
         ) {
-            Surface(
-                onClick = {
-                    scope.launch {
-                        downloadHelper.downloadMedia(imageUrl, fileName, isVideo = false)
-                    }
-                },
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                color = Color.Black.copy(alpha = 0.6f)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = "Download",
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Surface(
-                onClick = { onDismiss() },
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                color = Color.Black.copy(alpha = 0.6f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
+                IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
+                        tint = Color.White
+                    )
+                }
+                
+                Text(
+                    text = fileName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsoid
+                )
+
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            downloadHelper.downloadMedia(imageUrl, fileName, isVideo = false)
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = "Download",
+                        tint = Color.White
                     )
                 }
             }

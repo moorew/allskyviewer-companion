@@ -47,10 +47,17 @@ fun LayoutEditorScreen(
     onNavigateBack: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var layout by remember { mutableStateOf<List<String>>(emptyList()) }
+    var currentLayout by remember { mutableStateOf<List<String>>(emptyList()) }
+    
+    // Maintain a list of all possible modules, preserving current order where possible
+    val fullList = remember(currentLayout) {
+        val list = currentLayout.toMutableList()
+        ALL_MODULES.forEach { if (!list.contains(it)) list.add(it) }
+        list
+    }
 
     LaunchedEffect(Unit) {
-        layout = userPreferences.getMainLayout()
+        currentLayout = userPreferences.getMainLayout()
     }
 
     Scaffold(
@@ -67,12 +74,8 @@ fun LayoutEditorScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             LazyColumn(modifier = Modifier.weight(1f)) {
-                // Ensure all modules exist in our list so we can toggle them
-                val displayList = layout.toMutableList()
-                ALL_MODULES.forEach { if (!displayList.contains(it)) displayList.add(it) }
-
-                itemsIndexed(displayList) { index, module ->
-                    val isVisible = layout.contains(module)
+                itemsIndexed(fullList) { index, module ->
+                    val isVisible = currentLayout.contains(module)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -82,27 +85,30 @@ fun LayoutEditorScreen(
                         Checkbox(
                             checked = isVisible,
                             onCheckedChange = { checked ->
-                                val newLayout = layout.toMutableList()
+                                val newLayout = currentLayout.toMutableList()
                                 if (checked) {
-                                    if (!newLayout.contains(module)) newLayout.add(module)
+                                    if (!newLayout.contains(module)) {
+                                        // Insert it at its position in fullList among other visible items
+                                        newLayout.add(module) 
+                                    }
                                 } else {
                                     newLayout.remove(module)
                                 }
-                                layout = newLayout
+                                currentLayout = newLayout
                             }
                         )
                         Text(text = getModuleLabel(module), modifier = Modifier.weight(1f))
                         
                         if (isVisible) {
-                            val activeIndex = layout.indexOf(module)
+                            val activeIndex = currentLayout.indexOf(module)
                             IconButton(
                                 onClick = {
                                     if (activeIndex > 0) {
-                                        val newLayout = layout.toMutableList()
+                                        val newLayout = currentLayout.toMutableList()
                                         val temp = newLayout[activeIndex - 1]
                                         newLayout[activeIndex - 1] = newLayout[activeIndex]
                                         newLayout[activeIndex] = temp
-                                        layout = newLayout
+                                        currentLayout = newLayout
                                     }
                                 },
                                 enabled = activeIndex > 0
@@ -111,15 +117,15 @@ fun LayoutEditorScreen(
                             }
                             IconButton(
                                 onClick = {
-                                    if (activeIndex < layout.size - 1) {
-                                        val newLayout = layout.toMutableList()
+                                    if (activeIndex < currentLayout.size - 1) {
+                                        val newLayout = currentLayout.toMutableList()
                                         val temp = newLayout[activeIndex + 1]
                                         newLayout[activeIndex + 1] = newLayout[activeIndex]
                                         newLayout[activeIndex] = temp
-                                        layout = newLayout
+                                        currentLayout = newLayout
                                     }
                                 },
-                                enabled = activeIndex < layout.size - 1 && activeIndex != -1
+                                enabled = activeIndex < currentLayout.size - 1 && activeIndex != -1
                             ) {
                                 Icon(Icons.Default.ArrowDownward, contentDescription = "Down")
                             }
@@ -133,7 +139,7 @@ fun LayoutEditorScreen(
 
             Button(
                 onClick = {
-                    layout = ALL_MODULES
+                    currentLayout = ALL_MODULES
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -149,7 +155,7 @@ fun LayoutEditorScreen(
             Button(
                 onClick = {
                     scope.launch {
-                        userPreferences.saveMainLayout(layout)
+                        userPreferences.saveMainLayout(currentLayout)
                         onNavigateBack()
                     }
                 },
