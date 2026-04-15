@@ -192,7 +192,15 @@ class AllskyRepository(
             trimmedHref.startsWith("http") -> trimmedHref
             trimmedHref.startsWith("/") -> {
                 val uri = android.net.Uri.parse(baseUrl)
-                "${uri.scheme}://${uri.encodedAuthority}${trimmedHref}"
+                val baseScheme = uri.scheme ?: "http"
+                val baseAuth = uri.encodedAuthority
+                val basePath = uri.path?.trimEnd('/') ?: ""
+                
+                if (basePath.isNotEmpty() && trimmedHref.startsWith(basePath)) {
+                    "${baseScheme}://${baseAuth}${trimmedHref}"
+                } else {
+                    "${baseScheme}://${baseAuth}${basePath}/${trimmedHref.removePrefix("/")}"
+                }
             }
             else -> {
                 val path = trimmedHref.removePrefix("./")
@@ -235,7 +243,7 @@ class AllskyRepository(
     }
 
     private fun parseTimelapses(doc: org.jsoup.nodes.Document, baseUrl: String): List<AllskyMedia> {
-        val elements = doc.select("a[href], source[src]")
+        val elements = doc.select("a[href], source[src], video[src]")
         return elements.mapNotNull { element ->
             try {
                 val rawHref = element.attr("href").ifEmpty { element.attr("src") }.trim()
@@ -246,8 +254,11 @@ class AllskyRepository(
                 val lowerUrl = url.lowercase()
                 val lowerFileName = url.substringAfterLast("/").substringBefore("?").lowercase()
 
-                if ((lowerUrl.contains(".mp4") || lowerUrl.contains(".webm") || lowerUrl.contains(".mkv") || lowerUrl.contains(".mov")) &&
-                    !lowerFileName.contains("allsky-logo")) {
+                val isVideo = lowerUrl.contains(".mp4") || lowerUrl.contains(".webm") || 
+                              lowerUrl.contains(".mkv") || lowerUrl.contains(".mov") ||
+                              lowerUrl.contains(".avi")
+
+                if (isVideo && !lowerFileName.contains("allsky-logo")) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -271,6 +282,7 @@ class AllskyRepository(
                 val lowerUrl = url.lowercase()
                 val lowerFileName = url.substringAfterLast("/").substringBefore("?").lowercase()
 
+                val isImage = lowerUrl.contains(".jpg") || lowerUrl.contains(".png") || lowerUrl.contains(".jpeg")
                 val isExcluded = lowerFileName.contains("allsky-logo") || 
                                  lowerFileName.contains("image.jpg") || 
                                  lowerFileName.contains("image.png") ||
@@ -279,8 +291,7 @@ class AllskyRepository(
                                  lowerFileName.contains("default") ||
                                  lowerFileName.contains("logo")
 
-                if (lowerUrl.contains("keogram") && (lowerUrl.contains(".jpg") || lowerUrl.contains(".png") || lowerUrl.contains(".jpeg")) &&
-                    !isExcluded) {
+                if (isImage && !isExcluded && (lowerUrl.contains("keogram") || lowerUrl.contains("keo"))) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url
@@ -304,6 +315,7 @@ class AllskyRepository(
                 val lowerUrl = url.lowercase()
                 val lowerFileName = url.substringAfterLast("/").substringBefore("?").lowercase()
                 
+                val isImage = lowerUrl.contains(".jpg") || lowerUrl.contains(".png") || lowerUrl.contains(".jpeg")
                 val isExcluded = lowerFileName.contains("allsky-logo") || 
                                  lowerFileName.contains("image.jpg") || 
                                  lowerFileName.contains("image.png") ||
@@ -312,8 +324,7 @@ class AllskyRepository(
                                  lowerFileName.contains("default") ||
                                  lowerFileName.contains("logo")
 
-                if (lowerUrl.contains("startrail") && (lowerUrl.contains(".jpg") || lowerUrl.contains(".png") || lowerUrl.contains(".jpeg")) &&
-                    !isExcluded) {
+                if (isImage && !isExcluded && (lowerUrl.contains("startrail") || lowerUrl.contains("trail"))) {
                     AllskyMedia(
                         date = extractDate(rawHref, element),
                         url = url

@@ -34,6 +34,7 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     var urlInput by remember { mutableStateOf("") }
+    var stationNameInput by remember { mutableStateOf("") }
     var latInput by remember { mutableStateOf("") }
     var lonInput by remember { mutableStateOf("") }
     var usernameInput by remember { mutableStateOf("") }
@@ -46,6 +47,7 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         currentLanguage = languageManager.getCurrentLanguage()
         urlInput = userPreferences.getAllskyUrl()
+        stationNameInput = userPreferences.getStationName()
         latInput = userPreferences.getLatitude()
         lonInput = userPreferences.getLongitude()
         usernameInput = userPreferences.getUsername()
@@ -134,6 +136,17 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Station Name Input
+            OutlinedTextField(
+                value = stationNameInput,
+                onValueChange = { stationNameInput = it },
+                label = { Text("Station Name (e.g. Backyard Observatory)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
 
             // URL Input
             OutlinedTextField(
@@ -230,6 +243,7 @@ fun SettingsScreen(
             Button(
                 onClick = {
                     scope.launch {
+                        userPreferences.saveStationName(stationNameInput)
                         userPreferences.saveAllskyUrl(urlInput)
                         userPreferences.saveLatitude(latInput)
                         userPreferences.saveLongitude(lonInput)

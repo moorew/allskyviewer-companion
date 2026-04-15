@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import de.astronarren.allsky.data.WeatherData
 import de.astronarren.allsky.data.City
 import java.text.SimpleDateFormat
@@ -42,7 +43,7 @@ fun WeatherDisplay(
             uiState.weatherData != null -> {
                 val (city, forecasts) = uiState.weatherData
                 Column {
-                    // Location and Current Temp
+                    // Location Header
                     Text(
                         text = city.name.uppercase(),
                         style = MaterialTheme.typography.labelLarge.copy(
@@ -54,23 +55,33 @@ fun WeatherDisplay(
                     
                     forecasts.firstOrNull()?.let { current ->
                         Row(
-                            verticalAlignment = Alignment.Bottom,
-                            modifier = Modifier.padding(vertical = 12.dp)
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 16.dp)
                         ) {
                             Text(
                                 text = "${Math.round(current.main.temp)}°",
                                 style = MaterialTheme.typography.displayLarge.copy(
                                     fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 96.sp,
-                                    letterSpacing = (-6).sp
+                                    fontSize = 80.sp,
+                                    letterSpacing = (-4).sp
                                 ),
                                 color = Color.White
                             )
                             
-                            Column(modifier = Modifier.padding(start = 20.dp, bottom = 24.dp)) {
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            current.weather.firstOrNull()?.let { w ->
+                                AsyncImage(
+                                    model = "https://openweathermap.org/img/wn/${w.icon}@4x.png",
+                                    contentDescription = w.description,
+                                    modifier = Modifier.size(100.dp)
+                                )
+                            }
+                            
+                            Column(modifier = Modifier.padding(start = 8.dp)) {
                                 Text(
                                     text = current.weather.firstOrNull()?.description?.capitalize() ?: "",
-                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                    style = MaterialTheme.typography.titleLarge.copy(
                                         fontWeight = FontWeight.Black,
                                         letterSpacing = 1.sp
                                     ),
@@ -80,7 +91,7 @@ fun WeatherDisplay(
                                     text = "FEELS LIKE ${Math.round(current.main.feels_like)}°",
                                     style = MaterialTheme.typography.labelMedium.copy(
                                         fontWeight = FontWeight.Bold,
-                                        letterSpacing = 2.sp
+                                        letterSpacing = 1.sp
                                     ),
                                     color = Color.White.copy(alpha = 0.6f)
                                 )
@@ -104,7 +115,7 @@ fun WeatherDisplay(
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             modifier = Modifier.fillMaxWidth().padding(24.dp)
                         ) {
-                            items(forecasts.take(5)) { dayWeather ->
+                            items(forecasts.filterIndexed { index, _ -> index % 8 == 0 }.take(5)) { dayWeather ->
                                 DayForecast(dayWeather)
                             }
                         }
@@ -125,14 +136,22 @@ private fun DayForecast(weather: WeatherData) {
             text = formatDay(weather.dt).uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp
+                letterSpacing = 1.sp
             ),
             color = Color.White.copy(alpha = 0.4f)
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        
+        weather.weather.firstOrNull()?.let { w ->
+            AsyncImage(
+                model = "https://openweathermap.org/img/wn/${w.icon}@2x.png",
+                contentDescription = w.description,
+                modifier = Modifier.size(40.dp)
+            )
+        }
+        
         Text(
             text = "${Math.round(weather.main.temp)}°",
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
             color = Color.White
         )
     }

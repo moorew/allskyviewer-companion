@@ -112,7 +112,12 @@ fun SetupScreen(
                 ) {
                     when (uiState.currentStep) {
                         1 -> WelcomeStep(onNext = { viewModel.nextStep() })
-                        2 -> UrlStep(
+                        2 -> PersonalizationStep(
+                            currentName = uiState.stationName,
+                            onNameChange = { viewModel.updateStationName(it) },
+                            onNext = { viewModel.nextStep() }
+                        )
+                        3 -> UrlStep(
                             currentUrl = uiState.allskyUrl,
                             currentUsername = uiState.username,
                             currentPassword = uiState.password,
@@ -121,7 +126,7 @@ fun SetupScreen(
                             onPasswordChange = { viewModel.updatePassword(it) },
                             onNext = { viewModel.nextStep() }
                         )
-                        3 -> LocationStep(
+                        4 -> LocationStep(
                             currentLat = uiState.latitude,
                             currentLon = uiState.longitude,
                             onLatChange = { viewModel.updateLatitude(it) },
@@ -137,7 +142,7 @@ fun SetupScreen(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                repeat(3) { index ->
+                repeat(4) { index ->
                     Box(
                         modifier = Modifier
                             .size(if (uiState.currentStep == index + 1) 24.dp else 12.dp, 6.dp)
@@ -148,6 +153,57 @@ fun SetupScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PersonalizationStep(
+    currentName: String,
+    onNameChange: (String) -> Unit,
+    onNext: () -> Unit
+) {
+    var nameInput by remember { mutableStateOf(currentName) }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "PERSONALIZATION",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black, letterSpacing = 2.sp),
+            color = Color.White
+        )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        OutlinedTextField(
+            value = nameInput,
+            onValueChange = { 
+                nameInput = it
+                onNameChange(it)
+            },
+            label = { Text("Station Name") },
+            placeholder = { Text("e.g. Backyard Observatory") },
+            modifier = Modifier.fillMaxWidth().semantics { contentDescription = "station_name" },
+            singleLine = true,
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                focusedBorderColor = Color.White,
+                unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
+                focusedLabelColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedTextColor = Color.White
+            )
+        )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        Button(
+            onClick = onNext,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+        ) {
+            Text("CONTINUE", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
         }
     }
 }

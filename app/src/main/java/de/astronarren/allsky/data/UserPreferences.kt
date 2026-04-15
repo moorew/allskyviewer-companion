@@ -18,12 +18,29 @@ class UserPreferences(private val context: Context) {
         private val LAST_NOTIFICATION_DATE = stringPreferencesKey("last_notification_date")
         private val USERNAME = stringPreferencesKey("username")
         private val PASSWORD = stringPreferencesKey("password")
+        private val STATION_NAME = stringPreferencesKey("station_name")
         private val MAIN_LAYOUT = stringPreferencesKey("main_layout")
         private val LATITUDE = stringPreferencesKey("latitude")
         private val LONGITUDE = stringPreferencesKey("longitude")
         
         private const val DEFAULT_LAYOUT = "LIVE_VIEW,BEST_VIEWING,WEATHER,MOON,TIMELAPSES,METEORS,IMAGES,KEOGRAMS,STARTRAILS"
         private const val DEFAULT_API_KEY = "9908d92979873f12ec6eaecc05335284"
+    }
+
+    suspend fun saveStationName(name: String) {
+        context.dataStore.edit { preferences ->
+            preferences[STATION_NAME] = name
+        }
+    }
+
+    suspend fun getStationName(): String = withContext(Dispatchers.IO) {
+        context.dataStore.data.first()[STATION_NAME] ?: ""
+    }
+
+    fun getStationNameFlow(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[STATION_NAME] ?: ""
+        }
     }
 
     suspend fun saveLatitude(lat: String) {

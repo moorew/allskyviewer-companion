@@ -90,6 +90,7 @@ fun MainScreen(
     )
     
     val allskyUrl by userPreferences.getAllskyUrlFlow().collectAsStateWithLifecycle(initialValue = "")
+    val stationName by userPreferences.getStationNameFlow().collectAsStateWithLifecycle(initialValue = "")
     val apiKey by userPreferences.getApiKeyFlow().collectAsStateWithLifecycle(initialValue = "")
 
     var currentVideo by remember { mutableStateOf<String?>(null) }
@@ -128,12 +129,14 @@ fun MainScreen(
                     title = { 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                "ALLSKY", 
+                                if (stationName.isNotEmpty()) stationName.uppercase() else "ALLSKY", 
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Black,
-                                    letterSpacing = 8.sp,
-                                    fontSize = 20.sp
-                                )
+                                    letterSpacing = if (stationName.isNotEmpty()) 2.sp else 8.sp,
+                                    fontSize = if (stationName.isNotEmpty()) 18.sp else 20.sp
+                                ),
+                                textAlign = TextAlign.Center,
+                                maxLines = 1
                             )
                             if (allskyUrl.isNotEmpty()) {
                                 Text(

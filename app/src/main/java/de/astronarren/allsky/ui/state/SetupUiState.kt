@@ -3,6 +3,7 @@ package de.astronarren.allsky.ui.state
 data class SetupUiState(
     val currentStep: Int = 1,
     val allskyUrl: String = "",
+    val stationName: String = "",
     val username: String = "",
     val password: String = "",
     val latitude: String = "",
