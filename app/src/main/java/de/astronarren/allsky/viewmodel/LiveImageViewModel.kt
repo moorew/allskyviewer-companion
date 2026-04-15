@@ -7,6 +7,8 @@ import de.astronarren.allsky.ui.state.LiveImageUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import java.util.*
 
 class LiveImageViewModel(

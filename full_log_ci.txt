@@ -1,0 +1,244 @@
+build	Set up job	﻿2026-04-15T01:37:43.0634540Z Current runner version: '2.333.1'
+build	Set up job	2026-04-15T01:37:43.0669551Z ##[group]Runner Image Provisioner
+build	Set up job	2026-04-15T01:37:43.0670690Z Hosted Compute Agent
+build	Set up job	2026-04-15T01:37:43.0671578Z Version: 20260213.493
+build	Set up job	2026-04-15T01:37:43.0672442Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+build	Set up job	2026-04-15T01:37:43.0673400Z Build Date: 2026-02-13T00:28:41Z
+build	Set up job	2026-04-15T01:37:43.0674483Z Worker ID: {31ae8918-99f0-43b9-8f76-852d930f9c8e}
+build	Set up job	2026-04-15T01:37:43.0675498Z Azure Region: westcentralus
+build	Set up job	2026-04-15T01:37:43.0676334Z ##[endgroup]
+build	Set up job	2026-04-15T01:37:43.0678482Z ##[group]Operating System
+build	Set up job	2026-04-15T01:37:43.0679539Z Ubuntu
+build	Set up job	2026-04-15T01:37:43.0680172Z 24.04.4
+build	Set up job	2026-04-15T01:37:43.0680889Z LTS
+build	Set up job	2026-04-15T01:37:43.0681578Z ##[endgroup]
+build	Set up job	2026-04-15T01:37:43.0682251Z ##[group]Runner Image
+build	Set up job	2026-04-15T01:37:43.0683099Z Image: ubuntu-24.04
+build	Set up job	2026-04-15T01:37:43.0683776Z Version: 20260406.80.1
+build	Set up job	2026-04-15T01:37:43.0685315Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260406.80/images/ubuntu/Ubuntu2404-Readme.md
+build	Set up job	2026-04-15T01:37:43.0687846Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260406.80
+build	Set up job	2026-04-15T01:37:43.0689334Z ##[endgroup]
+build	Set up job	2026-04-15T01:37:43.0693533Z ##[group]GITHUB_TOKEN Permissions
+build	Set up job	2026-04-15T01:37:43.0696303Z Actions: write
+build	Set up job	2026-04-15T01:37:43.0697125Z ArtifactMetadata: write
+build	Set up job	2026-04-15T01:37:43.0697964Z Attestations: write
+build	Set up job	2026-04-15T01:37:43.0698669Z Checks: write
+build	Set up job	2026-04-15T01:37:43.0699573Z Contents: write
+build	Set up job	2026-04-15T01:37:43.0700283Z Deployments: write
+build	Set up job	2026-04-15T01:37:43.0701043Z Discussions: write
+build	Set up job	2026-04-15T01:37:43.0701738Z Issues: write
+build	Set up job	2026-04-15T01:37:43.0702570Z Metadata: read
+build	Set up job	2026-04-15T01:37:43.0703228Z Models: read
+build	Set up job	2026-04-15T01:37:43.0703913Z Packages: write
+build	Set up job	2026-04-15T01:37:43.0704683Z Pages: write
+build	Set up job	2026-04-15T01:37:43.0705493Z PullRequests: write
+build	Set up job	2026-04-15T01:37:43.0706257Z RepositoryProjects: write
+build	Set up job	2026-04-15T01:37:43.0707121Z SecurityEvents: write
+build	Set up job	2026-04-15T01:37:43.0707929Z Statuses: write
+build	Set up job	2026-04-15T01:37:43.0708628Z ##[endgroup]
+build	Set up job	2026-04-15T01:37:43.0712101Z Secret source: Actions
+build	Set up job	2026-04-15T01:37:43.0713138Z Prepare workflow directory
+build	Set up job	2026-04-15T01:37:43.1933912Z Prepare all required actions
+build	Set up job	2026-04-15T01:37:43.1989231Z Getting action download info
+build	Set up job	2026-04-15T01:37:43.5836208Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+build	Set up job	2026-04-15T01:37:43.6629016Z Download action repository 'actions/setup-java@v4' (SHA:c1e323688fd81a25caa38c78aa6df2d33d3e20d9)
+build	Set up job	2026-04-15T01:37:44.6860451Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+build	Set up job	2026-04-15T01:37:45.0101513Z Complete job name: build
+build	Run actions/checkout@v4	﻿2026-04-15T01:37:45.2568836Z ##[group]Run actions/checkout@v4
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2570292Z with:
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2571109Z   repository: moorew/allskyviewer-companion
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2572461Z   token: ***
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2573180Z   ssh-strict: true
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2573926Z   ssh-user: git
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2574680Z   persist-credentials: true
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2575551Z   clean: true
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2576302Z   sparse-checkout-cone-mode: true
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2577198Z   fetch-depth: 1
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2577923Z   fetch-tags: false
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2578704Z   show-progress: true
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2579756Z   lfs: false
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2580478Z   submodules: false
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2581253Z   set-safe-directory: true
+build	Run actions/checkout@v4	2026-04-15T01:37:45.2582375Z ##[endgroup]
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3607001Z Syncing repository: moorew/allskyviewer-companion
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3609804Z ##[group]Getting Git version info
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3611309Z Working directory is '/home/runner/work/allskyviewer-companion/allskyviewer-companion'
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3613460Z [command]/usr/bin/git version
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3628380Z git version 2.53.0
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3651528Z ##[endgroup]
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3664914Z Temporarily overriding HOME='/home/runner/work/_temp/312dc9eb-4583-4b52-bd88-83cfebd142eb' before making global git config changes
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3667467Z Adding repository directory to the temporary git global config as a safe directory
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3678164Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/allskyviewer-companion/allskyviewer-companion
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3704903Z Deleting the contents of '/home/runner/work/allskyviewer-companion/allskyviewer-companion'
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3707700Z ##[group]Initializing the repository
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3712206Z [command]/usr/bin/git init /home/runner/work/allskyviewer-companion/allskyviewer-companion
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3776708Z hint: Using 'master' as the name for the initial branch. This default branch name
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3779930Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3782710Z hint: to use in all of your new repositories, which will suppress this warning,
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3784869Z hint: call:
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3785980Z hint:
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3787393Z hint: 	git config --global init.defaultBranch <name>
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3789342Z hint:
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3790998Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3793678Z hint: 'development'. The just-created branch can be renamed via this command:
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3795870Z hint:
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3797002Z hint: 	git branch -m <name>
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3797821Z hint:
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3798892Z hint: Disable this message with "git config set advice.defaultBranchName false"
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3801710Z Initialized empty Git repository in /home/runner/work/allskyviewer-companion/allskyviewer-companion/.git/
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3835437Z [command]/usr/bin/git remote add origin https://github.com/moorew/allskyviewer-companion
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3842016Z ##[endgroup]
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3844226Z ##[group]Disabling automatic garbage collection
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3846285Z [command]/usr/bin/git config --local gc.auto 0
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3854614Z ##[endgroup]
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3855843Z ##[group]Setting up auth
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3860954Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build	Run actions/checkout@v4	2026-04-15T01:37:45.3886539Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build	Run actions/checkout@v4	2026-04-15T01:37:45.4133760Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Run actions/checkout@v4	2026-04-15T01:37:45.4162222Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build	Run actions/checkout@v4	2026-04-15T01:37:45.4333292Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+build	Run actions/checkout@v4	2026-04-15T01:37:45.4360707Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+build	Run actions/checkout@v4	2026-04-15T01:37:45.4542135Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+build	Run actions/checkout@v4	2026-04-15T01:37:45.4570404Z ##[endgroup]
+build	Run actions/checkout@v4	2026-04-15T01:37:45.4571787Z ##[group]Fetching the repository
+build	Run actions/checkout@v4	2026-04-15T01:37:45.4578649Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f929ec7d601b5bafcd52bbcb27199b494b87595f:refs/remotes/origin/main
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0457686Z From https://github.com/moorew/allskyviewer-companion
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0469450Z  * [new ref]         f929ec7d601b5bafcd52bbcb27199b494b87595f -> origin/main
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0481448Z ##[endgroup]
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0482066Z ##[group]Determining the checkout info
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0484380Z ##[endgroup]
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0489772Z [command]/usr/bin/git sparse-checkout disable
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0519298Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0538529Z ##[group]Checking out the ref
+build	Run actions/checkout@v4	2026-04-15T01:37:47.0560543Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+build	Run actions/checkout@v4	2026-04-15T01:37:47.2335080Z Switched to a new branch 'main'
+build	Run actions/checkout@v4	2026-04-15T01:37:47.2335650Z branch 'main' set up to track 'origin/main'.
+build	Run actions/checkout@v4	2026-04-15T01:37:47.2343606Z ##[endgroup]
+build	Run actions/checkout@v4	2026-04-15T01:37:47.2378864Z [command]/usr/bin/git log -1 --format=%H
+build	Run actions/checkout@v4	2026-04-15T01:37:47.2400627Z f929ec7d601b5bafcd52bbcb27199b494b87595f
+build	set up JDK 17	﻿2026-04-15T01:37:47.4203784Z ##[group]Run actions/setup-java@v4
+build	set up JDK 17	2026-04-15T01:37:47.4204103Z with:
+build	set up JDK 17	2026-04-15T01:37:47.4204300Z   java-version: 17
+build	set up JDK 17	2026-04-15T01:37:47.4204500Z   distribution: temurin
+build	set up JDK 17	2026-04-15T01:37:47.4204693Z   cache: gradle
+build	set up JDK 17	2026-04-15T01:37:47.4204873Z   java-package: jdk
+build	set up JDK 17	2026-04-15T01:37:47.4205054Z   check-latest: false
+build	set up JDK 17	2026-04-15T01:37:47.4205240Z   server-id: github
+build	set up JDK 17	2026-04-15T01:37:47.4205423Z   server-username: GITHUB_ACTOR
+build	set up JDK 17	2026-04-15T01:37:47.4205655Z   server-password: GITHUB_TOKEN
+build	set up JDK 17	2026-04-15T01:37:47.4205870Z   overwrite-settings: true
+build	set up JDK 17	2026-04-15T01:37:47.4206086Z   job-status: success
+build	set up JDK 17	2026-04-15T01:37:47.4206448Z   token: ***
+build	set up JDK 17	2026-04-15T01:37:47.4206616Z ##[endgroup]
+build	set up JDK 17	2026-04-15T01:37:47.6067008Z ##[group]Installed distributions
+build	set up JDK 17	2026-04-15T01:37:47.6121780Z Resolved Java 17.0.18+8 from tool-cache
+build	set up JDK 17	2026-04-15T01:37:47.6122489Z Setting Java 17.0.18+8 as the default
+build	set up JDK 17	2026-04-15T01:37:47.6133765Z Creating toolchains.xml for JDK version 17 from temurin
+build	set up JDK 17	2026-04-15T01:37:47.6201942Z Writing to /home/runner/.m2/toolchains.xml
+build	set up JDK 17	2026-04-15T01:37:47.6202442Z 
+build	set up JDK 17	2026-04-15T01:37:47.6202784Z Java configuration:
+build	set up JDK 17	2026-04-15T01:37:47.6204007Z   Distribution: temurin
+build	set up JDK 17	2026-04-15T01:37:47.6204354Z   Version: 17.0.18+8
+build	set up JDK 17	2026-04-15T01:37:47.6204833Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+build	set up JDK 17	2026-04-15T01:37:47.6205307Z 
+build	set up JDK 17	2026-04-15T01:37:47.6205774Z ##[endgroup]
+build	set up JDK 17	2026-04-15T01:37:47.6222240Z Creating settings.xml with server-id: github
+build	set up JDK 17	2026-04-15T01:37:47.6225601Z Writing to /home/runner/.m2/settings.xml
+build	set up JDK 17	2026-04-15T01:37:47.8787754Z gradle cache is not found
+build	Grant execute permission for gradlew	﻿2026-04-15T01:37:47.8962464Z ##[group]Run chmod +x gradlew
+build	Grant execute permission for gradlew	2026-04-15T01:37:47.8962843Z [36;1mchmod +x gradlew[0m
+build	Grant execute permission for gradlew	2026-04-15T01:37:47.8980505Z shell: /usr/bin/bash -e {0}
+build	Grant execute permission for gradlew	2026-04-15T01:37:47.8980768Z env:
+build	Grant execute permission for gradlew	2026-04-15T01:37:47.8981053Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+build	Grant execute permission for gradlew	2026-04-15T01:37:47.8981484Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+build	Grant execute permission for gradlew	2026-04-15T01:37:47.8981815Z ##[endgroup]
+build	Build with Gradle	﻿2026-04-15T01:37:47.9118710Z ##[group]Run ./gradlew assembleDebug
+build	Build with Gradle	2026-04-15T01:37:47.9119013Z [36;1m./gradlew assembleDebug[0m
+build	Build with Gradle	2026-04-15T01:37:47.9131903Z shell: /usr/bin/bash -e {0}
+build	Build with Gradle	2026-04-15T01:37:47.9132145Z env:
+build	Build with Gradle	2026-04-15T01:37:47.9132417Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+build	Build with Gradle	2026-04-15T01:37:47.9132854Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+build	Build with Gradle	2026-04-15T01:37:47.9133172Z ##[endgroup]
+build	Build with Gradle	2026-04-15T01:37:48.5996207Z Downloading https://services.gradle.org/distributions/gradle-8.9-bin.zip
+build	Build with Gradle	2026-04-15T01:37:51.0373164Z ............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
+build	Build with Gradle	2026-04-15T01:37:52.1449217Z 
+build	Build with Gradle	2026-04-15T01:37:52.1450982Z Welcome to Gradle 8.9!
+build	Build with Gradle	2026-04-15T01:37:52.1451825Z 
+build	Build with Gradle	2026-04-15T01:37:52.1452118Z Here are the highlights of this release:
+build	Build with Gradle	2026-04-15T01:37:52.1459992Z  - Enhanced Error and Warning Messages
+build	Build with Gradle	2026-04-15T01:37:52.1462448Z  - IDE Integration Improvements
+build	Build with Gradle	2026-04-15T01:37:52.1466098Z  - Daemon JVM Information
+build	Build with Gradle	2026-04-15T01:37:52.1466341Z 
+build	Build with Gradle	2026-04-15T01:37:52.1468701Z For more details see https://docs.gradle.org/8.9/release-notes.html
+build	Build with Gradle	2026-04-15T01:37:52.1469541Z 
+build	Build with Gradle	2026-04-15T01:37:52.3442520Z Starting a Gradle Daemon (subsequent builds will be faster)
+build	Build with Gradle	2026-04-15T01:38:56.7477451Z > Task :app:preBuild UP-TO-DATE
+build	Build with Gradle	2026-04-15T01:38:56.7494561Z > Task :app:preDebugBuild UP-TO-DATE
+build	Build with Gradle	2026-04-15T01:38:56.8445898Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+build	Build with Gradle	2026-04-15T01:38:56.8479768Z > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+build	Build with Gradle	2026-04-15T01:38:56.9441119Z > Task :app:generateDebugBuildConfig
+build	Build with Gradle	2026-04-15T01:39:26.7441776Z > Task :app:generateDebugResValues
+build	Build with Gradle	2026-04-15T01:39:26.9448595Z > Task :app:checkDebugAarMetadata
+build	Build with Gradle	2026-04-15T01:39:26.9450039Z > Task :app:mapDebugSourceSetPaths
+build	Build with Gradle	2026-04-15T01:39:26.9450757Z > Task :app:generateDebugResources
+build	Build with Gradle	2026-04-15T01:39:28.4450124Z > Task :app:packageDebugResources
+build	Build with Gradle	2026-04-15T01:39:29.3443807Z > Task :app:createDebugCompatibleScreenManifests
+build	Build with Gradle	2026-04-15T01:39:29.3460796Z > Task :app:extractDeepLinksDebug
+build	Build with Gradle	2026-04-15T01:39:29.4470180Z > Task :app:mergeDebugResources
+build	Build with Gradle	2026-04-15T01:39:29.5449905Z > Task :app:parseDebugLocalResources
+build	Build with Gradle	2026-04-15T01:39:29.8451582Z > Task :app:processDebugMainManifest
+build	Build with Gradle	2026-04-15T01:39:29.9442323Z > Task :app:processDebugManifest
+build	Build with Gradle	2026-04-15T01:39:29.9443490Z > Task :app:processDebugManifestForPackage
+build	Build with Gradle	2026-04-15T01:39:29.9444234Z > Task :app:javaPreCompileDebug
+build	Build with Gradle	2026-04-15T01:39:31.6450095Z > Task :app:mergeDebugShaders
+build	Build with Gradle	2026-04-15T01:39:31.6509881Z > Task :app:compileDebugShaders NO-SOURCE
+build	Build with Gradle	2026-04-15T01:39:31.6537861Z > Task :app:generateDebugAssets UP-TO-DATE
+build	Build with Gradle	2026-04-15T01:39:31.8449958Z > Task :app:mergeDebugAssets
+build	Build with Gradle	2026-04-15T01:39:31.8489867Z > Task :app:compressDebugAssets
+build	Build with Gradle	2026-04-15T01:39:32.5460327Z > Task :app:processDebugResources
+build	Build with Gradle	2026-04-15T01:39:33.9451200Z > Task :app:checkDebugDuplicateClasses
+build	Build with Gradle	2026-04-15T01:39:41.1463131Z > Task :app:desugarDebugFileDependencies
+build	Build with Gradle	2026-04-15T01:40:03.8440629Z > Task :app:compileDebugKotlin
+build	Build with Gradle	2026-04-15T01:40:07.1469457Z 
+build	Build with Gradle	2026-04-15T01:40:07.1500979Z e: file:///home/runner/work/allskyviewer-companion/allskyviewer-companion/app/src/main/java/de/astronarren/allsky/ui/MainScreen.kt:269:65 Unresolved reference 'CircularProgressIndicator'.
+build	Build with Gradle	2026-04-15T01:40:07.1510919Z e: file:///home/runner/work/allskyviewer-companion/allskyviewer-companion/app/src/main/java/de/astronarren/allsky/ui/MainScreen.kt:409:62 Unresolved reference 'ButtonDefaults'.
+build	Build with Gradle	2026-04-15T01:40:07.1513136Z e: file:///home/runner/work/allskyviewer-companion/allskyviewer-companion/app/src/main/java/de/astronarren/allsky/viewmodel/LiveImageViewModel.kt:69:63 Unresolved reference 'withContext'.
+build	Build with Gradle	2026-04-15T01:40:07.1515411Z e: file:///home/runner/work/allskyviewer-companion/allskyviewer-companion/app/src/main/java/de/astronarren/allsky/viewmodel/LiveImageViewModel.kt:69:75 Unresolved reference 'Dispatchers'.
+build	Build with Gradle	2026-04-15T01:40:07.1516794Z > Task :app:compileDebugKotlin FAILED
+build	Build with Gradle	2026-04-15T01:40:11.1469969Z > Task :app:mergeExtDexDebug
+build	Build with Gradle	2026-04-15T01:41:25.4440103Z 
+build	Build with Gradle	2026-04-15T01:41:25.4470121Z FAILURE: Build failed with an exception.
+build	Build with Gradle	2026-04-15T01:41:25.4473331Z 22 actionable tasks: 22 executed
+build	Build with Gradle	2026-04-15T01:41:25.4476840Z 
+build	Build with Gradle	2026-04-15T01:41:25.4493787Z * What went wrong:
+build	Build with Gradle	2026-04-15T01:41:25.4494596Z Execution failed for task ':app:compileDebugKotlin'.
+build	Build with Gradle	2026-04-15T01:41:25.4500224Z > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+build	Build with Gradle	2026-04-15T01:41:25.4517965Z    > Compilation error. See log for more details
+build	Build with Gradle	2026-04-15T01:41:25.4518373Z 
+build	Build with Gradle	2026-04-15T01:41:25.4518478Z * Try:
+build	Build with Gradle	2026-04-15T01:41:25.4518850Z > Run with --stacktrace option to get the stack trace.
+build	Build with Gradle	2026-04-15T01:41:25.4519590Z > Run with --info or --debug option to get more log output.
+build	Build with Gradle	2026-04-15T01:41:25.4520161Z > Run with --scan to get full insights.
+build	Build with Gradle	2026-04-15T01:41:25.4520618Z > Get more help at https://help.gradle.org.
+build	Build with Gradle	2026-04-15T01:41:25.4520954Z 
+build	Build with Gradle	2026-04-15T01:41:25.4521085Z BUILD FAILED in 3m 37s
+build	Build with Gradle	2026-04-15T01:41:25.9167249Z ##[error]Process completed with exit code 1.
+build	Post set up JDK 17	﻿2026-04-15T01:41:25.9618157Z Post job cleanup.
+build	Post Run actions/checkout@v4	﻿2026-04-15T01:41:26.1603269Z Post job cleanup.
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2481726Z [command]/usr/bin/git version
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2514315Z git version 2.53.0
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2553718Z Temporarily overriding HOME='/home/runner/work/_temp/d92d776b-8929-4cfd-9ca1-433f1824f73f' before making global git config changes
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2554995Z Adding repository directory to the temporary git global config as a safe directory
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2560447Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/allskyviewer-companion/allskyviewer-companion
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2597861Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2626912Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2810572Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2827819Z http.https://github.com/.extraheader
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2838639Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.2864302Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.3033448Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+build	Post Run actions/checkout@v4	2026-04-15T01:41:26.3060836Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+build	Complete job	﻿2026-04-15T01:41:26.3339510Z Cleaning up orphan processes
+build	Complete job	2026-04-15T01:41:26.3573873Z Terminate orphan process: pid (2276) (java)
+build	Complete job	2026-04-15T01:41:26.3593400Z Terminate orphan process: pid (2506) (java)
+build	Complete job	2026-04-15T01:41:26.3610448Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-java@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
